@@ -86,6 +86,60 @@
     100.1% { right: 250%; } 
 }
 
+.volume-control {
+    position: relative;
+}
+
+.volume-slider {
+    position: absolute;
+    top: 100%; /* Đặt thanh slider ở dưới nút */
+    left: 0;
+    width: 100%; /* Chiều rộng như nút */
+    display: none; /* Ẩn mặc định */
+}
+
+#playPauseBtn {
+    background: none; /* Xóa nền mặc định */
+    border: none; /* Xóa viền */
+    padding: 0; /* Xóa padding */
+    cursor: pointer; /* Thay đổi con trỏ khi hover */
+    display: flex; /* Sử dụng flexbox để căn giữa */
+    align-items: center; /* Căn giữa theo chiều dọc */
+}
+
+#playPauseBtn:hover {
+    background: rgb(255, 60, 0);
+    border-radius: 50%;
+}
+
+#playPauseIcon {
+    width: 25px; /* Đặt kích thước cho icon */
+    height: 25px; /* Đặt kích thước cho icon */
+    transition: transform 0.2s; /* Thêm hiệu ứng khi chuyển đổi */
+}
+
+#playPauseBtn.playing #playPauseIcon {
+    transform: rotate(180deg);
+}
+
+.audio-controls {
+    display: flex;
+    align-items: center;
+    margin: 10px 0; 
+}
+
+.time-display {
+    font-weight: bold;
+    margin-right: 10px;
+}
+.seekbar {
+    flex-grow: 1;
+    height: 4px; 
+    border-radius: 5px; 
+    outline: none; 
+}
+
+
 
 
 .background{
