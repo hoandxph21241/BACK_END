@@ -75,6 +75,20 @@ if (nextBtn) {
     });
 }
 
+// Nút Back
+var backBtn = document.getElementById("backBtn");
+if (backBtn) {
+    backBtn.addEventListener("click", function() {
+        if (currentSongIndex > 0) {
+            currentSongIndex--; // Quay về bài trước
+        } else {
+            currentSongIndex = playlist.length - 1; // Quay về bài cuối nếu ở bài đầu
+        }
+        var previousSong = playlist[currentSongIndex];
+        handleItemClick(previousSong.data, previousSong.name, currentSongIndex);
+    });
+}
+
 // Nút Play/Pause
 var playPauseBtn = document.getElementById("playPauseBtn");
 if (playPauseBtn) {
