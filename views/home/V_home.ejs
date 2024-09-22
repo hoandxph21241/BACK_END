@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Home</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+    <link rel='stylesheet' href='/stylesheets/media_control_bar.css' />
+     <!-- <script src="/javascripts/media_control_bar.js"></script> -->
+     <script src="/javascripts/media_contronl_bar_1.js"></script>
+    <!-- <script src="/javascripts/render_view.js"></script> -->
+
+
+
+</head>
+
+<body>
+    <% let mp3data%>
+        <%- include('../../inc/top.ejs',{mp3List:mp3List})%>
+            
+            <div>
+                <p class="text-capitalize text-center fs-7 font-monospace fw-bold">Home</p>
+            </div>
+
+            <div class="row p-5">
+                <% var playlist = [];  mp3List.forEach((mp3, index) => { %>
+                    <div class="col-md-4 mb-3" aria-hidden="true"
+                        onclick="handleItemClick('<%= mp3.data.toString('base64') %>', '<%= mp3.name %>', <%= index %>)">
+                        <div class="card h-100 d-flex justify-content-center" style="width: 21rem">
+                            <img src="https://i.pinimg.com/236x/ff/5f/b3/ff5fb33001497b403cb86db7978b7943.jpg"
+                                class="card-img-top" style="height: 100%; width: 100%;" />
+                            <div class="card-body bg-dark-subtle">
+                                <h5 class="card-title text-center">
+                                    <%= mp3.name %>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+            
+
+
+<div class="col-12">
+    <div class="media-control-bar d-flex align-items-center justify-content-between">
+        <div class="border border-dark bg-info border-3 rounded text-center align-items-center ">
+            <p class="song-name mb-0 fw-bold font-monospace p-2 bg-dark-subtle" data-text="mp3Name" style="width: 100%;">Tên bài hát</p>
+            <div class="d-flex align-items-center"> 
+            <img src="/images/chibi.gif" alt="Album cover"
+                class="img-media album-cover ml-auto rounded bg-primary-subtle">
+            <div class="song-info d-flex flex-column align-items-start mr-auto m-2">
+                <div class="bg-light d-flex flex-column align-items-start mr-auto  rounded"> 
+                <audio id="audioPlayer" controls class="text-center" autoplay>
+                    <source src="data:audio/mpeg;base64" type="audio/mpeg">
+                </audio>
+
+                <div class="btn-group mt-1 m-1 text-center bg-light align-items-center px-2">
+                    <button id="autoPlayBtn" type="button" class="btn btn-outline-dark">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-rewind-circle" viewBox="0 0 16 16">
+                            <path d="M7.729 5.055a.5.5 0 0 0-.52.038l-3.5 2.5a.5.5 0 0 0 0 .814l3.5 2.5A.5.5 0 0 0 8 10.5V8.614l3.21 2.293A.5.5 0 0 0 12 10.5v-5a.5.5 0 0 0-.79-.407L8 7.386V5.5a.5.5 0 0 0-.271-.445"/>
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8"/>
+                          </svg>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-play-circle" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                            <path d="M6.271 5.055a.5.5 0 0 1 .52.038l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 6 10.5v-5a.5.5 0 0 1 .271-.445"/>
+                          </svg>
+                    </button>
+                    <button  id="nextBtn" type="button" class="btn btn-outline-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-fast-forward-circle" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                            <path d="M4.271 5.055a.5.5 0 0 1 .52.038L8 7.386V5.5a.5.5 0 0 1 .79-.407l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 8 10.5V8.614l-3.21 2.293A.5.5 0 0 1 4 10.5v-5a.5.5 0 0 1 .271-.445"/>
+                          </svg>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-repeat" viewBox="0 0 16 16">
+                            <path d="M11 5.466V4H5a4 4 0 0 0-3.584 5.777.5.5 0 1 1-.896.446A5 5 0 0 1 5 3h6V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192m3.81.086a.5.5 0 0 1 .67.225A5 5 0 0 1 11 13H5v1.466a.25.25 0 0 1-.41.192l-2.36-1.966a.25.25 0 0 1 0-.384l2.36-1.966a.25.25 0 0 1 .41.192V12h6a4 4 0 0 0 3.585-5.777.5.5 0 0 1 .225-.67Z"/>
+                          </svg>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-repeat-1" viewBox="0 0 16 16">
+                            <path d="M11 4v1.466a.25.25 0 0 0 .41.192l2.36-1.966a.25.25 0 0 0 0-.384l-2.36-1.966a.25.25 0 0 0-.41.192V3H5a5 5 0 0 0-4.48 7.223.5.5 0 0 0 .896-.446A4 4 0 0 1 5 4zm4.48 1.777a.5.5 0 0 0-.896.446A4 4 0 0 1 11 12H5.001v-1.466a.25.25 0 0 0-.41-.192l-2.36 1.966a.25.25 0 0 0 0 .384l2.36 1.966a.25.25 0 0 0 .41-.192V13h6a5 5 0 0 0 4.48-7.223Z"/>
+                            <path d="M9 5.5a.5.5 0 0 0-.854-.354l-1.75 1.75a.5.5 0 1 0 .708.708L8 6.707V10.5a.5.5 0 0 0 1 0z"/>
+                          </svg>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-shuffle" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.6 9.6 0 0 0 7.556 8a9.6 9.6 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.6 10.6 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.6 9.6 0 0 0 6.444 8a9.6 9.6 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5"/>
+                            <path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192m0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192"/>
+                          </svg>
+                    </button>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-3">
+                        <div id="currentTime">00:00</div>
+                    </div>
+                    <div class="col-6">
+                        <input id="seekbar" type="range" min="0" value="0" step="0.1">
+                    </div>
+                    <div class="col-3">
+                        <div id="endTime">00:00</div>
+                    </div>
+                </div>
+                
+                
+                
+
+
+
+                <!-- <input type="range" value="0" id="seek-bar" /> 
+                <span id="music-time">00:00</span> 
+               <button class="btn" id="btnnext">Next</button>
+                <button class="btn" id="playNextButton">Pause</button>
+                <button class="btn" id="btnback">Preview</button> -->
+            </div>
+           </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+
+            <!-- 
+            <div class="col-12">
+                <div class="media-control-bar d-flex align-items-center justify-content-end">
+                    <div class="border border-dark col-12 bg-info border-3 rounded d-flex align-items-center">
+                        <img src="/images/chibi.gif" alt="Album cover"
+                            class="img-media album-cover ml-auto rounded bg-primary-subtle">
+                        <div class="song-info d-flex flex-column align-items-start mr-auto">
+                            <p class="song-name mb-0 fw-bold font-monospace p-3" data-text="mp3Name">Tên bài hát</p>
+                            <audio id="audioPlayer" controls class="text-center">
+                                <source src="data:audio/mpeg;base64" type="audio/mpeg">
+                            </audio>
+                        </div>
+                        <div class="btn-group-container d-flex flex-column align-items-center">
+                            <button type="button" class="btn btn-outline-dark">
+                            </button>
+                            <button type="button" class="btn btn-outline-dark" id="playNextButton">
+                            </button>
+                            <button type="button" class="btn btn-outline-dark" id="">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+
+</body>
+
+</html>

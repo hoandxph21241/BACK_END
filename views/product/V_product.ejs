@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <%- include('../../inc/top.ejs')%>
+
+        <div>
+            <p class="text-capitalize text-center fs-7 font-monospace fw-bold">Product</p>
+
+
+
+            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                    class="bi bi-file-earmark-arrow-up" viewBox="0 0 16 16">
+                    <path
+                        d="M8.5 11.5a.5.5 0 0 1-1 0V7.707L6.354 8.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 7.707z">
+                    </path>
+                    <path
+                        d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z">
+                    </path>
+                </svg>
+                NEW SONG
+            </button>
+
+
+        </div>
+
+
+        <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="uploadModalLabel">Upload MP3</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/product/upload" method="post" enctype="multipart/form-data">
+                            <label for="mp3Name">Name:</label>
+                            <input type="text" id="mp3Name" name="name" >
+                            <br><br>
+                            <label for="mp3File">Select MP3 file:</label>
+                            <input type="file" id="mp3File" name="mp3File" accept=".mp3" required>
+                            <br><br>
+                            <input type="submit" value="Upload">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%- include('../../inc/end.ejs')%>
+
+</body>
+
+</html>

@@ -1,0 +1,85 @@
+
+<!--             
+            <div class="col-12">
+                <div class="media-control-bar d-flex align-items-center justify-content-end">
+                    <div class="border border-dark col-12 bg-info border-3 rounded d-flex align-items-center">
+                        <img src="/images/chibi.gif" alt="Album cover"
+                            class="img-media album-cover ml-auto rounded bg-primary-subtle">
+                        <div class="song-info d-flex flex-column align-items-start mr-auto">
+                            <p class="song-name mb-0 fw-bold font-monospace p-3" data-text="mp3Name">Tên bài hát</p>
+                            <audio id="audioPlayer" controls class="text-center">
+                                <source src="data:audio/mpeg;base64" type="audio/mpeg">
+                            </audio>
+                        </div>
+                    </div>
+
+
+                    
+                    <div class="btn-group-container  bg-light border-1 rounded d-flex flex-column align-items-center">
+                        <button type="button" class="btn btn-outline-danger">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16">
+                                <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                              </svg>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" id="playNextButton">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-repeat" viewBox="0 0 16 16">
+                                <path
+                                    d="M11 5.466V4H5a4 4 0 0 0-3.584 5.777.5.5 0 1 1-.896.446A5 5 0 0 1 5 3h6V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192m3.81.086a.5.5 0 0 1 .67.225A5 5 0 0 1 11 13H5v1.466a.25.25 0 0 1-.41.192l-2.36-1.966a.25.25 0 0 1 0-.384l2.36-1.966a.25.25 0 0 1 .41.192V12h6a4 4 0 0 0 3.585-5.777.5.5 0 0 1 .225-.67Z">
+                                </path>
+                            </svg>
+                        </button>
+                        <button type="button" class="btn btn-outline-info" id="">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+                              </svg>
+                        </button>
+                    </div>
+                </div>
+
+            </div> -->
+
+            <!-- <div class="col-12">
+                <div class="media-control-bar d-flex align-items-center justify-content-end">
+                    <div class="border border-dark col-12 bg-info border-3 rounded d-flex align-items-center">
+                        <img src="/images/chibi.gif" alt="Album cover"
+                            class="img-media album-cover ml-auto rounded bg-primary-subtle">
+                        <div class="song-info d-flex flex-column align-items-start mr-auto">
+                            <p class="song-name mb-0 fw-bold font-monospace p-3" data-text="mp3Name">Tên bài hát</p>
+                            <audio id="audioPlayer" controls class="text-center">
+                                <source src="data:audio/mpeg;base64" type="audio/mpeg">
+                            </audio>
+                        </div>
+                        <div class="btn-group-container d-flex flex-column align-items-center">
+                            <button type="button" class="btn m-1" data-bs-toggle="button" aria-pressed="false">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor"
+                                    class="bi bi-x-square" viewBox="0 0 16 16">
+                                    <path
+                                        d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
+                                    <path
+                                        d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+                                </svg>
+                            </button>
+                            <button type="button" class="btn m-1" data-bs-toggle="button" aria-pressed="false" id="playNextButton">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor"
+                                    class="bi bi-repeat" viewBox="0 0 16 16">
+                                    <path
+                                        d="M11 5.466V4H5a4 4 0 0 0-3.584 5.777.5.5 0 1 1-.896.446A5 5 0 0 1 5 3h6V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192m3.81.086a.5.5 0 0 1 .67.225A5 5 0 0 1 11 13H5v1.466a.25.25 0 0 1-.41.192l-2.36-1.966a.25.25 0 0 1 0-.384l2.36-1.966a.25.25 0 0 1 .41.192V12h6a4 4 0 0 0 3.585-5.777.5.5 0 0 1 .225-.67Z">
+                                    </path>
+                                </svg>
+                            </button>
+                            <button type="button" class="btn m-01" data-bs-toggle="button" aria-pressed="false" id="">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor"
+                                    class="bi bi-info-circle" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                    <path
+                                        d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+
