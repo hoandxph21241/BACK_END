@@ -28,11 +28,26 @@ function formatTime(seconds) {
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
-// Hàm xử lý khi click vào bài hát
 function handleItemClick(mp3Data, mp3Name, index) {
     var audioPlayer = document.getElementById("audioPlayer");
     var songNameElement = document.querySelector(".song-name");
     var mediaControlBar = document.querySelector(".media-control-bar");
+
+    // Chỉ thêm bài hát nếu chưa có trong playlist
+    if (!playlist.some(song => song.data === mp3Data && song.name === mp3Name)) {
+        playlist.push({ data: mp3Data, name: mp3Name });
+    }
+
+    // Kiểm tra xem playlist có trống không
+    if (playlist.length === 0) {
+        console.log("Playlist is empty!"); // Sử dụng log để theo dõi
+        return; // Nếu playlist trống, thoát khỏi hàm
+    }
+
+    console.log("JS Playlist Count: " + playlist.length);
+
+    // Cập nhật chỉ số bài hát hiện tại
+    currentSongIndex = index;
 
     // Gán bài hát và phát nhạc
     audioPlayer.querySelector("source").src = "data:audio/mpeg;base64," + mp3Data;
@@ -44,9 +59,6 @@ function handleItemClick(mp3Data, mp3Name, index) {
     // Hiển thị thanh điều khiển
     mediaControlBar.classList.add("active");
 
-    // Cập nhật chỉ số bài hát hiện tại
-    currentSongIndex = index;
-
     // Cập nhật timeline sau khi nhạc được tải
     var seekbar = document.getElementById('seekbar');
     var currentTimeDisplay = document.getElementById('currentTime');
@@ -55,24 +67,29 @@ function handleItemClick(mp3Data, mp3Name, index) {
     updateTimeline(audioPlayer, seekbar, currentTimeDisplay, endTimeDisplay);
 }
 
-// Sự kiện khi click vào nút "Next"
-var nextBtn = document.getElementById("nextBtn");
-nextBtn.addEventListener("click", function() {
-    // Kiểm tra xem có bài tiếp theo trong playlist không
-    if (currentSongIndex < playlist.length - 1) {
-        currentSongIndex++; // Chuyển sang bài tiếp theo
-    } else {
-        currentSongIndex = 0; // Quay về bài đầu tiên nếu hết playlist
-    }
-
-    // Lấy bài hát tiếp theo từ playlist
-    var nextSong = playlist[currentSongIndex];
-    handleItemClick(nextSong.data, nextSong.name, currentSongIndex);
-});
-
 
 // Hàm để đóng thanh điều khiển
 function closeMediaControlBar() {
     var mediaControlBar = document.querySelector(".media-control-bar");
     mediaControlBar.classList.add("hidden");
 }
+
+
+var nextBtn = document.getElementById("nextBtn");
+if (nextBtn) {
+    nextBtn.addEventListener("click", function() {
+        // Kiểm tra xem có bài tiếp theo trong playlist không
+        if (currentSongIndex < playlist.length - 1) {
+            currentSongIndex++; // Chuyển sang bài tiếp theo
+        } else {
+            currentSongIndex = 0; // Quay về bài đầu tiên nếu hết playlist
+        }
+
+        // Lấy bài hát tiếp theo từ playlist
+        var nextSong = playlist[currentSongIndex];
+        if (nextSong) { // Kiểm tra bài hát có tồn tại không
+            handleItemClick(nextSong.data, nextSong.name, currentSongIndex);
+        }
+    });
+}
+
