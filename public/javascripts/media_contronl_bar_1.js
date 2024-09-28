@@ -115,16 +115,37 @@ playPauseBtn.addEventListener("click", function() {
     }
 });
 
-const volumeBtn = document.getElementById("volumeBtn");
-const volumeSlider = document.getElementById("volumeSlider");
+// const volumeBtn = document.getElementById("volumeBtn");
+// const volumeSlider = document.getElementById("volumeSlider");
 
-volumeBtn.addEventListener("mouseenter", () => {
-    volumeSlider.style.display = "block"; // Hiển thị thanh slider khi di chuột vào nút
+// volumeBtn.addEventListener("mouseenter", () => {
+//     volumeSlider.style.display = "block"; // Hiển thị thanh slider khi di chuột vào nút
+// });
+
+// volumeBtn.addEventListener("mouseleave", () => {
+//     volumeSlider.style.display = "none"; // Ẩn thanh slider khi không còn di chuột vào nút
+// });
+
+const volumeBtn = document.getElementById('volumeBtn');
+const volumeSlider = document.getElementById('volumeSlider');
+
+// Hiển thị giá trị mặc định của thanh trượt (0.5)
+volumeSlider.addEventListener('input', function() {
+  const volumeValue = volumeSlider.value;
+  console.log(`Current Volume: ${volumeValue}`); // In giá trị âm lượng ra console
 });
 
-volumeBtn.addEventListener("mouseleave", () => {
-    volumeSlider.style.display = "none"; // Ẩn thanh slider khi không còn di chuột vào nút
+// Khi hover vào nút volume, thanh trượt sẽ hiển thị
+volumeBtn.addEventListener('mouseenter', () => {
+  document.querySelector('.slider-container').style.display = 'block';
 });
+
+volumeBtn.addEventListener('mouseleave', () => {
+  document.querySelector('.slider-container').style.display = 'none';
+});
+
+
+
 
 // Cập nhật âm lượng của audio khi thay đổi thanh slider
 volumeSlider.addEventListener("input", (event) => {

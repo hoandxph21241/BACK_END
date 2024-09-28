@@ -86,17 +86,87 @@
     100.1% { right: 250%; } 
 }
 
+/*  volume */
+/* General Styling for Volume Control */
 .volume-control {
+    display: flex;
+    align-items: center;
     position: relative;
 }
 
-.volume-slider {
-    position: absolute;
-    top: 100%; /* Đặt thanh slider ở dưới nút */
-    left: 0;
-    width: 100%; /* Chiều rộng như nút */
-    display: none; /* Ẩn mặc định */
+#volumeBtn {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    color: #000;
+    font-size: 24px;
+    padding: 10px;
 }
+
+#volumeBtn svg {
+    transition: fill 0.3s ease;
+}
+
+#volumeBtn:hover svg {
+    fill: #007bff; /* Hover color */
+}
+
+/* Slider Styling */
+.slider-container {
+    display: none; /* Hidden until hovered or button clicked */
+    position: absolute;
+    left: 30px;
+    bottom: 0;
+    width: 30px;
+    height: 150px;
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    overflow: hidden;
+    padding: 5px;
+    transition: height 0.3s ease;
+}
+
+.volume-slider {
+    width: 4px;
+    height: 100%;
+    -webkit-appearance: none;
+    background: #f3f3f3;
+    outline: none;
+    margin: 0;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    width: 16px;
+    height: 16px;
+    background: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+    -webkit-appearance: none;
+}
+
+.volume-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.volume-control:hover .slider-container {
+    display: block;
+    height: 150px; /* Show slider on hover */
+}
+
+
+
+
+
+.audioPlayer{
+    display: inline;
+}
+
 
 #playPauseBtn {
     background: none; /* Xóa nền mặc định */
@@ -109,7 +179,6 @@
 
 #playPauseBtn:hover {
     background: rgb(255, 60, 0);
-    border-radius: 50%;
 }
 
 #playPauseIcon {
