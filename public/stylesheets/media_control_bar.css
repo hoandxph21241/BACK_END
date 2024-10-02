@@ -189,25 +189,28 @@ audio{
 }
 
 #playPauseBtn {
-    background: none;
-    border: none; 
+    background: none; 
+    border: none;
     cursor: pointer;
     display: inline-flex; 
     align-items: center; 
-    justify-content: center;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease; 
+    justify-content: center; 
+    position: relative;
+    transition: box-shadow 0.2s ease; 
+    border-radius: 5px; 
 }
 
 #playPauseBtn:hover {
-    background: rgb(255, 60, 0); 
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    border-radius: 5px; 
+    background: rgb(255, 60, 0); /* Background color change on hover */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Add shadow effect on hover */
+}
 
 #playPauseIcon {
-    width: 25px;
-    height: 25px;
-    transition: transform 0.2s ease;
+    width: 25px; /* Icon size */
+    height: 25px; /* Icon size */
+    transition: transform 0.2s ease; /* Smooth transition for transforms */
 }
+
 
 
 #playPauseBtn.playing #playPauseIcon {
