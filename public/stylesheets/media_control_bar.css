@@ -160,32 +160,55 @@
 }
 
 
+.song-name-container{
+    height: 40px;
+}
 
+.song-name {
+    text-transform: uppercase;
+    background: url('https://i.ibb.co/RDTnNrT/animated-text-fill.png') repeat-y;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: aitf 80s linear infinite;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+}
+
+@keyframes aitf {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+audio{
+    display:none;
+}
 
 
 .audioPlayer{
     display: inline;
 }
 
-
 #playPauseBtn {
-    background: none; /* Xóa nền mặc định */
-    border: none; /* Xóa viền */
-    padding: 0; /* Xóa padding */
-    cursor: pointer; /* Thay đổi con trỏ khi hover */
-    display: flex; /* Sử dụng flexbox để căn giữa */
-    align-items: center; /* Căn giữa theo chiều dọc */
+    background: none;
+    border: none; 
+    cursor: pointer;
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease; 
 }
 
 #playPauseBtn:hover {
-    background: rgb(255, 60, 0);
-}
+    background: rgb(255, 60, 0); 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    border-radius: 5px; 
 
 #playPauseIcon {
-    width: 25px; /* Đặt kích thước cho icon */
-    height: 25px; /* Đặt kích thước cho icon */
-    transition: transform 0.2s; /* Thêm hiệu ứng khi chuyển đổi */
+    width: 25px;
+    height: 25px;
+    transition: transform 0.2s ease;
 }
+
 
 #playPauseBtn.playing #playPauseIcon {
     transform: rotate(180deg);
@@ -209,7 +232,7 @@
 }
 
 
-
+/* 
 
 .background{
     background-color: #064f47c5;
@@ -333,4 +356,4 @@
         opacity: 0;
         border-radius: 50%;
     }
-}
+} */
