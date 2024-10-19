@@ -35,41 +35,34 @@
     align-items: center;
     visibility: hidden;
 }
-
 .media-control-bar .progress {
     height: 5px;
 }
-
 .img-media {
     height: 100px;
     width: 100px;
     margin: 5px;
 }
-
 .audioPlayer {
     width: 100px;
     height: 50px;
     margin: 5px;
 }
-
 .song-info {
     flex-grow: 1;
     display: flex;
     align-items: center;
     margin-bottom: 15px;
 }
-
 .media-control-bar.active {
     visibility: visible;
 }
-
 .song-name {
     position: relative;
     width: 320px; 
     white-space: nowrap;
     overflow: hidden; 
 }
-
 .song-name::after {
     content: attr(data-text);
     position: absolute;
@@ -79,21 +72,16 @@
     
     animation: marquee 10s linear infinite;
 }
-
 @keyframes marquee {
     0% { right: 100%; }
     100% { right: -90%; }
     100.1% { right: 250%; } 
 }
-
-/*  volume */
-/* General Styling for Volume Control */
 .volume-control {
     display: flex;
     align-items: center;
     position: relative;
 }
-
 #volumeBtn {
     background-color: transparent;
     border: none;
@@ -103,18 +91,14 @@
     font-size: 24px;
     padding: 10px;
 }
-
 #volumeBtn svg {
     transition: fill 0.3s ease;
 }
-
 #volumeBtn:hover svg {
-    fill: #007bff; /* Hover color */
+    fill: #007bff; 
 }
-
-/* Slider Styling */
 .slider-container {
-    display: none; /* Hidden until hovered or button clicked */
+    display: none;
     position: absolute;
     left: 30px;
     bottom: 0;
@@ -127,7 +111,6 @@
     padding: 5px;
     transition: height 0.3s ease;
 }
-
 .volume-slider {
     width: 4px;
     height: 100%;
@@ -136,7 +119,6 @@
     outline: none;
     margin: 0;
 }
-
 .volume-slider::-webkit-slider-thumb {
     width: 16px;
     height: 16px;
@@ -145,7 +127,6 @@
     cursor: pointer;
     -webkit-appearance: none;
 }
-
 .volume-slider::-moz-range-thumb {
     width: 16px;
     height: 16px;
@@ -153,17 +134,13 @@
     border-radius: 50%;
     cursor: pointer;
 }
-
 .volume-control:hover .slider-container {
     display: block;
-    height: 150px; /* Show slider on hover */
+    height: 150px;
 }
-
-
 .song-name-container{
     height: 40px;
 }
-
 .song-name {
     text-transform: uppercase;
     background: url('https://i.ibb.co/RDTnNrT/animated-text-fill.png') repeat-y;
@@ -173,21 +150,16 @@
     transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
 }
-
 @keyframes aitf {
     0% { background-position: 0% 50%; }
     100% { background-position: 100% 50%; }
 }
-
 audio{
     display:none;
 }
-
-
 .audioPlayer{
     display: inline;
 }
-
 #playPauseBtn {
     background: none; 
     border: none;
@@ -199,30 +171,22 @@ audio{
     transition: box-shadow 0.2s ease; 
     border-radius: 5px; 
 }
-
 #playPauseBtn:hover {
-    background: rgb(255, 60, 0); /* Background color change on hover */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Add shadow effect on hover */
+    background: rgb(255, 60, 0); 
 }
-
 #playPauseIcon {
     width: 25px; /* Icon size */
     height: 25px; /* Icon size */
-    transition: transform 0.2s ease; /* Smooth transition for transforms */
+    transition: transform 0.2s ease; 
 }
-
-
-
 #playPauseBtn.playing #playPauseIcon {
     transform: rotate(180deg);
 }
-
 .audio-controls {
     display: flex;
     align-items: center;
     margin: 10px 0; 
 }
-
 .time-display {
     font-weight: bold;
     margin-right: 10px;
@@ -232,6 +196,7 @@ audio{
     height: 4px; 
     border-radius: 5px; 
     outline: none; 
+    accent-color: rgb(255, 0, 0);
 }
 
 

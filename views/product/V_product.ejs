@@ -46,6 +46,16 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="Category" class="form-label">Category:</label>
+                            <select class="form-select" id="nameCategory" name="idCategory">
+                                <% listidCategory.forEach(function(typer) { %>
+                                    <option value="<%= typer._id %>">
+                                        <%= typer.nameCategory %>
+                                    </option>
+                                <% }); %>
+                            </select>
+                        </div>
                         <form action="/product/upload" method="post" enctype="multipart/form-data">
                             <label for="mp3Name">Name:</label>
                             <input type="text" id="mp3Name" name="name" >

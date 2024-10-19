@@ -37,6 +37,7 @@ let MP3 = db.mongoose.model("MP3", mp3Schema);
     // Bổ sung Table
 var CategorySchema = new db.mongoose.Schema(
   {
+    idCategory:{type:String,require:true},
     nameCategory: { type: String, require: false },
     image: { type: String, require: false },
   },
