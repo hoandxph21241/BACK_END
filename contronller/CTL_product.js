@@ -20,9 +20,9 @@ exports.saveMP3 = async (req, res) => {
     if (!name) {
       name = mp3File.originalname;
     }
-    if (!nameCategory) {
-      msg('Khong dc de trong');
-    }
+    // if (!nameCategory) {
+    //   msg('Khong dc de trong');
+    // }
     const mp3Data = fs.readFileSync(mp3File.path);
     const newMP3 = new db.MP3({
       name: name,
@@ -31,7 +31,7 @@ exports.saveMP3 = async (req, res) => {
     const savedMP3 = await newMP3.save();
     res.redirect('/home');
   } catch (err) {
-    console.log(err.message);
+    console.log(err);
     res.status(500).json({ error: "Error uploading MP3" });
   }
 };
