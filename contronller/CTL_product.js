@@ -8,11 +8,12 @@ exports.Product = async (req, res, next) => {
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 const fs = require("fs");
+const { log } = require("console");
 exports.uploadMP3 = upload.single("mp3File");
 exports.saveMP3 = async (req, res) => {
   try {
     let msg='';
-    let { name,nameCategory } = req.body;
+    let { name,categoryId } = req.body;
     const mp3File = req.file;
     if (!mp3File) {
       return res.status(400).json({ error: "Please upload an MP3 file" });
@@ -26,9 +27,12 @@ exports.saveMP3 = async (req, res) => {
     const mp3Data = fs.readFileSync(mp3File.path);
     const newMP3 = new db.MP3({
       name: name,
+      categoryId:categoryId,
       data: mp3Data,
     });
     const savedMP3 = await newMP3.save();
+    console.log(name+" / "+categoryId);
+    
     res.redirect('/home');
   } catch (err) {
     console.log(err);

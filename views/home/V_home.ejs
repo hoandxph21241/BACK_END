@@ -40,7 +40,13 @@
                             <div class="card-body bg-dark-subtle">
                                 <h5 class="card-title text-center">
                                     <%= mp3.name %>
-                                </h5>
+                                </h5>        
+                                     
+                                <span class="badge bg-primary"> <% if (mp3.categoryId && mp3.categoryId.nameCategory) { %>
+                                    <span><%= mp3.categoryId.nameCategory %></span>
+                                  <% } %>
+                                </span>
+                    
                             </div>
                         </div>
                     </div>

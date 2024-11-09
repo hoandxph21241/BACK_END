@@ -26,7 +26,7 @@ var mp3Schema = new db.mongoose.Schema(
 
     // Bổ sung item
     image: { type: String, require: false },
-    category: { type: db.mongoose.Schema.Types.ObjectId, ref: "CategoryModel" },
+    categoryId: { type: db.mongoose.Schema.Types.ObjectId, ref: "CategoryModel" },
     userID:{type:String, require:false},
     
   },
