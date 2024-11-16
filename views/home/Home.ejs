@@ -33,7 +33,7 @@
                         console.log("EJS Playlist Count: " + <%= mp3List.length %>);
                     </script>
                     <div class="col-md-3 mb-3" aria-hidden="true"
-                        onclick="handleItemClick('<%= mp3.data.toString('base64') %>', '<%= mp3.name %>', <%= index %>)">
+                    onclick="handleItemClick('<%= mp3._id %>')">
                         <div class="card h-100 d-flex justify-content-center" style="width: 21rem">
                             <img src="https://i.pinimg.com/236x/ff/5f/b3/ff5fb33001497b403cb86db7978b7943.jpg"
                                 class="card-img-top" style="height: 100%; width: 100%;" />
@@ -162,7 +162,7 @@
                 </div>
             </div> -->
 
-            <script src="/javascripts/media_contronl_bar_1.js"></script>
+            <script src="/javascripts/media_contron_bar_test.js"></script>
             <!-- <script src="/javascripts/render_view.js"></script> -->
 </body>
 

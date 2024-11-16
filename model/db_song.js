@@ -42,6 +42,7 @@ var CategorySchema = new db.mongoose.Schema(
     idCategory:{type:String,require:true},
     nameCategory: { type: String, require: false },
     image: { type: String, require: false },
+    color:{type: String, require:false},
   },
   {
     collection: "Category",
