@@ -24,7 +24,7 @@ exports.Home_NEW = async (req, res, next) => {
     .select('-data -userID')
       .populate({
         path: "categoryId",
-        select: "nameCategory",
+        select: "nameCategory _id",
       })
       .lean();
 
@@ -52,11 +52,25 @@ exports.Find_ID = async (req, res, next) => {
   try {
     const data = await db.MP3.findById(id)
     // .select("-name -image -categoryId -userID")
-    .select('-userID -categoryId -image')
+    .select('-userID -image')
     .lean();
     console.log("Rounter"+data);
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json({error:"Error data"});
+  }
+};
+// Lấy danh sách id các bài hát cùng thể loại
+exports.GetSongsByCategory = async (req, res, next) => {
+  const categoryId = req.params.categoryId; // Thể loại của bài hát hiện tại
+  try {
+    console.log(categoryId);
+    const songs = await db.MP3.find({ categoryId: categoryId }) // Lọc theo thể loại
+      .select('_id name') // Chỉ trả về id và name
+      .lean();
+      console.log(songs.name)
+    res.json(songs);
+  } catch (error) {
+    res.status(500).json({ error: "Lỗi khi lấy danh sách bài hát" });
   }
 };

@@ -33,7 +33,7 @@
                         console.log("EJS Playlist Count: " + <%= mp3List.length %>);
                     </script>
                     <div class="col-md-3 mb-3" aria-hidden="true"
-                    onclick="handleItemClick('<%= mp3._id %>')">
+                    onclick="handleItemClick('<%= mp3._id %>', '<%= mp3.name %>', '<%= mp3.categoryId  %>')">
                         <div class="card h-100 d-flex justify-content-center" style="width: 21rem">
                             <img src="https://i.pinimg.com/236x/ff/5f/b3/ff5fb33001497b403cb86db7978b7943.jpg"
                                 class="card-img-top" style="height: 100%; width: 100%;" />
@@ -61,7 +61,7 @@
 <div class="col-12">
     <div class="media-control-bar d-flex align-items-center justify-content-between">
         <div class="border border-dark bg-info border-3 rounded text-center align-items-center ">
-            <div class="song-name-container mb-0 fw-bold font-monospace p-2 bg-dark"  style="width: 100%;">
+            <div class="song-name-container mb-0 fw-bold font-monospace p-2 bg-dark">
             <p class="song-name text-center" data-text="mp3Name">Tên bài hát</p>
             </div>
             <div class="d-flex align-items-center"> 
