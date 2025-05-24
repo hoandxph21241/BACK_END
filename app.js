@@ -7,8 +7,12 @@ var logger = require('morgan');
 //session
 var session = require('express-session')
 
+const passport = require('passport');
+require('dotenv').config({ path: '../env/B_E_S.env' });
+require('./config/passport');
+
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+
 
 var app = express();
 
@@ -22,6 +26,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
+
 //session check
 app.use(session({
   secret: 'AAAAAAAAABBBBBBBBBCCCCCCCDDDDDDD',
@@ -31,7 +36,15 @@ app.use(session({
 }))
 
 
+// Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 app.use('/', indexRouter);
+
+//user
+var usersRouter = require('./routes/RT_user');
 app.use('/users', usersRouter);
 
 //home
@@ -56,6 +69,14 @@ app.use("/product", ProductRounter);
 // app.use("/api", apiRouter);
 
 
+app.get('/profile', (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.redirect('/login');
+  }
+  res.send(`Welcome ${req.user.displayName}`);
+});
+
+
 app.use(function(req, res, next) {
   next(createError(404));
 });
@@ -65,15 +86,15 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
 
   // link api
-  if (req.originalUrl.indexOf("/api") == 0) {
-    res.json({
+  if (req.originalUrl.indexOf("/api") === 0) {
+    return res.json({
       status: err.status,
       msg: err.message,
     });
   } else {
-    res.render("error");
+    return res.render("error");
   }
-  res.render("error");
 });
+
 
 module.exports = app;

@@ -34,6 +34,7 @@
     display: flex;
     align-items: center;
     visibility: hidden;
+    z-index: 1000;
 }
 .media-control-bar .progress {
     height: 5px;
@@ -77,67 +78,69 @@
     100% { right: -90%; }
     100.1% { right: 250%; } 
 }
+
 .volume-control {
-    display: flex;
-    align-items: center;
     position: relative;
+    display: inline-block;
 }
+
 #volumeBtn {
-    background-color: transparent;
+    background: transparent;
     border: none;
-    outline: none;
     cursor: pointer;
-    color: #000;
-    font-size: 24px;
-    padding: 10px;
+    padding: 8px;
 }
-#volumeBtn svg {
-    transition: fill 0.3s ease;
-}
-#volumeBtn:hover svg {
-    fill: #007bff; 
-}
+
 .slider-container {
-    display: none;
+    display: none; /* Ẩn mặc định */
     position: absolute;
-    left: 30px;
-    bottom: 0;
-    width: 30px;
-    height: 150px;
+    bottom: 40px; /* đưa slider lên trên nút volume */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 120px;
     background-color: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 4px;
-    overflow: hidden;
-    padding: 5px;
-    transition: height 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    z-index: 9999; /* tăng z-index cho chắc chắn nằm trên */
+    pointer-events: auto; /* đảm bảo nhận sự kiện chuột */
 }
+
+/* Thanh slider dọc */
 .volume-slider {
+    writing-mode: bt-lr; /* dọc từ dưới lên trên */
+    -webkit-appearance: none;
     width: 4px;
     height: 100%;
-    -webkit-appearance: none;
-    background: #f3f3f3;
-    outline: none;
-    margin: 0;
-}
-.volume-slider::-webkit-slider-thumb {
-    width: 16px;
-    height: 16px;
-    background: #007bff;
-    border-radius: 50%;
+    background: #ddd;
+    border-radius: 5px;
     cursor: pointer;
-    -webkit-appearance: none;
-}
-.volume-slider::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    background: #007bff;
-    border-radius: 50%;
-    cursor: pointer;
-}
-.volume-control:hover .slider-container {
+    margin: 0 auto;
     display: block;
-    height: 150px;
 }
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    background-color: #871919;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+}
+
+.volume-slider::-moz-range-thumb {
+    background-color: #198754;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+}
+
+
 .song-name-container{
     height: 40px;
 }

@@ -200,3 +200,32 @@
                     </div>
                 </div>
             </div>
+
+
+
+
+
+
+            <!-- 
+            <div class="col-12">
+                <div class="media-control-bar d-flex align-items-center justify-content-end">
+                    <div class="border border-dark col-12 bg-info border-3 rounded d-flex align-items-center">
+                        <img src="/images/chibi.gif" alt="Album cover"
+                            class="img-media album-cover ml-auto rounded bg-primary-subtle">
+                        <div class="song-info d-flex flex-column align-items-start mr-auto">
+                            <p class="song-name mb-0 fw-bold font-monospace p-3" data-text="mp3Name">Tên bài hát</p>
+                            <audio id="audioPlayer" controls class="text-center">
+                                <source src="data:audio/mpeg;base64" type="audio/mpeg">
+                            </audio>
+                        </div>
+                        <div class="btn-group-container d-flex flex-column align-items-center">
+                            <button type="button" class="btn btn-outline-dark">
+                            </button>
+                            <button type="button" class="btn btn-outline-dark" id="playNextButton">
+                            </button>
+                            <button type="button" class="btn btn-outline-dark" id="">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div> -->

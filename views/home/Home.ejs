@@ -2,168 +2,106 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Home</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-        crossorigin="anonymous"></script>
-    <link rel='stylesheet' href='/stylesheets/media_control_bar.css' />
-     <!-- <script src="/javascripts/media_control_bar.js"></script> -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
 
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOM8zE4dR8H3Xx7hPQ4d6G4He3bF1u8x1p/wi7" crossorigin="anonymous">
-     <link rel="icon" href="/images/bg.png" type="image/x-icon">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/stylesheets/media_control_bar1.css" />
+    <link rel="icon" href="/images/bg.png" type="image/x-icon" />
+
+    <%- include('../../inc/mediabar.ejs') %>
 </head>
 
 <body>
-    <% let mp3data%>
-        <%- include('../../inc/top.ejs',{mp3List:mp3List})%>
-            
+    <% let mp3data %>
+        <%- include('../../inc/top.ejs', { mp3List: mp3List }) %>
+
             <div>
                 <p class="text-capitalize text-center fs-7 font-monospace fw-bold">Home</p>
             </div>
 
             <div class="row p-5">
-                <% var playlist = [];  mp3List.forEach((mp3, index) => { %>
-                    <script>
-                        console.log("EJS Playlist Count: " + <%= mp3List.length %>);
-                    </script>
-                    <div class="col-md-3 mb-3" aria-hidden="true"
-                    onclick="handleItemClick('<%= mp3._id %>', '<%= mp3.name %>', '<%= mp3.categoryId  %>')">
+                <% mp3List.forEach((mp3)=> { %>
+                    <div class="col-md-3 mb-3 song-item" data-id="<%= mp3._id %>" data-name="<%= mp3.name %>"
+                        data-category="<%= mp3.categoryId %>">
+
                         <div class="card h-100 d-flex justify-content-center" style="width: 21rem">
                             <img src="https://i.pinimg.com/236x/ff/5f/b3/ff5fb33001497b403cb86db7978b7943.jpg"
                                 class="card-img-top" style="height: 100%; width: 100%;" />
+
                             <div class="card-body bg-dark-subtle">
                                 <h5 class="card-title text-center">
                                     <%= mp3.name %>
-                                </h5>        
-                                     
-                                <span class="badge bg-danger" > <% if (mp3.categoryId && mp3.categoryId.nameCategory) { %>
-                                    <span><%= mp3.categoryId.nameCategory %></span>
-                                  <% } else { %>
-                                    <p>No Catetory</p> 
-                                   <% } %>
+                                </h5>
+
+                                <span class="badge bg-danger">
+                                    <% if (mp3.categoryId && mp3.categoryId.nameCategory) { %>
+                                        <span>
+                                            <%= mp3.categoryId.nameCategory %>
+                                        </span>
+                                        <% } else { %>
+                                            <span>No Category</span>
+                                            <% } %>
                                 </span>
-                    
                             </div>
                         </div>
                     </div>
-                <% }); %>
+                    <% }); %>
             </div>
-            
-            
 
+            <script src="/javascripts/media.js" defer></script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const items = document.querySelectorAll(".song-item");
+                    items.forEach(item => {
+                        item.addEventListener("click", () => {
+                            const mp3Id = item.dataset.id;
+                            const mp3Name = item.dataset.name;
+                            const categoryId = item.dataset.category;
+                            if (typeof handleItemClick === "function") {
+                                handleItemClick(mp3Id, mp3Name, categoryId);
+                            } else {
+                                console.error("handleItemClick is not defined");
+                            }
+                        });
+                    });
 
-<div class="col-12">
-    <div class="media-control-bar d-flex align-items-center justify-content-between">
-        <div class="border border-dark bg-info border-3 rounded text-center align-items-center ">
-            <div class="song-name-container mb-0 fw-bold font-monospace p-2 bg-dark">
-            <p class="song-name text-center" data-text="mp3Name">Tên bài hát</p>
-            </div>
-            <div class="d-flex align-items-center"> 
-            <img src="/images/chibi.gif" alt="Album cover"
-                class="img-media album-cover ml-auto rounded bg-primary-subtle">
-            <div class="song-info d-flex flex-column align-items-start mr-auto m-2">
-                <div class="bg-light d-flex flex-column align-items-start mr-auto  rounded"> 
-                <audio id="audioPlayer" controls class="text-center" autoplay>
-                    <source src="data:audio/mpeg;base64" type="audio/mpeg">
-                </audio>
+                    const audioPlayer = document.getElementById("audioPlayer");
+                    const songNameElement = document.querySelector(".song-name");
+                    const mediaControlBar = document.querySelector(".media-control-bar");
+                    const playPauseBtn = document.getElementById("playPauseBtn");
+                    const playPauseIcon = document.getElementById("playPauseIcon");
+                    const nextBtn = document.getElementById("nextBtn");
+                    const backBtn = document.getElementById("backBtn");
+                    const volumeBtn = document.getElementById('volumeBtn');
+                    const volumeSlider = document.getElementById('volumeSlider');
+                    const seekbar = document.getElementById('seekbar');
+                    const currentTimeDisplay = document.getElementById('currentTime');
+                    const endTimeDisplay = document.getElementById('endTime');
 
-              <div class="btn-group mt-1 m-1 text-center bg-light align-items-center px-2"> 
-                    <button id="backBtn" type="button" class="btn btn-outline-dark">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-rewind-circle" viewBox="0 0 16 16">
-                            <path d="M7.729 5.055a.5.5 0 0 0-.52.038l-3.5 2.5a.5.5 0 0 0 0 .814l3.5 2.5A.5.5 0 0 0 8 10.5V8.614l3.21 2.293A.5.5 0 0 0 12 10.5v-5a.5.5 0 0 0-.79-.407L8 7.386V5.5a.5.5 0 0 0-.271-.445"/>
-                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8"/>
-                          </svg>
-                    </button>
-                    
-                    <button  id="nextBtn" type="button" class="btn btn-outline-dark">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-fast-forward-circle" viewBox="0 0 16 16">
-                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                            <path d="M4.271 5.055a.5.5 0 0 1 .52.038L8 7.386V5.5a.5.5 0 0 1 .79-.407l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 8 10.5V8.614l-3.21 2.293A.5.5 0 0 1 4 10.5v-5a.5.5 0 0 1 .271-.445"/>
-                          </svg>
-                    </button>             
+                    window.audioPlayer = audioPlayer;
+                    window.songNameElement = songNameElement;
+                    window.mediaControlBar = mediaControlBar;
+                    window.playPauseBtn = playPauseBtn;
+                    window.playPauseIcon = playPauseIcon;
+                    window.nextBtn = nextBtn;
+                    window.backBtn = backBtn;
+                    window.volumeBtn = volumeBtn;
+                    window.volumeSlider = volumeSlider;
+                    window.seekbar = seekbar;
+                    window.currentTimeDisplay = currentTimeDisplay;
+                    window.endTimeDisplay = endTimeDisplay;
 
-                     <div class="volume-control">
-                        <button id="volumeBtn" type="button" class="btn btn-outline-dark">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-volume-up" viewBox="0 0 16 16">
-                                <path d="M11.536 14.01A8.47 8.47 0 0 0 14.026 8a8.47 8.47 0 0 0-2.49-6.01l-.708.707A7.48 7.48 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303z"/>
-                                <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.48 5.48 0 0 1 11.025 8a5.48 5.48 0 0 1-1.61 3.89z"/>
-                                <path d="M10.025 8a4.5 4.5 0 0 1-1.318 3.182L8 10.475A3.5 3.5 0 0 0 9.025 8c0-.966-.392-1.841-1.025-2.475l.707-.707A4.5 4.5 0 0 1 10.025 8M7 4a.5.5 0 0 0-.812-.39L3.825 5.5H1.5A.5.5 0 0 0 1 6v4a.5.5 0 0 0 .5.5h2.325l2.363 1.89A.5.5 0 0 0 7 12zM4.312 6.39 6 5.04v5.92L4.312 9.61A.5.5 0 0 0 4 9.5H2v-3h2a.5.5 0 0 0 .312-.11"/>
-                            </svg>
-                        </button>
-                        <div class="slider-container">
-                            <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="0.5" class="volume-slider vertical">
-                        </div>
-                    </div>
-                    
-                    <button type="button" class="btn btn-outline-secondary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-repeat" viewBox="0 0 16 16">
-                            <path d="M11 5.466V4H5a4 4 0 0 0-3.584 5.777.5.5 0 1 1-.896.446A5 5 0 0 1 5 3h6V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192m3.81.086a.5.5 0 0 1 .67.225A5 5 0 0 1 11 13H5v1.466a.25.25 0 0 1-.41.192l-2.36-1.966a.25.25 0 0 1 0-.384l2.36-1.966a.25.25 0 0 1 .41.192V12h6a4 4 0 0 0 3.585-5.777.5.5 0 0 1 .225-.67Z"/>
-                          </svg>
-                    </button>
-                    
-                    <button type="button" class="btn btn-outline-secondary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-shuffle" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.6 9.6 0 0 0 7.556 8a9.6 9.6 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.6 10.6 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.6 9.6 0 0 0 6.444 8a9.6 9.6 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5"/>
-                            <path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192m0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192"/>
-                          </svg>
-                    </button>
-                </div>
-
-
-                <div class="audio-controls">
-                    <button id="playPauseBtn" type="button" class="px-3 btn btn-outline-dark">
-                        <svg id="playPauseIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pause-circle" viewBox="0 0 16 16">
-                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                            <path d="M5 6.25a1.25 1.25 0 1 1 2.5 0v3.5a1.25 1.25 0 1 1-2.5 0zm3.5 0a1.25 1.25 0 1 1 2.5 0v3.5a1.25 1.25 0 1 1-2.5 0z"/>
-                        </svg>
-                    </button>
-                    <div class="time-display">
-                        <span id="currentTime">00:00</span> / <span id="endTime">00:00</span>
-                    </div>
-                    <input id="seekbar" type="range" min="0" value="0" step="0.1" class="seekbar">
-                </div>
-            </div>
-           </div>
-        </div>
-        </div>
-    </div>
-</div>
-
-
-
-
-            <!-- 
-            <div class="col-12">
-                <div class="media-control-bar d-flex align-items-center justify-content-end">
-                    <div class="border border-dark col-12 bg-info border-3 rounded d-flex align-items-center">
-                        <img src="/images/chibi.gif" alt="Album cover"
-                            class="img-media album-cover ml-auto rounded bg-primary-subtle">
-                        <div class="song-info d-flex flex-column align-items-start mr-auto">
-                            <p class="song-name mb-0 fw-bold font-monospace p-3" data-text="mp3Name">Tên bài hát</p>
-                            <audio id="audioPlayer" controls class="text-center">
-                                <source src="data:audio/mpeg;base64" type="audio/mpeg">
-                            </audio>
-                        </div>
-                        <div class="btn-group-container d-flex flex-column align-items-center">
-                            <button type="button" class="btn btn-outline-dark">
-                            </button>
-                            <button type="button" class="btn btn-outline-dark" id="playNextButton">
-                            </button>
-                            <button type="button" class="btn btn-outline-dark" id="">
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-
-            <script src="/javascripts/media_contron_bar_test.js"></script>
-            <!-- <script src="/javascripts/render_view.js"></script> -->
+                });
+            </script>
 </body>
 
 </html>

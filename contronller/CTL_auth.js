@@ -1,4 +1,5 @@
 var Model = require("../model/db_song");
+require("dotenv").config();
 
 exports.Register = async (req, res, next) => {
   let msg = "";
@@ -74,73 +75,64 @@ exports.SignIn = async (req, res, next) => {
   res.render("auth/sign_in.ejs", { msg: msg, user: user });
 };
 
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 
-const client_id = "300181281255-1j7l2fmmm18u901kitvjtp6fjgb7ftlr.apps.googleusercontent.com";
-const client_secret = "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";
-// const redirect_uri = "htttps://developers.google.com/oauthplayground";
-const redirect_uri = "http://localhost:3000/auth/google";
-const refresh_token = "1//0401_MnbQxNI9CgYIARAAGAQSNwF-L9IrwTmvFFX4MCOSgq5FLmoQttpMG9qhm21xbRHfcQBleRmgdwn4litO5OG19NtsOnDqvn0";
-const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uri);
-  oAuth2Client.setCredentials({ refresh_token: refresh_token });
+const client_id = process.env.GOOGLE_CLIENT_ID;
+const client_secret = process.env.GOOGLE_CLIENT_SECRET;
+const redirect_uri = process.env.GOOGLE_REDIRECT_URI;
+const refresh_token = process.env.GOOGLE_REFRESH_TOKEN;
+const email_sender = process.env.EMAIL_SENDER;
 
+const oAuth2Client = new google.auth.OAuth2(
+  client_id,
+  client_secret,
+  redirect_uri
+);
+oAuth2Client.setCredentials({ refresh_token: refresh_token });
 
-exports.Google = function(req, res, next) {
-  passport.use(new GoogleStrategy({
-      clientID: client_id,
-      clientSecret: client_secret,
-      callbackURL: redirect_uri
-    },
-    function(accessToken, refreshToken, profile, cb) {
-      // Tìm hoặc tạo người dùng trong cơ sở dữ liệu của bạn
-        User.findOrCreate({ googleId: profile.id }, function (err, user) {
-        return cb(err, user);
-      });
-    }
-  ));
-  passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
-  passport.authenticate('google', { failureRedirect: '/auth/signin' }),
-  function(req, res) {
-    res.redirect('/home');
-    sendMail(req.user.email);
-  }
-  async function sendMail(userEmail) {
-    const oAuth2Client = new google.auth.OAuth2(
-      client_id,
-      client_secret,
-      redirect_uri
-    );
+exports.googleLogin = (req, res, next) => {
+  passport.authenticate("google", { scope: ["profile", "email"] })(
+    req,
+    res,
+    next
+  );
+};
+
+exports.googleCallback = (req, res, next) => {
+  passport.authenticate('google', { failureRedirect: '/auth/signin' }, async (err, user, info) => {
+    if (err || !user) return res.redirect('/auth/signin');
 
     try {
-      const accessToken = await oAuth2Client.getAccessToken();
-      const transport = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          type: 'OAuth2',
-          user: 'hzdev231@gmail.com',
-          clientId: client_id,
-          clientSecret: client_secret,
-          refreshToken: refresh_token,
-          accessToken: accessToken,
-        },
-      });
-      const mailOptions = {
-        from: 'HZ_DEV 🎉<hzdev231@gmail.com>',
-        to: userEmail,
-        subject: 'Hello, Welcome to Shoes Shop',
-        text: 'Hello guy',
-        html: '<h1> Finish Login </h1>',
-      };
-      const result = await transport.sendMail(mailOptions);
-      return result;
-    } catch (err) {
-      return err;
+      const email = user.gmail;
+      let existingUser = await Model.UserModel.findOne({ gmail: email });
+
+      if (!existingUser) {
+        existingUser = await Model.UserModel.create({
+          userID: Date.now().toString(),
+          nameAccount: email,
+          namePassword: '',
+          imageAccount: user.imageAccount,
+          userName: email.split('@')[0],
+          fullName: user.fullName,
+          gmail: email,
+          grender: '',
+          role: 1
+        });
+      }
+
+      req.session.userLogin = existingUser;
+      return res.redirect('/users/profile'); 
+
+    } catch (error) {
+      console.error("Lỗi lưu user:", error);
+      return res.redirect('/auth/signin');
     }
-  }
-}
+  })(req, res, next);
+};
+
 
 
 exports.SignOut = async (req, res, next) => {
