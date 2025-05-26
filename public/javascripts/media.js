@@ -18,19 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentTimeDisplay = document.getElementById('currentTime');
     const endTimeDisplay = document.getElementById('endTime');
 
-
     console.log({ nextBtn, backBtn, playPauseBtn });
-
 
     console.log("volumeBtn:", volumeBtn);
     console.log("volumeSlider:", volumeSlider);
     console.log("audioPlayer:", audioPlayer);
-
-    if (!volumeBtn || !volumeSlider) {
-        console.error("❌ Một hoặc nhiều phần tử không tồn tại trong DOM!");
-        return;
-    }
-
 
     window.handleItemClick = function (mp3Id, mp3Name, categoryId) {
         console.log(`Fetching data for mp3Id: ${mp3Id}`);
@@ -113,80 +105,37 @@ document.addEventListener("DOMContentLoaded", () => {
         return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
     }
 
-    // function handleItemClick(mp3Id, mp3Name, categoryId) {
-    //   console.log(`Fetching data for mp3Id: ${mp3Id}`);
-
-    //   fetch(`/home/find/${mp3Id}`)
-    //     .then(response => {
-    //       if (!response.ok) {
-    //         throw new Error(`Failed to fetch audio data for ID: ${mp3Id}`);
-    //       }
-    //       return response.json();
-    //     })
-    //     .then(data => {
-    //       if (!playlist.some(song => song.id === mp3Id)) {
-    //         playlist.push({ id: mp3Id, data: data.data, name: mp3Name, categoryId: categoryId });
-    //         currentSongIndex = playlist.length - 1;
-    //         console.log("Updated playlist:", playlist);
-    //       } else {
-    //         currentSongIndex = playlist.findIndex(song => song.id === mp3Id);
-    //       }
-
-    //       const source = document.createElement("source");
-    //       source.src = "data:audio/mpeg;base64," + data.data;
-    //       source.type = "audio/mpeg";
-
-    //       if (window.songNameElement) {
-    //         window.songNameElement.textContent = data.name;
-    //       } else {
-    //         console.warn("Không tìm thấy phần tử .song-name");
-    //       }
-
-    //       if (window.audioPlayer) {
-    //         const audio = window.audioPlayer;
-    //         audio.innerHTML = "";
-    //         audio.appendChild(source);
-    //         audio.load();
-    //         audio.play();
-    //       }
-
-    //       if (window.mediaControlBar) {
-    //         window.mediaControlBar.classList.add("active");
-    //       }
-
-    //       currentSong = { id: mp3Id, name: data.name, categoryId: data.categoryId };
-    //       isPlaying = true;
-    //       updatePlayPauseIcon();
-
-    //       // Gọi updateTimeline đúng biến toàn cục đã gán vào window
-    //       updateTimeline(window.audioPlayer, window.seekbar, window.currentTimeDisplay, window.endTimeDisplay);
-    //     })
-    //     .catch(error => {
-    //       console.error("Error fetching or playing audio:", error);
-    //     });
-    // }
-
-
-
     audioPlayer.addEventListener('ended', function () {
         if (filteredPlaylist.length === 0) {
+            if (!currentSong || !currentSong.categoryId) {
+                console.error("currentSong không tồn tại hoặc thiếu categoryId");
+                return;
+              }
             const currentCategoryId = String(currentSong.categoryId);
             fetch(`/home/category/${currentCategoryId}`)
-              .then(response => {
-                  if (!response.ok) throw new Error('Không thể lấy danh sách bài hát cùng thể loại');
-                  return response.json();
-              })
-              .then(songs => {
-                  filteredPlaylist = songs.map(song => ({ id: song._id, categoryId: song.categoryId }));
-                  console.log('Danh sách bài hát cùng thể loại:', filteredPlaylist);
-                  if (filteredPlaylist.length > 0) {
-                      const nextSong = filteredPlaylist.shift();
-                      fetchAndPlayNextSong(nextSong.id);
-                  }
-              })
-              .catch(error => {
-                  console.error('Lỗi khi lấy danh sách bài hát:', error);
-              });
+                .then(response => {
+                    if (!response.ok) throw new Error('Không thể lấy danh sách bài hát cùng thể loại');
+                    return response.json();
+                })
+                .then(songs => {
+                    filteredPlaylist = songs.map(song => ({ id: song._id, title: song.name || song.title }));
+
+                    console.log('Danh sách bài hát cùng thể loại:', filteredPlaylist);
+                    console.log(songs)
+
+
+                    console.log("Render playlist với:", filteredPlaylist);
+                    renderPlaylist(filteredPlaylist);
+
+
+                    if (filteredPlaylist.length > 0) {
+                        const nextSong = filteredPlaylist.shift();
+                        fetchAndPlayNextSong(nextSong.id);
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi khi lấy danh sách bài hát:', error);
+                });
         } else {
             const nextSong = filteredPlaylist.shift();
             fetchAndPlayNextSong(nextSong.id);
@@ -212,6 +161,29 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch(error => {
                 console.error('Lỗi khi fetch và phát bài hát:', error);
             });
+    }
+
+    function renderPlaylist(songs) {
+        const listContainer = document.getElementById('playlist');
+        const fallbackContainer = document.getElementById('playlistItems');
+
+        if (fallbackContainer) {
+            fallbackContainer.style.display = 'none';
+        }
+
+        if (!listContainer) return;
+
+        listContainer.innerHTML = '';
+
+        songs.forEach(song => {
+            const li = document.createElement('li');
+            li.textContent = song.title;
+            li.style.cursor = 'pointer';
+            li.addEventListener('click', () => {
+                fetchAndPlayNextSong(song.id);
+            });
+            listContainer.appendChild(li);
+        });
     }
 
     nextBtn.addEventListener("click", function () {
@@ -330,7 +302,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+    const togglePlaylistBtn = document.getElementById('togglePlaylistBtn');
+    const playlistPopup = document.getElementById('playlistPopup');
+    const playlistItems = document.getElementById('playlistItems');
 
+    togglePlaylistBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (playlistPopup.style.display === 'block') {
+        playlistPopup.style.display = 'none';
+      } else {
+        renderPlaylistItems();
+        playlistPopup.style.display = 'block';
+      }
+    });
+    playlistPopup.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+
+    document.addEventListener('click', () => {
+        playlistPopup.style.display = 'none';
+    });
+    
+
+    function renderPlaylistItems() {
+        playlistItems.innerHTML = '';
+        if (!window.filteredPlaylist || window.filteredPlaylist.length === 0) {
+            playlistItems.innerHTML = '<li>Không có bài hát trong danh sách</li>';
+            return;
+        }
+        window.filteredPlaylist.forEach(song => {
+            const li = document.createElement('li');
+            li.textContent = song.name || `Bài hát ID: ${song.id}`;
+            li.style.userSelect = 'none';
+
+            li.addEventListener('click', () => {
+                fetchAndPlayNextSong(song.id);
+                playlistPopup.style.display = 'none';
+            });
+
+            playlistItems.appendChild(li);
+        });
+    }
 
 
 })

@@ -108,37 +108,6 @@
     pointer-events: auto; /* đảm bảo nhận sự kiện chuột */
 }
 
-/* Thanh slider dọc */
-.volume-slider {
-    writing-mode: bt-lr; /* dọc từ dưới lên trên */
-    -webkit-appearance: none;
-    width: 4px;
-    height: 100%;
-    background: #ddd;
-    border-radius: 5px;
-    cursor: pointer;
-    margin: 0 auto;
-    display: block;
-}
-
-.volume-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    background-color: #871919;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-}
-
-.volume-slider::-moz-range-thumb {
-    background-color: #198754;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-}
 
 
 .song-name-container{
@@ -201,6 +170,24 @@ audio{
     outline: none; 
     accent-color: rgb(255, 0, 0);
 }
+
+
+.playlistPopup {
+    transform: translateY(30px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    pointer-events: none; /* để tránh click trúng khi ẩn */
+  }
+  
+  /* Khi hiện popup */
+  .playlistPopup.show {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  
 
 
 /* 
