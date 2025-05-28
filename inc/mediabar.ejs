@@ -104,32 +104,27 @@
           </div>
         </div>
         <!-- Nút mở danh sách bài hát -->
-        <button id="togglePlaylistBtn" class="btn btn-outline-dark position-absolute" style="top: 5px; right: 5px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-caret-down"
+        <button id="togglePlaylistBtn" class="position-absolute btnPlaylist" style="top: 10px; right: 10px; background: none; border: none; padding: 0;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="white" class="bi bi-caret-down"
             viewBox="0 0 16 16">
-            <path
-              d="M3.204 5h9.592L8 10.481zm-.753.659 4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659">
+            <path d="M3.204 5h9.592L8 10.481zm-.753.659 4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659">
             </path>
           </svg>
         </button>
+        
 
       </div>
 
-      <div id="playlistPopup" class="playlist-popup position-absolute bg-white border border-dark p-3 rounded shadow"
-        style="bottom: 157px; width: 320px; z-index: 999;">
+      <div id="playlistPopup" class="playlist-popup position-absolute bg-dark border border-dark p-3 rounded shadow"
+        style="bottom: 157px; width: 405px; z-index: 999;">
         <div>
-          <div class="playlist-header d-flex justify-content-between align-items-center mb-3">
-            <strong>🎵 Danh sách phát</strong>
+          <div class="playlist-header d-flex justify-content-between align-items-center mb-3 text-light">
+            <strong class="no-select">🎵 Danh sách phát</strong>
           </div>
           <div class="playlist-body">
             <ul id="playlistItems" class="playlist-list list-unstyled"></ul>
             <ul id="playlist" class="list-unstyled mb-0">
               <li class="playlist-item d-flex align-items-center mb-2 p-2 rounded hover-bg">
-                <img src="https://i.pinimg.com/236x/ff/5f/b3/ff5fb33001497b403cb86db7978b7943.jpg" alt="Song Thumbnail" class="rounded me-2 thumbnail-img" style="height: 50px; width: 50px;">
-                <div class="text-truncate">
-                  <div class="song-title fw-semibold">Tên bài hát</div>
-                  <div class="text-muted small">Nghệ sĩ</div>
-                </div>
               </li>
               <!-- Thêm nhiều li tương tự -->
             </ul>

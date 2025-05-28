@@ -224,3 +224,113 @@ audio {
     border: none;
 }
 
+.btnPlaylist {
+    background: none;
+    border: none;
+    padding: 0;
+    color: white;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  .btnPlaylist svg {
+    pointer-events: none;
+  }
+
+  .btnPlaylist:hover {
+    transform: scale(1.2);
+    color: #ff0707; 
+  }
+  
+
+/* CSS */
+.playlist-popup {
+    display: none;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: none;
+  }
+  
+  .playlist-popup.show {
+    display: block;
+    animation: slideUp 0.3s ease forwards;
+  }
+  
+  .playlist-popup.hide {
+    display: block;
+    animation: slideDown 0.3s ease forwards;
+  }
+  
+  @keyframes slideUp {
+    from {
+      transform: translateY(40px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideDown {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(40px);
+      opacity: 0;
+    }
+  }
+
+/* CSS gốc cho user-select */
+.playlist-header strong {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+#playlist, #playlistItems,
+#playlist li, #playlistItems li {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* Hiệu ứng hover cho từng item trong playlist-body */
+.playlist-body li {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+}
+
+.playlist-body li::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.playlist-body li:hover::before {
+    left: 100%;
+}
+
+.playlist-body li:hover {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(0, 123, 255, 0.1));
+    transform: translateX(8px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-left: 3px solid #ffc107;
+}
+
+.playlist-body li:active {
+    transform: translateX(8px) scale(0.98);
+    transition: transform 0.1s ease;
+}
