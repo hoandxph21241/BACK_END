@@ -95,3 +95,25 @@
             playlistItems.appendChild(li);
         });
     }
+   // function renderPlaylist(songs) {
+    //     const listContainer = document.getElementById('playlist');
+    //     const fallbackContainer = document.getElementById('playlistItems');
+
+    //     if (fallbackContainer) {
+    //         fallbackContainer.style.display = 'none';
+    //     }
+
+    //     if (!listContainer) return;
+
+    //     listContainer.innerHTML = '';
+
+    //     songs.forEach(song => {
+    //         const li = document.createElement('li');
+    //         li.textContent = song.title;
+    //         li.style.cursor = 'pointer';
+    //         li.addEventListener('click', () => {
+    //             fetchAndPlayNextSong(song.id);
+    //         });
+    //         listContainer.appendChild(li);
+    //     });
+    // }
