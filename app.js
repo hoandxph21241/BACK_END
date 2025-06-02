@@ -64,6 +64,14 @@ app.use("/dashboard", DashboardRounter);
 var ProductRounter = require("./routes/RT_product");
 app.use("/product", ProductRounter);
 
+
+// iframe Mediabar
+app.get('/mediabar', (req, res) => {
+  // res.render('./views/inc/mediabar.ejs'); 
+  res.render('inc/mediabar');
+});
+
+
 // //api
 // var apiRouter = require("./routes/api_Rounters");
 // app.use("/api", apiRouter);

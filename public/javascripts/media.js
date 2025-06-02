@@ -540,18 +540,34 @@ function renderPlaylist(songs) {
     }
 
     function openPopup() {
+
+        if (window.isExpanded) return;
+
         isAnimating = true;
         playlistPopup.style.display = "block";
         playlistPopup.classList.remove("hide");
         void playlistPopup.offsetWidth;
         playlistPopup.classList.add("show");
+
+
+        window.isExpanded = true;
+        window.parent.postMessage({ type: 'playlistState', isExpanded: true }, '*');
+        console.log('openPopup:', window.isExpanded);
+        
     }
 
     function closePopup() {
+
+        if (!window.isExpanded) return;
+
         isAnimating = true;
         playlistPopup.classList.remove("show");
         void playlistPopup.offsetWidth;
         playlistPopup.classList.add("hide");
+
+        window.isExpanded = false;
+        window.parent.postMessage({ type: 'playlistState', isExpanded: false }, '*');
+        console.log('closePopup:', window.isExpanded);
     }
 
     function handleAnimationEnd(e) {
@@ -574,7 +590,6 @@ function renderPlaylist(songs) {
             closePopup();
         }
     }
-
     initializePopup();
 
 

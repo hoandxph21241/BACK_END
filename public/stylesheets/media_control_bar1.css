@@ -1,11 +1,11 @@
+
 .body {
     overflow-x: hidden;
 }
-
 .media-control-bar {
     position: fixed;
-    bottom: 3%;
-    right: 2%;
+    bottom: 10px; /* Sử dụng giá trị pixel thay vì % */
+    right: 10px;
     display: flex;
     align-items: center;
     visibility: hidden;
@@ -263,6 +263,7 @@ audio {
     opacity: 0;
     transform: translateY(40px);
     transition: none;
+    height: 385px;
 }
 
 .playlist-popup.show {
@@ -436,4 +437,24 @@ img{
     60% {
         transform: translateY(-55%);
     }
+}
+
+
+
+
+body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    overflow: hidden; 
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+.media-control-bar * {
+    pointer-events: auto;
+}
+body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
