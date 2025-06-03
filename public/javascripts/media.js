@@ -326,14 +326,72 @@ document.addEventListener("DOMContentLoaded", () => {
     // }
 
     // Cập nhật function renderPlaylist - chỉ cần thêm/xóa class
+    // function renderPlaylist(songs) {
+    //     const listContainer = document.getElementById('playlist');
+    //     const fallbackContainer = document.getElementById('playlistItems');
+
+    //     if (!listContainer) return;
+
+    //     listContainer.innerHTML = '';
+
+    //     // Nếu không có bài hát, xóa class has-data để ẩn
+    //     if (!songs || songs.length === 0) {
+    //         listContainer.classList.remove('has-data');
+    //         if (fallbackContainer) {
+    //             fallbackContainer.classList.remove('has-data');
+    //         }
+    //         return;
+    //     }
+
+    //     // Có bài hát thì thêm class has-data để hiển thị
+    //     listContainer.classList.add('has-data');
+    //     if (fallbackContainer) {
+    //         fallbackContainer.classList.remove('has-data'); // Ẩn fallback khi dùng main playlist
+    //     }
+
+    //     songs.forEach(song => {
+    //         const li = document.createElement('li');
+    //         li.className = 'playlist-item d-flex align-items-center mb-2 p-2 rounded hover-bg';
+    //         li.style.cursor = 'pointer';
+
+    //         li.setAttribute('data-song-id', song.id);
+
+    //         if (currentSong && currentSong.id === song.id) {
+    //             li.classList.add('current-playing');
+    //         }
+
+    //         li.innerHTML = `
+    //         <img src="${song.thumbnail || 'https://i.pinimg.com/236x/ff/5f/b3/ff5fb33001497b403cb86db7978b7943.jpg'}"
+    //              alt="Thumbnail"
+    //              class="rounded me-2"
+    //              style="height: 50px; width: 50px; object-fit: cover;">
+    //         <div class="text-truncate text-light">
+    //             <div class="song-title fw-semibold">${song.title || 'Không rõ tên'}</div>
+    //             <div class="text-muted small">${song.artist || ''}</div>
+    //         </div>
+    //     `;
+
+    //         li.addEventListener('click', () => {
+    //             document.querySelectorAll('.playlist-item.current-playing')
+    //                 .forEach(item => item.classList.remove('current-playing'));
+
+    //             li.classList.add('current-playing');
+    //             fetchAndPlayNextSong(song.id);
+    //         });
+
+    //         listContainer.appendChild(li);
+    //     });
+        
+    // }
+
     function renderPlaylist(songs) {
         const listContainer = document.getElementById('playlist');
         const fallbackContainer = document.getElementById('playlistItems');
-
+    
         if (!listContainer) return;
-
+    
         listContainer.innerHTML = '';
-
+    
         // Nếu không có bài hát, xóa class has-data để ẩn
         if (!songs || songs.length === 0) {
             listContainer.classList.remove('has-data');
@@ -342,46 +400,49 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             return;
         }
-
+    
         // Có bài hát thì thêm class has-data để hiển thị
         listContainer.classList.add('has-data');
         if (fallbackContainer) {
             fallbackContainer.classList.remove('has-data'); // Ẩn fallback khi dùng main playlist
         }
-
+    
         songs.forEach(song => {
             const li = document.createElement('li');
             li.className = 'playlist-item d-flex align-items-center mb-2 p-2 rounded hover-bg';
             li.style.cursor = 'pointer';
-
             li.setAttribute('data-song-id', song.id);
-
+    
             if (currentSong && currentSong.id === song.id) {
                 li.classList.add('current-playing');
             }
-
+    
             li.innerHTML = `
-            <img src="${song.thumbnail || 'https://i.pinimg.com/236x/ff/5f/b3/ff5fb33001497b403cb86db7978b7943.jpg'}"
-                 alt="Thumbnail"
-                 class="rounded me-2"
-                 style="height: 50px; width: 50px; object-fit: cover;">
-            <div class="text-truncate text-light">
-                <div class="song-title fw-semibold">${song.title || 'Không rõ tên'}</div>
-                <div class="text-muted small">${song.artist || ''}</div>
-            </div>
-        `;
-
+                <img src="${song.thumbnail || 'https://i.pinimg.com/236x/ff/5f/b3/ff5fb33001497b403cb86db7978b7943.jpg'}"
+                     alt="Thumbnail"
+                     class="rounded me-2"
+                     style="height: 50px; width: 50px; object-fit: cover;">
+                <div class="text-truncate text-light">
+                    <div class="song-title fw-semibold">${song.title || 'Không rõ tên'}</div>
+                    <div class="text-muted small">${song.artist || ''}</div>
+                </div>
+            `;
+    
             li.addEventListener('click', () => {
                 document.querySelectorAll('.playlist-item.current-playing')
                     .forEach(item => item.classList.remove('current-playing'));
-
+    
                 li.classList.add('current-playing');
                 fetchAndPlayNextSong(song.id);
             });
-
+    
             listContainer.appendChild(li);
         });
+    
+        // GỌI HÀM KÍCH HOẠT SCROLL NẾU NHIỀU ITEM
+        applyScrollIfNeeded();
     }
+    
 
     function updateCurrentSongHighlight(songId) {
         // Xóa tất cả highlight cũ
@@ -592,6 +653,52 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     initializePopup();
 
+
+
+    // function applyScrollIfNeeded() {
+    //     const playlistItems = document.querySelectorAll('#playlist li');
+    //     const playlistBody = document.querySelector('.playlist-body');
+      
+    //     if (playlistItems.length > 4) {
+    //       playlistBody.style.maxHeight = '310px';
+    //     } else {
+    //       playlistBody.style.maxHeight = 'unset';
+    //     }
+    //   }
+    //   applyScrollIfNeeded();
+
+
+    
+    // function applyScrollIfNeeded() {
+    //     const playlistItems = document.querySelectorAll('#playlist li');
+    //     const playlistBody = document.querySelector('.playlist-body');
+    //     const playlistPopup = document.getElementById('playlistPopup');
+      
+    //     // QUAN TRỌNG: Force width trước khi thay đổi maxHeight
+    //     if (playlistPopup) {
+    //         playlistPopup.style.width = '320px';
+    //         playlistPopup.style.minWidth = '320px';
+    //         playlistPopup.style.maxWidth = '320px';
+    //         playlistPopup.style.boxSizing = 'border-box';
+    //         playlistPopup.style.overflow = 'hidden';
+    //     }
+    
+    //     if (playlistItems.length > 4) {
+    //         playlistBody.style.maxHeight = '310px';
+    //         playlistBody.style.overflowX = 'hidden'; // Ẩn horizontal scroll
+    //     } else {
+    //         playlistBody.style.maxHeight = 'unset';
+    //     }
+        
+    //     // Force lại width sau khi set scroll (double check)
+    //     if (playlistPopup) {
+    //         setTimeout(() => {
+    //             playlistPopup.style.width = '405px';
+    //         }, 0);
+    //     }
+    // }
+
+    // applyScrollIfNeeded();
 
     const playlistHeader = document.querySelector('.playlist-header strong');
     const playlistElements = document.querySelectorAll('#playlist, #playlistItems, #playlist li, #playlistItems li');
