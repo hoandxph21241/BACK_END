@@ -26,7 +26,9 @@ var mp3Schema = new db.mongoose.Schema(
 
     // Bổ sung item
     image: { type: String, require: false },
-    category: { type: db.mongoose.Schema.Types.ObjectId, ref: "CategoryModel" },
+    categoryId: { type: db.mongoose.Schema.Types.ObjectId, ref: "CategoryModel" },
+    userID:{type:String, require:false},
+    
   },
   {
     collection: "mp3",
@@ -37,8 +39,10 @@ let MP3 = db.mongoose.model("MP3", mp3Schema);
     // Bổ sung Table
 var CategorySchema = new db.mongoose.Schema(
   {
+    idCategory:{type:String,require:true},
     nameCategory: { type: String, require: false },
     image: { type: String, require: false },
+    color:{type: String, require:false},
   },
   {
     collection: "Category",

@@ -1,0 +1,119 @@
+
+    // togglePlaylistBtn.addEventListener('click', (e) => {
+    //   e.stopPropagation();
+    //   if (playlistPopup.style.display === 'block') {
+    //     playlistPopup.style.display = 'none';
+    //   } else {
+    //     renderPlaylistItems();
+    //     playlistPopup.style.display = 'block';
+    //   }
+    // });
+    
+    // playlistPopup.addEventListener('click', (e) => {
+    //     e.stopPropagation();
+    //   });
+
+    // document.addEventListener('click', () => {
+    //     playlistPopup.style.display = 'none';
+    // });
+    
+
+    // togglePlaylistBtn.addEventListener('click', (e) => {
+    //     e.stopPropagation();
+    //     if (playlistPopup.style.display === 'block') {
+    //         // muốn ẩn popup thì gán animation đóng
+    //         playlistPopup.classList.add('hide');
+    //         playlistPopup.classList.remove('show');
+    //       } else {
+    //         // muốn hiện popup thì gán animation mở
+    //         playlistPopup.classList.add('show');
+    //         playlistPopup.classList.remove('hide');
+    //         playlistPopup.style.display = 'block'; // bật hiện ngay để animation chạy
+    //       }
+          
+    //   });
+      
+
+
+    // function openPopup() {
+    //     playlistPopup.style.display = 'block'; // Hiện popup trước
+    //     // Đảm bảo reflow để browser áp dụng style trước khi chạy animation
+    //     void playlistPopup.offsetWidth; // Trigger reflow
+    //     playlistPopup.classList.add('show');
+    //     playlistPopup.classList.remove('hide');
+    //   }
+    //   function closePopup() {
+    //     playlistPopup.classList.remove('show');
+    //     playlistPopup.classList.add('hide');
+    //   }
+      
+    //   playlistPopup.addEventListener('animationend', () => {
+    //     if (playlistPopup.classList.contains('hide')) {
+    //       playlistPopup.style.display = 'none';
+    //     }
+    //   });
+            
+      
+    //   togglePlaylistBtn.addEventListener('click', (e) => {
+    //     e.stopPropagation();
+    //     if (playlistPopup.style.display === 'block') {
+    //       openPopup();
+    //     } else if (playlistPopup.style.display != 'block') {
+    //       closePopup();
+    //     } else {
+    //       playlistPopup.style.display = 'none';
+    //     }
+    //   });
+      
+      
+    
+    // playlistPopup.addEventListener('click', (e) => {
+    //     e.stopPropagation();
+    //   });
+
+    // document.addEventListener('click', () => {
+    //     playlistPopup.style.display = 'none';
+    // });
+
+
+    function renderPlaylistItems() {
+        playlistItems.innerHTML = '';
+        if (!window.filteredPlaylist || window.filteredPlaylist.length === 0) {
+            playlistItems.innerHTML = '<li>Không có bài hát trong danh sách</li>';
+            return;
+        }
+        window.filteredPlaylist.forEach(song => {
+            const li = document.createElement('li');
+            li.textContent = song.name || `Bài hát ID: ${song.id}`;
+            li.style.userSelect = 'none';
+
+            li.addEventListener('click', () => {
+                fetchAndPlayNextSong(song.id);
+                playlistPopup.style.display = 'none';
+            });
+
+            playlistItems.appendChild(li);
+        });
+    }
+   // function renderPlaylist(songs) {
+    //     const listContainer = document.getElementById('playlist');
+    //     const fallbackContainer = document.getElementById('playlistItems');
+
+    //     if (fallbackContainer) {
+    //         fallbackContainer.style.display = 'none';
+    //     }
+
+    //     if (!listContainer) return;
+
+    //     listContainer.innerHTML = '';
+
+    //     songs.forEach(song => {
+    //         const li = document.createElement('li');
+    //         li.textContent = song.title;
+    //         li.style.cursor = 'pointer';
+    //         li.addEventListener('click', () => {
+    //             fetchAndPlayNextSong(song.id);
+    //         });
+    //         listContainer.appendChild(li);
+    //     });
+    // }

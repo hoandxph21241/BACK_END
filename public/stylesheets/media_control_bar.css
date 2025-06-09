@@ -34,42 +34,36 @@
     display: flex;
     align-items: center;
     visibility: hidden;
+    z-index: 1000;
 }
-
 .media-control-bar .progress {
     height: 5px;
 }
-
 .img-media {
     height: 100px;
     width: 100px;
     margin: 5px;
 }
-
 .audioPlayer {
     width: 100px;
     height: 50px;
     margin: 5px;
 }
-
 .song-info {
     flex-grow: 1;
     display: flex;
     align-items: center;
     margin-bottom: 15px;
 }
-
 .media-control-bar.active {
     visibility: visible;
 }
-
 .song-name {
     position: relative;
     width: 320px; 
     white-space: nowrap;
     overflow: hidden; 
 }
-
 .song-name::after {
     content: attr(data-text);
     position: absolute;
@@ -79,7 +73,6 @@
     
     animation: marquee 10s linear infinite;
 }
-
 @keyframes marquee {
     0% { right: 100%; }
     100% { right: -90%; }
@@ -88,46 +81,84 @@
 
 .volume-control {
     position: relative;
+    display: inline-block;
 }
 
-.volume-slider {
-    position: absolute;
-    top: 100%; /* Đặt thanh slider ở dưới nút */
-    left: 0;
-    width: 100%; /* Chiều rộng như nút */
+#volumeBtn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+}
+
+.slider-container {
     display: none; /* Ẩn mặc định */
+    position: absolute;
+    bottom: 40px; /* đưa slider lên trên nút volume */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 120px;
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    z-index: 9999; /* tăng z-index cho chắc chắn nằm trên */
+    pointer-events: auto; /* đảm bảo nhận sự kiện chuột */
 }
 
+
+
+.song-name-container{
+    height: 40px;
+}
+.song-name {
+    text-transform: uppercase;
+    background: url('https://i.ibb.co/RDTnNrT/animated-text-fill.png') repeat-y;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: aitf 80s linear infinite;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+}
+@keyframes aitf {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+audio{
+    display:none;
+}
+.audioPlayer{
+    display: inline;
+}
 #playPauseBtn {
-    background: none; /* Xóa nền mặc định */
-    border: none; /* Xóa viền */
-    padding: 0; /* Xóa padding */
-    cursor: pointer; /* Thay đổi con trỏ khi hover */
-    display: flex; /* Sử dụng flexbox để căn giữa */
-    align-items: center; /* Căn giữa theo chiều dọc */
+    background: none; 
+    border: none;
+    cursor: pointer;
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    position: relative;
+    transition: box-shadow 0.2s ease; 
+    border-radius: 5px; 
 }
-
 #playPauseBtn:hover {
-    background: rgb(255, 60, 0);
-    border-radius: 50%;
+    background: rgb(255, 60, 0); 
 }
-
 #playPauseIcon {
-    width: 25px; /* Đặt kích thước cho icon */
-    height: 25px; /* Đặt kích thước cho icon */
-    transition: transform 0.2s; /* Thêm hiệu ứng khi chuyển đổi */
+    width: 25px; /* Icon size */
+    height: 25px; /* Icon size */
+    transition: transform 0.2s ease; 
 }
-
 #playPauseBtn.playing #playPauseIcon {
     transform: rotate(180deg);
 }
-
 .audio-controls {
     display: flex;
     align-items: center;
     margin: 10px 0; 
 }
-
 .time-display {
     font-weight: bold;
     margin-right: 10px;
@@ -137,10 +168,14 @@
     height: 4px; 
     border-radius: 5px; 
     outline: none; 
+    accent-color: rgb(255, 0, 0);
 }
 
 
+  
 
+
+/* 
 
 .background{
     background-color: #064f47c5;
@@ -264,4 +299,4 @@
         opacity: 0;
         border-radius: 50%;
     }
-}
+} */
