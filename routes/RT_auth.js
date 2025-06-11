@@ -24,9 +24,7 @@ router.get("/signin", (req, res) => {
 router.post("/signin", Contronlers.SignIn);
 
 
-// Login với Google
 router.get('/google', Contronlers.googleLogin);
-// Callback sau khi xác thực
 router.get('/google/callback', Contronlers.googleCallback);
 
 router.get("/signout", Contronlers.SignOut);

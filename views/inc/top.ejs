@@ -1,8 +1,8 @@
 <!-- Header -->
 <style>
     .custom-sidebar {
-    max-height: 100vh;
-    overflow-y: auto;
+        max-height: 100vh;
+        overflow-y: auto;
     }
 
     /* .custom-sidebar {
@@ -17,22 +17,29 @@
 
 
     .background_nav {
-    height: 100vh;
-    background-color: rgb(0, 0, 0);
-    background-image: radial-gradient(circle, white 1%, transparent 5%), 
-                      radial-gradient(circle, red 1%, transparent 5%);
-    background-size: 30px 30px;
-    background-position: 0 0, 15px 15px;
+        height: 100vh;
+        background-color: rgb(0, 0, 0);
+        background-image: radial-gradient(circle, white 1%, transparent 5%),
+            radial-gradient(circle, red 1%, transparent 5%);
+        background-size: 30px 30px;
+        background-position: 0 0, 15px 15px;
     }
 </style>
+
 <body>
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
-            <nav class="background_nav col-1 d-none d-md-block sidebar text-dark bg-opacity-25 min-vh-100 sticky-top custom-sidebar">
+            <nav
+                class="background_nav col-1 d-none d-md-block sidebar text-dark bg-opacity-25 min-vh-100 sticky-top custom-sidebar">
                 <div class="sidebar-sticky">
                     <!-- <p class="text-capitalize text-center fs-3 font-monospace fw-bold">Song</p> -->
-                     <img src="/images/bg.png" alt="Logo Icon" style="width: 100%; height: auto; max-height: 175px; max-width: 175px;">
+                    <!-- <img src="/images/bg.png" alt="Logo Icon" data-url="/home"
+                        style="width: 100%; height: auto; max-height: 175px; max-width: 175px;"> -->
+                        <a href="/home">
+                            <img src="/images/bg.png" alt="Logo Icon" title="Bấm để quay về trang chủ"
+                                 style="width: 100%; height: auto; max-height: 175px; max-width: 175px;">
+                          </a>
                     <ul class="nav flex-column">
 
 
@@ -40,7 +47,7 @@
                         <!-- Home Icon -->
                         <li class="nav-item p-2">
                             <div class="text-center">
-                                <a href="/home">
+                                <a href="/home/pratical" class="nav-link d-inline p-0" data-url="/home/pratical">
                                     <button type="button" class="btn btn-outline-light">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                             fill="currentColor" class="bi bi-house-door align-baseline"
@@ -53,15 +60,33 @@
                             </div>
                         </li>
 
+
+                        <!-- User Icon -->
+                        <li class="nav-item p-2">
+                            <div class="text-center">
+                                <a href="/users/profile" class="nav-link d-inline p-0" data-url="/users/profile">
+                                    <button type="button" class="btn btn-outline-warning">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                                            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                                          </svg>
+                                    </button>
+                                </a>
+                            </div>
+                        </li>
+
                         <!-- Upload Icon -->
                         <li class="nav-item p-2">
                             <div class="text-center">
-                                <a href="/product">
+                                <a href="/product" class="nav-link d-inline p-0" data-url="/product">
                                     <button type="button" class="btn btn-outline-warning">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-earmark-arrow-up" viewBox="0 0 16 16">
-                                            <path d="M8.5 11.5a.5.5 0 0 1-1 0V7.707L6.354 8.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 7.707z"/>
-                                            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
-                                          </svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                            fill="currentColor" class="bi bi-file-earmark-arrow-up" viewBox="0 0 16 16">
+                                            <path
+                                                d="M8.5 11.5a.5.5 0 0 1-1 0V7.707L6.354 8.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 7.707z" />
+                                            <path
+                                                d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z" />
+                                        </svg>
                                     </button>
                                 </a>
                             </div>
@@ -86,27 +111,45 @@
                             </div>
                         </li> -->
 
-                                                <!-- Fati Icon -->
-                                                <li class="nav-item p-2">
-                                                    <div class="text-center">
-                                                        <a href="">
-                                                            <button type="button" class="btn btn-outline-danger">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
-                                                                    <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
-                                                                  </svg>
-                                                            </button>
-                                                        </a>
-                                                    </div>
-                                                </li>
+                        <!-- Fati Icon -->
+                        <li class="nav-item p-2">
+                            <div class="text-center">
+                                <a href="">
+                                    <button type="button" class="btn btn-outline-danger">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                            fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd"
+                                                d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314" />
+                                        </svg>
+                                    </button>
+                                </a>
+                            </div>
+                        </li>
 
                         <!-- Song Icon -->
                         <li class="nav-item p-2">
                             <div class="text-center">
-                                <a href="">
+                                <a href="/home/ct_home" class="nav-link d-inline p-0" data-url="/home/ct_home">
                                     <button type="button" class="btn btn-outline-primary">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-earmark-music" viewBox="0 0 16 16">
-                                            <path d="M11 6.64a1 1 0 0 0-1.243-.97l-1 .25A1 1 0 0 0 8 6.89v4.306A2.6 2.6 0 0 0 7 11c-.5 0-.974.134-1.338.377-.36.24-.662.628-.662 1.123s.301.883.662 1.123c.364.243.839.377 1.338.377s.974-.134 1.338-.377c.36-.24.662-.628.662-1.123V8.89l2-.5z"/>
-                                            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                            fill="currentColor" class="bi bi-file-earmark-music" viewBox="0 0 16 16">
+                                            <path
+                                                d="M11 6.64a1 1 0 0 0-1.243-.97l-1 .25A1 1 0 0 0 8 6.89v4.306A2.6 2.6 0 0 0 7 11c-.5 0-.974.134-1.338.377-.36.24-.662.628-.662 1.123s.301.883.662 1.123c.364.243.839.377 1.338.377s.974-.134 1.338-.377c.36-.24.662-.628.662-1.123V8.89l2-.5z" />
+                                            <path
+                                                d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z" />
+                                        </svg>
+                                    </button>
+                                </a>
+                            </div>
+                        </li>
+
+
+                        <li class="nav-item p-2">
+                            <div class="text-center">
+                                <a href="/home/ct_home" class="nav-link d-inline p-0" data-url="/home/ct_home">
+                                    <button type="button" class="btn btn-outline-primary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cloud-arrow-up-fill" viewBox="0 0 16 16">
+                                            <path d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2m2.354 5.146a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0z"/>
                                           </svg>
                                     </button>
                                 </a>
@@ -137,7 +180,7 @@
             <!-- Main content -->
             <main role="main" class="col px-0">
                 <!-- <div class="d-flex flex-column mb-2" > -->
-                    <div class="d-flex flex-column mb-2 overflow-hidden main-sidebar" >
+                <div class="d-flex flex-column mb-2 overflow-hidden main-sidebar">
                     <div class="p-0">
                         <div
                             class="d-flex justify-content-end align-items-center pt-3 pb-2 mb-3 border-bottom bg-success-subtle bg-gradient w-100">

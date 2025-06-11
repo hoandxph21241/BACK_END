@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home - Music Library</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    .scroll-container {
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      padding: 10px 0;
+      scrollbar-width: thin;
+      scrollbar-color: #6c757d transparent;
+    }
+    
+    .scroll-container::-webkit-scrollbar {
+      height: 6px;
+    }
+    
+    .scroll-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    .scroll-container::-webkit-scrollbar-thumb {
+      background: #6c757d;
+      border-radius: 10px;
+    }
+    
+    .scroll-container::-webkit-scrollbar-thumb:hover {
+      background: #495057;
+    }
+    
+    .music-card {
+      display: inline-block;
+      width: 200px;
+      margin-right: 15px;
+      white-space: normal;
+      vertical-align: top;
+      transition: transform 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .music-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .music-card:last-child {
+      margin-right: 0;
+    }
+    
+    .music-thumbnail {
+      width: 100%;
+      height: 150px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+      margin-bottom: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .music-thumbnail::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .music-card:hover .music-thumbnail::before {
+      left: 100%;
+    }
+    
+    .music-info {
+      padding: 0 5px;
+    }
+    
+    .music-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #333;
+      margin-bottom: 5px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.3;
+    }
+    
+    .music-category {
+      font-size: 0.8rem;
+      color: #6c757d;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      padding: 0 5px;
+    }
+    
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #333;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .view-all-btn {
+      color: #007bff;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    
+    .view-all-btn:hover {
+      color: #0056b3;
+      text-decoration: underline;
+    }
+    
+    .section-divider {
+      margin: 40px 0 30px 0;
+    }
+    
+    .top-rated-icon {
+      color: #ffc107;
+    }
+    
+    .category-icon {
+      color: #28a745;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6c757d;
+    }
+    
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+    
+    .song-item {
+      transition: all 0.2s ease;
+    }
+    
+    .song-item:hover {
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid px-4 py-3">
+    <% 
+    // Sử dụng dữ liệu từ controller hoặc tạo fallback
+    const displayTopRated = topRatedSongs || (mp3List ? mp3List.slice(0, 5) : []);
+    const displayCategories = songsByCategory || {};
+    %>
+    
+    <% if (mp3List && mp3List.length > 0) { %>
+      <!-- Top Rated Section -->
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <i class="fas fa-star top-rated-icon"></i>
+            Top Rated
+          </h2>
+          <a href="/top-rated" class="view-all-btn">
+            View All <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+        
+        <div class="scroll-container">
+          <% displayTopRated.forEach(song => { %>
+            <div class="music-card song-item" 
+                 data-id="<%= song._id %>" 
+                 data-name="<%= song.name %>" 
+                 data-category="<%= song.categoryId ? song.categoryId._id : '' %>">
+              <!-- <div class="music-thumbnail">
+                <i class="fas fa-music"></i>
+              </div> -->
+              <div class="music-thumbnail">
+                <% if (song.image && song.image.url) { %>
+                  <img src="<%= song.image.url %>" alt="<%= song.name %>" style="width: 100%; height: 100%; object-fit: cover;">
+                <% } else { %>
+                  <i class="fas fa-music"></i>
+                <% } %>
+              </div>
+              
+              <div class="music-info">
+                <div class="music-title" title="<%= song.name %>">
+                  <%= song.name %>
+                </div>
+                <div class="music-category">
+                  <i class="fas fa-tag"></i>
+                  <%= song.categoryId ? song.categoryId.nameCategory : 'Unknown' %>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+      
+      <!-- Categories Sections -->
+      <% Object.keys(displayCategories).forEach((categoryId) => { 
+         const categoryData = displayCategories[categoryId];
+         if (categoryData.songs && categoryData.songs.length > 0) { %>
+        <div class="section-divider"></div>
+        
+        <div class="section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <i class="fas fa-music category-icon"></i>
+              <%= categoryData.name %>
+            </h2>
+            <a href="/category/<%= categoryId %>" class="view-all-btn">
+              View All <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+          
+          <div class="scroll-container">
+            <% categoryData.songs.forEach(song => { %>
+              <div class="music-card song-item" 
+                   data-id="<%= song._id %>" 
+                   data-name="<%= song.name %>" 
+                   data-category="<%= song.categoryId._id %>">
+                <div class="music-thumbnail">
+                  <i class="fas fa-music"></i>
+                </div>
+                <div class="music-info">
+                  <div class="music-title" title="<%= song.name %>">
+                    <%= song.name %>
+                  </div>
+                  <div class="music-category">
+                    <i class="fas fa-tag"></i>
+                    <%= categoryData.name %>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      <% } }); %>
+      
+    <% } else { %>
+      <!-- Empty State -->
+      <div class="empty-state">
+        <i class="fas fa-music"></i>
+        <h3>No Music Found</h3>
+        <p>There are no songs available at the moment.</p>
+        <a href="/product" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Upload Music
+        </a>
+      </div>
+    <% } %>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Smooth scrolling for scroll containers
+    document.querySelectorAll('.scroll-container').forEach(container => {
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+
+      container.addEventListener('mousedown', (e) => {
+        isDown = true;
+        container.style.cursor = 'grabbing';
+        startX = e.pageX - container.offsetLeft;
+        scrollLeft = container.scrollLeft;
+      });
+
+      container.addEventListener('mouseleave', () => {
+        isDown = false;
+        container.style.cursor = 'grab';
+      });
+
+      container.addEventListener('mouseup', () => {
+        isDown = false;
+        container.style.cursor = 'grab';
+      });
+
+      container.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - container.offsetLeft;
+        const walk = (x - startX) * 2;
+        container.scrollLeft = scrollLeft - walk;
+      });
+    });
+
+    // Add click handlers for music cards (if needed for parent page)
+    document.querySelectorAll('.song-item').forEach(item => {
+      item.addEventListener('click', function(e) {
+        // Prevent default if this is inside main content
+        e.preventDefault();
+        
+        const mp3Id = this.dataset.id;
+        const mp3Name = this.dataset.name;
+        const categoryId = this.dataset.category;
+        
+        // If this is loaded in main content, dispatch event to parent
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({
+            type: 'songSelected',
+            mp3Id,
+            mp3Name,
+            categoryId
+          }, '*');
+        }
+        
+        console.log('Song selected:', { mp3Id, mp3Name, categoryId });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const seekbar = document.getElementById('seekbar');
     const currentTimeDisplay = document.getElementById('currentTime');
     const endTimeDisplay = document.getElementById('endTime');
-
+    const albumCoverElement = document.getElementById('albumCover');
     console.log({ nextBtn, backBtn, playPauseBtn });
 
     console.log("volumeBtn:", volumeBtn);
@@ -76,59 +76,162 @@ document.addEventListener("DOMContentLoaded", () => {
     //         });
     // };
 
-    window.handleItemClick = function (mp3Id, mp3Name, categoryId) {
-        console.log(`Fetching data for mp3Id: ${mp3Id}`);
+    // window.handleItemClick = function (mp3Id, mp3Name, categoryId) {
+    //     console.log(`Fetching data for mp3Id: ${mp3Id}`);
 
-        fetch(`/home/find/${mp3Id}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch audio data for ID: ${mp3Id}`);
+    //     fetch(`/home/find/${mp3Id}`)
+    //         .then(response => {
+    //             if (!response.ok) {
+    //                 throw new Error(`Failed to fetch audio data for ID: ${mp3Id}`);
+    //             }
+    //             return response.json();
+    //         })
+    //         .then(data => {
+    //             if (!playlist.some(song => song.id === mp3Id)) {
+    //                 playlist.push({ id: mp3Id, data: data.data, name: mp3Name, categoryId: categoryId });
+    //                 currentSongIndex = playlist.length - 1;
+    //                 console.log("Updated playlist:", playlist);
+    //             } else {
+    //                 currentSongIndex = playlist.findIndex(song => song.id === mp3Id);
+    //             }
+
+    //             const source = document.createElement("source");
+    //             source.src = "data:audio/mpeg;base64," + data.data;
+    //             source.type = "audio/mpeg";
+
+    //             if (window.songNameElement) {
+    //                 window.songNameElement.textContent = data.name;
+    //             } else {
+    //                 console.warn("Không tìm thấy phần tử .song-name");
+    //             }
+
+    //             if (window.audioPlayer) {
+    //                 const audio = window.audioPlayer;
+    //                 audio.innerHTML = "";
+    //                 audio.appendChild(source);
+    //                 audio.load();
+    //                 audio.play();
+    //             }
+
+    //             if (window.mediaControlBar) {
+    //                 window.mediaControlBar.classList.add("active");
+    //             }
+
+    //             currentSong = { id: mp3Id, name: data.name, categoryId: data.categoryId };
+    //             isPlaying = true;
+    //             updatePlayPauseIcon();
+
+    //             updateCurrentSongHighlight(mp3Id);
+
+    //             updateTimeline(window.audioPlayer, window.seekbar, window.currentTimeDisplay, window.endTimeDisplay);
+    //         })
+    //         .catch(error => {
+    //             console.error("Error fetching or playing audio:", error);
+    //         });
+    // };
+
+// Cập nhật function handleItemClick để xử lý ảnh album cover
+window.handleItemClick = function (mp3Id, mp3Name, categoryId) {
+    console.log(`Fetching data for mp3Id: ${mp3Id}`);
+
+    fetch(`/home/find/${mp3Id}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to fetch audio data for ID: ${mp3Id}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Cập nhật playlist
+            if (!playlist.some(song => song.id === mp3Id)) {
+                playlist.push({ id: mp3Id, data: data.data, name: mp3Name, categoryId: categoryId });
+                currentSongIndex = playlist.length - 1;
+                console.log("Updated playlist:", playlist);
+            } else {
+                currentSongIndex = playlist.findIndex(song => song.id === mp3Id);
+            }
+
+            // ===== XỬ LÝ ẢNH ALBUM COVER =====
+            const albumCoverElement = document.getElementById('albumCover');
+            if (albumCoverElement) {
+                // Kiểm tra các trường hợp khác nhau mà DB có thể trả về
+                let imageUrl = '/images/chibi.gif'; // Ảnh mặc định
+               console.log(data);
+               
+
+                if (data.image) {
+                    // Trường hợp 1: data.image.url
+                    if (data.image.url) {
+                        imageUrl = data.image.url;  console.log("imageUrl:", imageUrl);
+                    }
+                    // Trường hợp 2: data.image là string trực tiếp
+                    else if (typeof data.image === 'string') {
+                        imageUrl = data.image;  console.log("imageUrl:", imageUrl);
+                    }
                 }
-                return response.json();
-            })
-            .then(data => {
-                if (!playlist.some(song => song.id === mp3Id)) {
-                    playlist.push({ id: mp3Id, data: data.data, name: mp3Name, categoryId: categoryId });
-                    currentSongIndex = playlist.length - 1;
-                    console.log("Updated playlist:", playlist);
-                } else {
-                    currentSongIndex = playlist.findIndex(song => song.id === mp3Id);
+                // Trường hợp 3: data.albumCover
+                else if (data.albumCover) {
+                    imageUrl = data.albumCover;
+                }
+                // Trường hợp 4: data.thumbnail
+                else if (data.thumbnail) {
+                    imageUrl = data.thumbnail;
+                }
+                // Trường hợp 5: data.cover
+                else if (data.cover) {
+                    imageUrl = data.cover;
                 }
 
-                const source = document.createElement("source");
-                source.src = "data:audio/mpeg;base64," + data.data;
-                source.type = "audio/mpeg";
+                // Cập nhật src cho album cover
+                albumCoverElement.src = imageUrl;
+                
+                // Xử lý lỗi nếu ảnh không load được
+                albumCoverElement.onerror = function() {
+                    console.warn('Không thể load ảnh album:', imageUrl);
+                    this.src = '/images/chibi.gif'; // Fallback về ảnh mặc định
+                    console.log("imageUrl: ERR");
+                };
+                
+                console.log('Album cover updated:', imageUrl);
+            }
 
-                if (window.songNameElement) {
-                    window.songNameElement.textContent = data.name;
-                } else {
-                    console.warn("Không tìm thấy phần tử .song-name");
-                }
+            // Xử lý audio
+            const source = document.createElement("source");
+            source.src = "data:audio/mpeg;base64," + data.data;
+            source.type = "audio/mpeg";
 
-                if (window.audioPlayer) {
-                    const audio = window.audioPlayer;
-                    audio.innerHTML = "";
-                    audio.appendChild(source);
-                    audio.load();
-                    audio.play();
-                }
+            // Cập nhật tên bài hát
+            if (window.songNameElement) {
+                window.songNameElement.textContent = data.name;
+            } else {
+                console.warn("Không tìm thấy phần tử .song-name");
+            }
 
-                if (window.mediaControlBar) {
-                    window.mediaControlBar.classList.add("active");
-                }
+            // Cập nhật audio player
+            if (window.audioPlayer) {
+                const audio = window.audioPlayer;
+                audio.innerHTML = "";
+                audio.appendChild(source);
+                audio.load();
+                audio.play();
+            }
 
-                currentSong = { id: mp3Id, name: data.name, categoryId: data.categoryId };
-                isPlaying = true;
-                updatePlayPauseIcon();
+            // Hiển thị media control bar
+            if (window.mediaControlBar) {
+                window.mediaControlBar.classList.add("active");
+            }
 
-                updateCurrentSongHighlight(mp3Id);
-
-                updateTimeline(window.audioPlayer, window.seekbar, window.currentTimeDisplay, window.endTimeDisplay);
-            })
-            .catch(error => {
-                console.error("Error fetching or playing audio:", error);
-            });
-    };
+            // Cập nhật thông tin bài hát hiện tại
+            currentSong = { id: mp3Id, name: data.name, categoryId: data.categoryId };
+            isPlaying = true;
+            updatePlayPauseIcon();
+            updateCurrentSongHighlight(mp3Id);
+            updateTimeline(window.audioPlayer, window.seekbar, window.currentTimeDisplay, window.endTimeDisplay);
+        })
+        .catch(error => {
+            console.error("Error fetching or playing audio:", error);
+        });
+};
 
     function updateTimeline(audioPlayer, seekbar, currentTimeDisplay, endTimeDisplay) {
         if (!audioPlayer || !seekbar || !currentTimeDisplay || !endTimeDisplay) {
@@ -170,16 +273,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     return response.json();
                 })
                 .then(songs => {
-                    filteredPlaylist = songs.map(song => ({ id: song._id, title: song.name || song.title }));
-
+                    filteredPlaylist = songs.map(song => ({
+                        id: song._id,
+                        title: song.name || song.title,
+                        image: song.image 
+                    }));
+    
                     console.log('Danh sách bài hát cùng thể loại:', filteredPlaylist);
-                    console.log(songs)
-
-
-                    console.log("Render playlist với:", filteredPlaylist);
                     renderPlaylist(filteredPlaylist);
-
-
+    
                     if (filteredPlaylist.length > 0) {
                         const nextSong = filteredPlaylist.shift();
                         fetchAndPlayNextSong(nextSong.id);
@@ -193,6 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
             fetchAndPlayNextSong(nextSong.id);
         }
     });
+    
 
     // function fetchAndPlayNextSong(mp3Id) {
     //     fetch(`/home/find/${mp3Id}`)
@@ -251,28 +354,76 @@ document.addEventListener("DOMContentLoaded", () => {
     //     });
     // }
 
-    function fetchAndPlayNextSong(mp3Id) {
-        fetch(`/home/find/${mp3Id}`)
-            .then(response => {
-                if (!response.ok) throw new Error(`Không thể lấy dữ liệu bài hát với ID: ${mp3Id}`);
-                return response.json();
-            })
-            .then(data => {
-                audioPlayer.querySelector("source").src = "data:audio/mpeg;base64," + data.data;
-                songNameElement.textContent = data.name;
-                audioPlayer.load();
-                audioPlayer.play();
+    // function fetchAndPlayNextSong(mp3Id) {
+    //     fetch(`/home/find/${mp3Id}`)
+    //         .then(response => {
+    //             if (!response.ok) throw new Error(`Không thể lấy dữ liệu bài hát với ID: ${mp3Id}`);
+    //             return response.json();
+    //         })
+    //         .then(data => {
+    //             audioPlayer.querySelector("source").src = "data:audio/mpeg;base64," + data.data;
+    //             songNameElement.textContent = data.name;
+    //             audioPlayer.load();
+    //             audioPlayer.play();
 
-                currentSong = { id: data._id, name: data.name, categoryId: data.categoryId };
-                isPlaying = true;
-                updatePlayPauseIcon();
+    //             currentSong = { id: data._id, name: data.name, categoryId: data.categoryId };
+    //             isPlaying = true;
+    //             updatePlayPauseIcon();
 
-                updateCurrentSongHighlight(data._id);
-            })
-            .catch(error => {
-                console.error('Lỗi khi fetch và phát bài hát:', error);
-            });
-    }
+    //             updateCurrentSongHighlight(data._id);
+    //         })
+    //         .catch(error => {
+    //             console.error('Lỗi khi fetch và phát bài hát:', error);
+    //         });
+    // }
+
+// Cập nhật function fetchAndPlayNextSong
+function fetchAndPlayNextSong(mp3Id) {
+    fetch(`/home/find/${mp3Id}`)
+        .then(response => {
+            if (!response.ok) throw new Error(`Không thể lấy dữ liệu bài hát với ID: ${mp3Id}`);
+            return response.json();
+        })
+        .then(data => {
+            audioPlayer.querySelector("source").src = "data:audio/mpeg;base64," + data.data;
+            songNameElement.textContent = data.name;
+            audioPlayer.load();
+            audioPlayer.play();
+            
+            const albumCoverElement = document.getElementById('albumCover');
+            if (albumCoverElement) {
+                let imageUrl = '/images/chibi.gif';
+                
+                if (data.image) {
+                    if (data.image.url) {
+                        imageUrl = data.image.url;
+                    } else if (typeof data.image === 'string') {
+                        imageUrl = data.image;
+                    }
+                } else if (data.albumCover) {
+                    imageUrl = data.albumCover;
+                } else if (data.thumbnail) {
+                    imageUrl = data.thumbnail;
+                } else if (data.cover) {
+                    imageUrl = data.cover;
+                }
+
+                albumCoverElement.src = imageUrl;
+                albumCoverElement.onerror = function() {
+                    console.warn('Không thể load ảnh album:', imageUrl);
+                    this.src = '/images/chibi.gif';
+                };
+            }
+            
+            currentSong = { id: data._id, name: data.name, categoryId: data.categoryId };
+            isPlaying = true;
+            updatePlayPauseIcon();
+            updateCurrentSongHighlight(data._id);
+        })
+        .catch(error => {
+            console.error('Lỗi khi fetch và phát bài hát:', error);
+        });
+}
 
     // function renderPlaylist(songs) {
     //     const listContainer = document.getElementById('playlist');
@@ -408,6 +559,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     
         songs.forEach(song => {
+
+            console.log("song.image");
+            console.log(song.image);
+            
             const li = document.createElement('li');
             li.className = 'playlist-item d-flex align-items-center mb-2 p-2 rounded hover-bg';
             li.style.cursor = 'pointer';
@@ -418,7 +573,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
     
             li.innerHTML = `
-                <img src="${song.thumbnail || 'https://i.pinimg.com/236x/ff/5f/b3/ff5fb33001497b403cb86db7978b7943.jpg'}"
+                <img src="${(song.image && song.image.url) || 'https://i.pinimg.com/236x/ff/5f/b3/ff5fb33001497b403cb86db7978b7943.jpg'}"
                      alt="Thumbnail"
                      class="rounded me-2"
                      style="height: 50px; width: 50px; object-fit: cover;">
@@ -438,18 +593,13 @@ document.addEventListener("DOMContentLoaded", () => {
     
             listContainer.appendChild(li);
         });
-    
-        // GỌI HÀM KÍCH HOẠT SCROLL NẾU NHIỀU ITEM
         applyScrollIfNeeded();
     }
     
 
     function updateCurrentSongHighlight(songId) {
-        // Xóa tất cả highlight cũ
         document.querySelectorAll('.playlist-item.current-playing')
             .forEach(item => item.classList.remove('current-playing'));
-
-        // Thêm highlight cho bài hát hiện tại
         const currentItem = document.querySelector(`[data-song-id="${songId}"]`);
         if (currentItem) {
             currentItem.classList.add('current-playing');
@@ -526,7 +676,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // Volume controls
-
     const volumeSliderContainer = document.getElementById('volumeSliderContainer');
     const otherBtns = document.querySelectorAll('.other-btn');
 
@@ -653,52 +802,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     initializePopup();
 
-
-
-    // function applyScrollIfNeeded() {
-    //     const playlistItems = document.querySelectorAll('#playlist li');
-    //     const playlistBody = document.querySelector('.playlist-body');
-      
-    //     if (playlistItems.length > 4) {
-    //       playlistBody.style.maxHeight = '310px';
-    //     } else {
-    //       playlistBody.style.maxHeight = 'unset';
-    //     }
-    //   }
-    //   applyScrollIfNeeded();
-
-
-    
-    // function applyScrollIfNeeded() {
-    //     const playlistItems = document.querySelectorAll('#playlist li');
-    //     const playlistBody = document.querySelector('.playlist-body');
-    //     const playlistPopup = document.getElementById('playlistPopup');
-      
-    //     // QUAN TRỌNG: Force width trước khi thay đổi maxHeight
-    //     if (playlistPopup) {
-    //         playlistPopup.style.width = '320px';
-    //         playlistPopup.style.minWidth = '320px';
-    //         playlistPopup.style.maxWidth = '320px';
-    //         playlistPopup.style.boxSizing = 'border-box';
-    //         playlistPopup.style.overflow = 'hidden';
-    //     }
-    
-    //     if (playlistItems.length > 4) {
-    //         playlistBody.style.maxHeight = '310px';
-    //         playlistBody.style.overflowX = 'hidden'; // Ẩn horizontal scroll
-    //     } else {
-    //         playlistBody.style.maxHeight = 'unset';
-    //     }
-        
-    //     // Force lại width sau khi set scroll (double check)
-    //     if (playlistPopup) {
-    //         setTimeout(() => {
-    //             playlistPopup.style.width = '405px';
-    //         }, 0);
-    //     }
-    // }
-
-    // applyScrollIfNeeded();
 
     const playlistHeader = document.querySelector('.playlist-header strong');
     const playlistElements = document.querySelectorAll('#playlist, #playlistItems, #playlist li, #playlistItems li');

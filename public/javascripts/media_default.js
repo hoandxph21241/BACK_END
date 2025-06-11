@@ -18,6 +18,7 @@ const playlistHeader = document.getElementById('playlist-header');
 const playlistPopup = document.getElementById('playlistPopup');
 const playlistItems = document.getElementById('playlistItems');
 const accordionContainer = document.getElementById("playlistAccordion");
+const albumCoverElement = document.getElementById('albumCover');
 
 window.audioPlayer = audioPlayer;
 window.songNameElement = songNameElement;
@@ -39,6 +40,7 @@ window.playlistHeader = playlistHeader;
 window.playlistPopup = playlistPopup;
 window.playlistItems = playlistItems;
 window.accordionContainer = accordionContainer;
+window.albumCover = albumCover;
 
 
 document.addEventListener("DOMContentLoaded", function () {

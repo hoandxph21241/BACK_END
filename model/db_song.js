@@ -19,30 +19,59 @@ var userSchema = new db.mongoose.Schema(
   }
 );
 let UserModel = db.mongoose.model("UserModel", userSchema);
-var mp3Schema = new db.mongoose.Schema(
-  {
-    name: String,
-    data: { type: Buffer },
+// var mp3Schema = new db.mongoose.Schema(
+//   {
+//     name: String,
+//     data: { type: Buffer },
 
-    // Bổ sung item
-    image: { type: String, require: false },
-    categoryId: { type: db.mongoose.Schema.Types.ObjectId, ref: "CategoryModel" },
-    userID:{type:String, require:false},
-    
+//     // Bổ sung item
+//     image: { type: String, require: false },
+//     categoryId: { type: db.mongoose.Schema.Types.ObjectId, ref: "CategoryModel" },
+//     userID:{type:String, require:false},
+
+//   },
+//   {
+//     collection: "mp3",
+//   }
+// );
+// let MP3 = db.mongoose.model("MP3", mp3Schema);
+
+const MP3Schema = new db.mongoose.Schema({
+  name: String,
+  data: { type: Buffer },
+  categoryId: { type: db.mongoose.Schema.Types.ObjectId, ref: "CategoryModel" },
+  userID:{type:String, require:false},
+  originalName: String,
+  fileSize: Number,
+  uploadDate: {
+    type: Date,
+    default: Date.now
   },
-  {
-    collection: "mp3",
+  image: {
+    url: String,
+    display_url: String,
+    delete_url: String,
+    thumb: {
+      filename: String,
+      name: String,
+      mime: String,
+      extension: String,
+      url: String
+    },
+    originalName: String
   }
-);
-let MP3 = db.mongoose.model("MP3", mp3Schema);
+});
 
-    // Bổ sung Table
+const MP3 = db.mongoose.model('MP3', MP3Schema);
+
+
+// Bổ sung Table
 var CategorySchema = new db.mongoose.Schema(
   {
-    idCategory:{type:String,require:true},
+    idCategory: { type: String, require: true },
     nameCategory: { type: String, require: false },
     image: { type: String, require: false },
-    color:{type: String, require:false},
+    color: { type: String, require: false },
   },
   {
     collection: "Category",

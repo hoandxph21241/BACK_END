@@ -1,0 +1,34 @@
+<div>
+  <p class="text-capitalize text-center fs-7 font-monospace fw-bold">Home</p>
+</div>
+
+<div class="row p-5">
+  <% mp3List.forEach((mp3) => { %>
+    <div class="col-md-3 mb-3 song-item" data-id="<%= mp3._id %>" data-name="<%= mp3.name %>"
+      data-category="<%= mp3.categoryId %>">
+
+      <div class="card h-100 d-flex justify-content-center" style="width: 21rem">
+        <img src="https://i.pinimg.com/236x/ff/5f/b3/ff5fb33001497b403cb86db7978b7943.jpg" class="card-img-top"
+          style="height: 100%; width: 100%;" />
+
+        <div class="card-body bg-dark-subtle">
+          <h5 class="card-title text-center">
+            <%= mp3.name %>
+          </h5>
+
+          <span class="badge bg-danger">
+            <% if (mp3.categoryId && mp3.categoryId.nameCategory) { %>
+              <span>
+                <%= mp3.categoryId.nameCategory %>
+              </span>
+            <% } else { %>
+              <span>No Category</span>
+            <% } %>
+          </span>
+        </div>
+      </div>
+    </div>
+  <% }); %>
+</div>
+
+</main>

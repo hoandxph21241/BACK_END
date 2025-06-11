@@ -2,105 +2,128 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <link rel="icon" href="/images/bg.png" type="image/x-icon" />
-    <link rel='stylesheet' href='/stylesheets/iframe_mediabar.css' />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="icon" href="/images/bg.png" type="image/x-icon" />
+  <link rel='stylesheet' href='/stylesheets/iframe_mediabar.css' />
 </head>
 
 <body>
-    <% let mp3data %>
+  <% let mp3data %>
     <%- include('../inc/top.ejs', { mp3List: mp3List }) %>
 
-    <div>
-        <p class="text-capitalize text-center fs-7 font-monospace fw-bold">Home</p>
-    </div>
+      <main id="main">
+      </main>
 
-    <div class="row p-5">
-        <% mp3List.forEach((mp3)=> { %>
-            <div class="col-md-3 mb-3 song-item" data-id="<%= mp3._id %>" data-name="<%= mp3.name %>"
-                data-category="<%= mp3.categoryId %>">
-
-                <div class="card h-100 d-flex justify-content-center" style="width: 21rem">
-                    <img src="https://i.pinimg.com/236x/ff/5f/b3/ff5fb33001497b403cb86db7978b7943.jpg"
-                        class="card-img-top" style="height: 100%; width: 100%;" />
-
-                    <div class="card-body bg-dark-subtle">
-                        <h5 class="card-title text-center">
-                            <%= mp3.name %>
-                        </h5>
-
-                        <span class="badge bg-danger">
-                            <% if (mp3.categoryId && mp3.categoryId.nameCategory) { %>
-                                <span>
-                                    <%= mp3.categoryId.nameCategory %>
-                                </span>
-                            <% } else { %>
-                                <span>No Category</span>
-                            <% } %>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        <% }); %>
-    </div>
-
-    <!-- <iframe 
-    src="/mediabar"
-    id="mediaPlayerFrame"
-    sandbox="allow-scripts allow-same-origin allow-forms"
-    style="
-    background-color: blue;
-        position: fixed;
-       
-        
-        height: 67%;
-    ">
-</iframe> -->
+      <div class="iframe-container" id="iframeContainer">
+        <iframe src="/mediabar" id="mediaPlayerFrame"></iframe>
+      </div>
 
 
-<div class="iframe-container" id="iframeContainer">
-    <iframe src="/mediabar" id="mediaPlayerFrame"></iframe>
-</div>
+      <script>
+        function initializeDynamicContent() {
+          if (document.getElementById('uploadForm')) {
+            if (typeof window.initUploadForm === 'function') {
+              window.initUploadForm();
+            }
+            else {
+              const scripts = document.getElementById('main').querySelectorAll('script');
+              scripts.forEach(script => {
+                try {
+                  eval(script.textContent || script.innerHTML);
+                } catch (e) {
+                  console.error('Error executing script:', e);
+                }
+              });
+            }
+          }
+        }
 
-  
-<script>
-    document.querySelectorAll('.song-item').forEach(item => {
-  item.addEventListener('click', () => {
-    const mp3Id = item.dataset.id;
-    const mp3Name = item.dataset.name;
-    const categoryId = item.dataset.category;
+        document.querySelectorAll('.song-item').forEach(item => {
+          item.addEventListener('click', () => {
+            const mp3Id = item.dataset.id;
+            const mp3Name = item.dataset.name;
+            const categoryId = item.dataset.category;
 
-    const iframe = document.getElementById('mediaPlayerFrame');
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage(
-        { mp3Id, mp3Name, categoryId },
-        '*'  // bạn có thể thay '*' bằng domain iframe nếu muốn an toàn hơn
-      );
-    }
-  });
-});
+            const iframe = document.getElementById('mediaPlayerFrame');
+            if (iframe && iframe.contentWindow) {
+              iframe.contentWindow.postMessage(
+                { mp3Id, mp3Name, categoryId },
+                '*'  // bạn có thể thay '*' bằng domain iframe nếu muốn an toàn hơn
+              );
+            }
+          });
+        });
 
-window.addEventListener('message', function(event) {
-  if(event.data && event.data.type === 'playlistState') {
-    window.isExpanded = event.data.isExpanded;
-    const iframeContainer = document.getElementById('iframeContainer');
-    if (iframeContainer) {
-      if (window.isExpanded) {
-        iframeContainer.style.height = '67%';
-      } else {
-        iframeContainer.style.height = '20%';
-      }
-    }
-  }
-});
+        window.addEventListener('message', function (event) {
+          if (event.data && event.data.type === 'playlistState') {
+            window.isExpanded = event.data.isExpanded;
+            const iframeContainer = document.getElementById('iframeContainer');
+            if (iframeContainer) {
+              if (window.isExpanded) {
+                iframeContainer.style.height = '67%';
+              } else {
+                iframeContainer.style.height = '20%';
+              }
+            }
+          }
+        });
 
-</script>
+        document.querySelectorAll('.nav-link').forEach(link => {
+          link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const url = this.dataset.url;
+            document.getElementById('main').innerHTML = '';
+            fetch(url)
+              .then(res => res.text())
+              .then(html => {
+                document.getElementById('main').innerHTML = html;
+                setTimeout(() => {
+                  initializeDynamicContent();
+                }, 100);
+                history.pushState(null, '', url);
+              })
+              .catch(err => console.error('Lỗi tải trang:', err));
+          });
+        });
+
+        window.addEventListener('popstate', () => {
+          fetch(location.pathname)
+            .then(res => res.text())
+            .then(html => {
+              document.getElementById('main').innerHTML = html;
+              setTimeout(() => {
+                initializeDynamicContent();
+              }, 100);
+            });
+        });
+
+        document.getElementById('main').addEventListener('click', function (event) {
+          let target = event.target;
+          while (target && !target.classList.contains('song-item')) {
+            target = target.parentElement;
+          }
+          if (target && target.classList.contains('song-item')) {
+            const mp3Id = target.dataset.id;
+            const mp3Name = target.dataset.name;
+            const categoryId = target.dataset.category;
+
+            const iframe = document.getElementById('mediaPlayerFrame');
+            if (iframe && iframe.contentWindow) {
+              iframe.contentWindow.postMessage(
+                { mp3Id, mp3Name, categoryId },
+                '*'
+              );
+            }
+          }
+        });
+
+      </script>
 </body>
 
 </html>

@@ -16,8 +16,8 @@ function requireAdmin(req, res, next) {
       return res.send('Bạn không đủ quyền hạn');
     }
 }
-router.get("",requireAdmin, Contronlers.Product);
-router.post("/upload",requireAdmin, Contronlers.uploadMP3,Contronlers.saveMP3);
 
+router.get("", requireAdmin, Contronlers.Product);
+router.post("/upload", requireAdmin, Contronlers.uploadFiles, Contronlers.handleMulterError, Contronlers.saveMP3);
 
 module.exports = router;

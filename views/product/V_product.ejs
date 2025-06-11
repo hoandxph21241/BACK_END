@@ -2,89 +2,74 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-        crossorigin="anonymous"></script>
-    <link rel='stylesheet' href='/stylesheets/media_upload_file.css' />
-    <!-- <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='currentColor' class='bi bi-file-earmark-arrow-up' viewBox='0 0 16 16'%3E%3Cpath d='M8.5 11.5a.5.5 0 0 1-1 0V7.707L6.354 8.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 7.707z'/%3E%3Cpath d='M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z'/%3E%3C/svg%3E"> -->
-    <link rel="icon" href="/images/bg.png" type="image/x-icon">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/javascripts/product/upload_Mediafile.js"></script>
 
 </head>
 
-<body>
+<body class="p-5">
+  <div class="container">
+    <h2 class="mb-4">Upload MP3 & Image</h2>
 
-    <%- include('../inc/top.ejs')%>
-        <div class="d-flex justify-content-between align-items-center">
+    <!-- Progress Bar -->
+    <div id="uploadProgressContainer" class="progress mb-3" style="height: 25px; display: none;">
+      <div id="uploadProgressBar" class="progress-bar progress-bar-striped bg-info progress-bar-animated"
+        role="progressbar" style="width: 0%;" aria-valuemin="0" aria-valuemax="100">0%</div>
+    </div>
 
-            <div class="d-flex title_media_heder">
-                <p class="text-capitalize text-center fs-7 font-monospace fw-bold mb-6">Upload Source Media</p>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                    class="bi bi-disc-fill m-1 svg_icon_media" viewBox="0 0 16 16">
-                    <path
-                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-6 0a2 2 0 1 0-4 0 2 2 0 0 0 4 0M4 8a4 4 0 0 1 4-4 .5.5 0 0 0 0-1 5 5 0 0 0-5 5 .5.5 0 0 0 1 0m9 0a.5.5 0 1 0-1 0 4 4 0 0 1-4 4 .5.5 0 0 0 0 1 5 5 0 0 0 5-5" />
-                </svg>
-            </div>
+    <!-- Alert Messages -->
+    <div id="alertContainer"></div>
 
-            <div class="d-flex flex-row-reverse">
-                <div class="p-3">
-                    <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal"
-                        data-bs-target="#uploadModal">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                            class="bi bi-filetype-mp3" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd"
-                                d="M14 4.5V14a2 2 0 0 1-2 2v-1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zm-4.911 9.67h-.443v-.609h.422a.7.7 0 0 0 .322-.073.56.56 0 0 0 .22-.2.5.5 0 0 0 .076-.284.49.49 0 0 0-.176-.392.65.65 0 0 0-.442-.15.7.7 0 0 0-.252.041.6.6 0 0 0-.193.112.5.5 0 0 0-.179.349H7.71q.009-.235.102-.437.094-.202.27-.352.176-.152.428-.237.255-.085.583-.088.418-.003.723.132.304.135.472.372a.9.9 0 0 1 .173.539.83.83 0 0 1-.12.478.96.96 0 0 1-.619.439v.041a1 1 0 0 1 .718.434.9.9 0 0 1 .144.521q.003.285-.117.507a1.1 1.1 0 0 1-.329.378q-.21.152-.486.234-.273.08-.583.08-.451 0-.77-.153a1.2 1.2 0 0 1-.487-.41 1.1 1.1 0 0 1-.178-.563h.726a.46.46 0 0 0 .106.258.7.7 0 0 0 .249.179 1 1 0 0 0 .357.067.9.9 0 0 0 .384-.076.6.6 0 0 0 .252-.217.56.56 0 0 0 .088-.319.56.56 0 0 0-.334-.522.8.8 0 0 0-.372-.079ZM.706 15.925v-2.66h.038l.952 2.16h.516l.946-2.16h.038v2.66h.715v-3.999h-.8l-1.14 2.596h-.026l-1.14-2.596H0v4zm5.458-3.999h-1.6v4h.792v-1.342h.803q.43 0 .732-.173.304-.177.463-.475a1.4 1.4 0 0 0 .161-.677q0-.374-.158-.677a1.2 1.2 0 0 0-.46-.477 1.4 1.4 0 0 0-.733-.179m.545 1.333a.8.8 0 0 1-.085.381.57.57 0 0 1-.237.24.8.8 0 0 1-.375.082h-.66v-1.406h.66q.328 0 .513.182.184.181.184.521" />
-                        </svg>
-                    </button>
-                </div>
-                <!-- <div class="p-2">Flex item 2</div> -->
-            </div>
+    <!-- Upload Form -->
+    <form id="uploadForm">
+      <div class="mb-3">
+        <label for="mp3Name" class="form-label">Name:</label>
+        <input type="text" class="form-control" id="mp3Name" name="name" placeholder="Nhập tên bài hát (tùy chọn)">
+      </div>
+
+      <div class="mb-3">
+        <label for="categoryId" class="form-label">Category:</label>
+        <select class="form-select" id="categoryId" name="categoryId" required>
+          <option value="">-- Chọn danh mục --</option>
+          <% if (listidCategory && listidCategory.length > 0) { %>
+            <% listidCategory.forEach(function(category) { %>
+              <option value="<%= category._id %>"><%= category.nameCategory %></option>
+            <% }); %>
+          <% } %>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="mp3File" class="form-label">Select MP3 File:</label>
+        <input type="file" class="form-control" id="mp3File" name="mp3File" accept=".mp3" required>
+        <div class="form-text">Chỉ chấp nhận file MP3 (tối đa 50MB)</div>
+      </div>
+
+      <!-- Thêm phần upload ảnh -->
+      <div class="mb-3">
+        <label for="imageFile" class="form-label">Select Image (Optional):</label>
+        <input type="file" class="form-control" id="imageFile" name="imageFile" accept="image/*">
+        <div class="form-text">Chọn ảnh bìa cho bài hát (tùy chọn) - Ảnh sẽ được upload lên ImgBB</div>
+      </div>
+
+      <!-- Image Preview -->
+      <div id="imagePreview" class="mb-3" style="display: none;">
+        <label class="form-label">Preview:</label>
+        <div class="border rounded p-2">
+          <img id="previewImg" src="" alt="Preview" style="max-width: 200px; max-height: 200px; object-fit: cover;">
         </div>
+      </div>
 
-
-        <main>
-            
-        </main>
-
-
-        <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="uploadModalLabel">Upload MP3</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form action="/product/upload" method="post" enctype="multipart/form-data">
-                            <label for="mp3Name">Name:</label>
-                            <input type="text" id="mp3Name" name="name">
-                            <br><br>
-                            <div class="mb-3">
-                                <label for="Category" class="form-label">Category:</label>
-                                <select class="form-select" id="categoryId" name="categoryId">
-                                    <% listidCategory.forEach(function(typer) { %>
-                                        <option value="<%= typer._id %>">
-                                            <%= typer.nameCategory %>
-                                        </option>
-                                    <% }); %>
-                                </select>
-                            </div>
-                            <label for="mp3File">Select MP3 file:</label>
-                            <input type="file" id="mp3File" name="mp3File" accept=".mp3" required>
-                            <br><br>
-                            <input type="submit" value="Upload">
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <%- include('../inc/end.ejs')%>
-
+      <button type="submit" class="btn btn-primary" id="uploadBtn">
+        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        Upload
+      </button>
+      <button type="button" class="btn btn-secondary ms-2" id="backBtn">Quay lại</button>
+    </form>
+  </div>
 </body>
 
 </html>

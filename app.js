@@ -26,6 +26,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
+app.listen(() => {
+  console.log(`✅ Server đang chạy tại http://localhost:3000/home`);
+});
 
 //session check
 app.use(session({
@@ -67,7 +70,6 @@ app.use("/product", ProductRounter);
 
 // iframe Mediabar
 app.get('/mediabar', (req, res) => {
-  // res.render('./views/inc/mediabar.ejs'); 
   res.render('inc/mediabar');
 });
 

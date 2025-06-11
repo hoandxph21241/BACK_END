@@ -1,0 +1,195 @@
+var db = require("../model/db_song");
+const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
+
+// Cấu hình multer với validation
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = "uploads/";
+    // Tạo thư mục nếu chưa tồn tại
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    // Tạo tên file unique để tránh trùng lặp
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  // Chỉ chấp nhận file MP3
+  if (file.mimetype === 'audio/mpeg' || file.mimetype === 'audio/mp3') {
+    cb(null, true);
+  } else {
+    cb(new Error('Chỉ chấp nhận file MP3!'), false);
+  }
+};
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB limit
+  }
+});
+
+// Render trang upload
+exports.Product = async (req, res, next) => {
+  try {
+    let listidCategory = await db.CategoryModel.find();
+    res.render("product/V_product.ejs", { 
+      listidCategory: listidCategory || [] 
+    });
+  } catch (error) {
+    console.error("Error loading categories:", error);
+    res.render("product/V_product.ejs", { 
+      listidCategory: [] 
+    });
+  }
+};  
+
+// Middleware upload file
+exports.uploadMP3 = upload.single("mp3File");
+
+// Xử lý lưu MP3
+exports.saveMP3 = async (req, res) => {
+  try {
+    let { name, categoryId } = req.body;
+    const mp3File = req.file;
+
+    // Validation
+    if (!mp3File) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Vui lòng chọn file MP3!" 
+      });
+    }
+
+    if (!categoryId) {
+      // Xóa file đã upload nếu validation fail
+      if (fs.existsSync(mp3File.path)) {
+        fs.unlinkSync(mp3File.path);
+      }
+      return res.status(400).json({ 
+        success: false, 
+        error: "Vui lòng chọn danh mục!" 
+      });
+    }
+
+    // Kiểm tra category có tồn tại không
+    const categoryExists = await db.CategoryModel.findById(categoryId);
+    if (!categoryExists) {
+      // Xóa file đã upload nếu validation fail
+      if (fs.existsSync(mp3File.path)) {
+        fs.unlinkSync(mp3File.path);
+      }
+      return res.status(400).json({ 
+        success: false, 
+        error: "Danh mục không tồn tại!" 
+      });
+    }
+
+    // Nếu không có tên thì dùng tên file gốc
+    if (!name || name.trim() === '') {
+      name = path.parse(mp3File.originalname).name; // Lấy tên file không có extension
+    }
+
+    // Đọc dữ liệu file
+    const mp3Data = fs.readFileSync(mp3File.path);
+
+    // Tạo MP3 record mới
+    const newMP3 = new db.MP3({
+      name: name.trim(),
+      categoryId: categoryId,
+      data: mp3Data,
+      originalName: mp3File.originalname,
+      fileSize: mp3File.size,
+      uploadDate: new Date()
+    });
+
+    // Lưu vào database
+    const savedMP3 = await newMP3.save();
+    
+    // Xóa file tạm sau khi lưu vào DB
+    if (fs.existsSync(mp3File.path)) {
+      fs.unlinkSync(mp3File.path);
+    }
+
+    console.log(`MP3 uploaded successfully: ${name} / Category: ${categoryId} / ID: ${savedMP3._id}`);
+    
+    // Trả về JSON response cho AJAX
+    res.status(200).json({ 
+      success: true, 
+      message: "Upload thành công!",
+      data: {
+        id: savedMP3._id,
+        name: savedMP3.name,
+        categoryId: savedMP3.categoryId
+      }
+    });
+
+  } catch (err) {
+    console.error("Error uploading MP3:", err);
+    
+    // Xóa file tạm nếu có lỗi
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
+    // Xử lý các loại lỗi khác nhau
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ 
+        success: false, 
+        error: "File quá lớn! Tối đa 50MB." 
+      });
+    }
+
+    if (err.message.includes('MP3')) {
+      return res.status(400).json({ 
+        success: false, 
+        error: err.message 
+      });
+    }
+
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Dữ liệu không hợp lệ!" 
+      });
+    }
+
+    res.status(500).json({ 
+      success: false, 
+      error: "Có lỗi xảy ra trong quá trình upload!" 
+    });
+  }
+};
+
+// Middleware xử lý lỗi multer
+exports.handleMulterError = (err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ 
+        success: false, 
+        error: "File quá lớn! Tối đa 50MB." 
+      });
+    }
+    return res.status(400).json({ 
+      success: false, 
+      error: "Lỗi upload file!" 
+    });
+  }
+  
+  if (err.message === 'Chỉ chấp nhận file MP3!') {
+    return res.status(400).json({ 
+      success: false, 
+      error: err.message 
+    });
+  }
+  
+  next(err);
+};

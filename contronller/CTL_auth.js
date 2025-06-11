@@ -124,7 +124,7 @@ exports.googleCallback = (req, res, next) => {
       }
 
       req.session.userLogin = existingUser;
-      return res.redirect('/users/profile'); 
+      return res.redirect('/home'); 
 
     } catch (error) {
       console.error("Lỗi lưu user:", error);
