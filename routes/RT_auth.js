@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-var Contronlers = require("../contronller/CTL_auth");
+var Contronlers = require("../controllers/CTL_auth");
 var check_login = require("../middlewares/check_login");
 
 router.get("/", check_login.yeu_cau_dang_nhap, function (req, res, next) {

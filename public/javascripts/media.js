@@ -377,7 +377,6 @@ window.handleItemClick = function (mp3Id, mp3Name, categoryId) {
     //         });
     // }
 
-// Cập nhật function fetchAndPlayNextSong
 function fetchAndPlayNextSong(mp3Id) {
     fetch(`/home/find/${mp3Id}`)
         .then(response => {
@@ -543,7 +542,6 @@ function fetchAndPlayNextSong(mp3Id) {
     
         listContainer.innerHTML = '';
     
-        // Nếu không có bài hát, xóa class has-data để ẩn
         if (!songs || songs.length === 0) {
             listContainer.classList.remove('has-data');
             if (fallbackContainer) {
@@ -551,11 +549,10 @@ function fetchAndPlayNextSong(mp3Id) {
             }
             return;
         }
-    
-        // Có bài hát thì thêm class has-data để hiển thị
+
         listContainer.classList.add('has-data');
         if (fallbackContainer) {
-            fallbackContainer.classList.remove('has-data'); // Ẩn fallback khi dùng main playlist
+            fallbackContainer.classList.remove('has-data');
         }
     
         songs.forEach(song => {

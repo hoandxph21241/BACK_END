@@ -16,11 +16,11 @@ function initUploadForm() {
     handleFormSubmit();
   });
 
-  uploadBtn.addEventListener('click', function(event) {
-    event.preventDefault();
-    console.log('Upload button clicked');
-    handleFormSubmit();
-  });
+  // uploadBtn.addEventListener('click', function(event) {
+  //   event.preventDefault();
+  //   console.log('Upload button clicked');
+  //   handleFormSubmit();
+  // });
 
   backBtn.addEventListener('click', function(event) {
     event.preventDefault();
@@ -187,10 +187,10 @@ function initUploadForm() {
               progressBar.setAttribute('aria-valuenow', 100);
               
               let successMessage = 'Upload thành công!';
-              if (response.data.imageUrl) {
-                successMessage += ' (Bao gồm ảnh bìa)';
-              }
-              successMessage += ' Đang chuyển hướng...';
+              // if (response.data.imageUrl) {
+              //   successMessage += ' (Bao gồm ảnh bìa)';
+              // }
+              // successMessage += ' Đang chuyển hướng...';
               
               showAlert(successMessage, 'success');
               

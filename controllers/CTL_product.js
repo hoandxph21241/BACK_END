@@ -147,8 +147,31 @@ exports.saveMP3 = async (req, res) => {
       });
     }
 
+    // Fix UTF-8 decoding for title
     if (!name || name.trim() === '') {
-      name = path.parse(mp3File.originalname).name;
+      let originalFileName = path.parse(mp3File.originalname).name;
+      
+      // Decode UTF-8 properly for Vietnamese characters
+      try {
+        // Try to decode if it's URL encoded
+        originalFileName = decodeURIComponent(originalFileName);
+      } catch (e) {
+        // If decoding fails, keep original
+      }
+      
+      // Convert buffer to proper UTF-8 string if needed
+      try {
+        const buffer = Buffer.from(originalFileName, 'latin1');
+        const utf8String = buffer.toString('utf8');
+        // Check if conversion looks correct (contains Vietnamese chars)
+        if (/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđĐ]/.test(utf8String)) {
+          originalFileName = utf8String;
+        }
+      } catch (e) {
+        // If conversion fails, keep original
+      }
+      
+      name = originalFileName;
     }
 
     let imageData = null;
@@ -178,6 +201,7 @@ exports.saveMP3 = async (req, res) => {
         });
       }
     }
+    
     const mp3Data = fs.readFileSync(mp3File.path);
 
     const newMP3 = new db.MP3({

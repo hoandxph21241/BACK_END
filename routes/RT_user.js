@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('../contronller/CTL_user');
+const userController = require('../controllers/CTL_user');
 const check_login = require("../middlewares/check_login");
 
 router.get("/", check_login.yeu_cau_dang_nhap, function (req, res, next) {

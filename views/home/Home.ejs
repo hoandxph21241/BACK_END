@@ -17,6 +17,10 @@
   <% let mp3data %>
     <%- include('../inc/top.ejs', { mp3List: mp3List }) %>
 
+      <iframe src="/network-popup" id="networkPopupFrame"
+        style="position: fixed; top: 20px; right: 20px; width: 360px; height: 305px; border: none; z-index: 9999;">
+      </iframe>
+
       <main id="main">
       </main>
 
@@ -25,24 +29,26 @@
       </div>
 
 
+
       <script>
+
         function initializeDynamicContent() {
           if (document.getElementById('uploadForm')) {
-            if (typeof window.initUploadForm === 'function') {
-              window.initUploadForm();
-            }
-            else {
-              const scripts = document.getElementById('main').querySelectorAll('script');
-              scripts.forEach(script => {
-                try {
-                  eval(script.textContent || script.innerHTML);
-                } catch (e) {
-                  console.error('Error executing script:', e);
+            if (typeof window.initUploadForm !== 'function') {
+              const script = document.createElement('script');
+              script.src = '/javascripts/product/upload_Mediafile.js';
+              script.onload = () => {
+                if (typeof window.initUploadForm === 'function') {
+                  window.initUploadForm();
                 }
-              });
+              };
+              document.body.appendChild(script);
+            } else {
+              window.initUploadForm();
             }
           }
         }
+
 
         document.querySelectorAll('.song-item').forEach(item => {
           item.addEventListener('click', () => {
@@ -122,6 +128,13 @@
             }
           }
         });
+
+        document.getElementById('networkPopupFrame').contentWindow.postMessage({
+          type: 'networkStatus',
+          isOnline: true,
+          message: 'Mạng đã được kết nối!'
+        }, '*');
+
 
       </script>
 </body>

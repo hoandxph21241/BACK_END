@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-var Contronlers = require("../contronller/CTL_dashboard");
+var Contronlers = require("../controllers/CTL_dashboard");
 
 function requireAdmin(req, res, next) {
     // Check Login

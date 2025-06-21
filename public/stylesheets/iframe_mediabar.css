@@ -2,7 +2,7 @@
     position: fixed;
     bottom: 3%;
     right: 2%;
-    width: 25%;
+    width: 400px;
     height: 20%;
     transform-origin: bottom right;
     transition: height 0.3s ease;

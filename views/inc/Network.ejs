@@ -1,0 +1,25 @@
+<link rel='stylesheet' href='/stylesheets/home/networkPopup.css' />
+<script src="/javascripts/home/networkPopup.js" defer></script>
+<body>
+    <div class="network-popup" id="networkPopup">
+        <div class="popup-header">
+          <div class="popup-title">
+            <div class="popup-icon online" id="popupIcon">✓</div>
+            <span id="popupTitle">Kết nối ổn định</span>
+          </div>
+          <button class="popup-close" onclick="hideNetworkPopup()">&times;</button>
+        </div>
+        <div class="popup-body">
+          <div class="popup-message" id="popupMessage">
+            Kết nối internet hoạt động bình thường.
+          </div>
+          <div class="popup-details">
+            <div class="popup-status" id="popup-status">
+              <div class="status-dot" id="statusDot"></div>
+              <span id="connectionStatus">Online</span>
+              <span id="popupTime"></span> 
+            </div>
+          </div>
+        </div>
+      </div>
+</body>

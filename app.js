@@ -72,6 +72,10 @@ app.use("/product", ProductRounter);
 app.get('/mediabar', (req, res) => {
   res.render('inc/mediabar');
 });
+app.get('/network-popup', (req, res) => {
+  res.render('inc/Network');
+});
+
 
 
 // //api
