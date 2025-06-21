@@ -1,4 +1,13 @@
 function initUploadForm() {
+  if (window._uploadFormInitialized) {
+    console.log('initUploadForm: already initialized');
+    return;
+  }
+  window._uploadFormInitialized = true;
+  console.log('initUploadForm: initialized');
+
+  let isUploading = false;
+
   const uploadForm = document.getElementById('uploadForm');
   const uploadBtn = document.getElementById('uploadBtn');
   const backBtn = document.getElementById('backBtn');
@@ -9,20 +18,18 @@ function initUploadForm() {
   const imagePreview = document.getElementById('imagePreview');
   const previewImg = document.getElementById('previewImg');
 
-  uploadForm.addEventListener('submit', function(event) {
+  // Tách wrapper để remove được
+  function handleSubmitWrapper(event) {
     event.preventDefault();
     event.stopPropagation();
     console.log('Form submitted - handling with AJAX');
     handleFormSubmit();
-  });
+  }
 
-  // uploadBtn.addEventListener('click', function(event) {
-  //   event.preventDefault();
-  //   console.log('Upload button clicked');
-  //   handleFormSubmit();
-  // });
+  uploadForm.removeEventListener('submit', handleSubmitWrapper);
+  uploadForm.addEventListener('submit', handleSubmitWrapper);
 
-  backBtn.addEventListener('click', function(event) {
+  backBtn.addEventListener('click', function (event) {
     event.preventDefault();
     if (window.parent !== window && window.parent.document.getElementById('main')) {
       loadHomePage();
@@ -57,21 +64,20 @@ function initUploadForm() {
     `;
   }
 
-  document.getElementById('mp3File').addEventListener('change', function(e) {
+  document.getElementById('mp3File').addEventListener('change', function (e) {
     const file = e.target.files[0];
     if (file) {
-      const maxSize = 50 * 1024 * 1024; // 50MB
+      const maxSize = 50 * 1024 * 1024;
       if (file.size > maxSize) {
         showAlert('File MP3 quá lớn! Vui lòng chọn file nhỏ hơn 50MB.');
         e.target.value = '';
         return;
       }
-      
       alertContainer.innerHTML = '';
     }
   });
 
-  document.getElementById('imageFile').addEventListener('change', function(e) {
+  document.getElementById('imageFile').addEventListener('change', function (e) {
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
@@ -81,7 +87,7 @@ function initUploadForm() {
         return;
       }
 
-      const maxSize = 10 * 1024 * 1024; // 10MB
+      const maxSize = 10 * 1024 * 1024;
       if (file.size > maxSize) {
         showAlert('File ảnh quá lớn! Vui lòng chọn file nhỏ hơn 10MB.');
         e.target.value = '';
@@ -90,12 +96,11 @@ function initUploadForm() {
       }
 
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         previewImg.src = e.target.result;
         imagePreview.style.display = 'block';
       };
       reader.readAsDataURL(file);
-      
       alertContainer.innerHTML = '';
     } else {
       imagePreview.style.display = 'none';
@@ -103,64 +108,59 @@ function initUploadForm() {
   });
 
   function handleFormSubmit() {
-    console.log('handleFormSubmit called');
-    
+    if (isUploading) return;
+    isUploading = true;
+
     const categoryId = document.getElementById('categoryId').value;
     const mp3File = document.getElementById('mp3File').files[0];
     const imageFile = document.getElementById('imageFile').files[0];
-    
+
     if (!categoryId) {
       showAlert('Vui lòng chọn danh mục!');
-      return false;
+      isUploading = false;
+      return;
     }
-    
+
     if (!mp3File) {
       showAlert('Vui lòng chọn file MP3!');
-      return false;
+      isUploading = false;
+      return;
     }
 
     const formData = new FormData();
     formData.append('name', document.getElementById('mp3Name').value);
     formData.append('categoryId', categoryId);
     formData.append('mp3File', mp3File);
-    
-    if (imageFile) {
-      formData.append('imageFile', imageFile);
-    }
-
-    console.log('Starting upload...');
+    if (imageFile) formData.append('imageFile', imageFile);
 
     alertContainer.innerHTML = '';
     progressContainer.style.display = 'block';
     progressBar.style.width = '0%';
     progressBar.innerText = '0%';
     progressBar.className = 'progress-bar progress-bar-striped bg-info progress-bar-animated';
-    
+
     uploadBtn.disabled = true;
     backBtn.disabled = true;
     spinner.classList.remove('d-none');
 
     const xhr = new XMLHttpRequest();
-    
+
     xhr.upload.addEventListener('progress', function (e) {
       if (e.lengthComputable) {
         const percent = Math.round((e.loaded / e.total) * 100);
         progressBar.style.width = percent + '%';
         progressBar.innerText = percent + '%';
         progressBar.setAttribute('aria-valuenow', percent);
-        console.log(`Upload progress: ${percent}%`);
       }
     });
 
-    xhr.upload.addEventListener('loadstart', function(e) {
-      console.log('Upload started');
+    xhr.upload.addEventListener('loadstart', function () {
       progressBar.style.width = '1%';
       progressBar.innerText = '1%';
       progressBar.setAttribute('aria-valuenow', 1);
     });
 
-    xhr.upload.addEventListener('load', function(e) {
-      console.log('Upload completed');
+    xhr.upload.addEventListener('load', function () {
       progressBar.style.width = '100%';
       progressBar.innerText = 'Đang xử lý...';
       progressBar.setAttribute('aria-valuenow', 100);
@@ -168,126 +168,75 @@ function initUploadForm() {
 
     xhr.onreadystatechange = function () {
       if (xhr.readyState === XMLHttpRequest.DONE) {
-        console.log('Request completed with status:', xhr.status);
-        
+        isUploading = false;
         uploadBtn.disabled = false;
         backBtn.disabled = false;
         spinner.classList.add('d-none');
-        
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const response = JSON.parse(xhr.responseText);
-            console.log('Server response:', response);
-            
-            if (response.success) {
-              progressBar.classList.remove('bg-info', 'progress-bar-animated');
-              progressBar.classList.add('bg-success');
-              progressBar.style.width = '100%';
-              progressBar.innerText = '100% - Hoàn thành!';
-              progressBar.setAttribute('aria-valuenow', 100);
-              
-              let successMessage = 'Upload thành công!';
-              // if (response.data.imageUrl) {
-              //   successMessage += ' (Bao gồm ảnh bìa)';
-              // }
-              // successMessage += ' Đang chuyển hướng...';
-              
-              showAlert(successMessage, 'success');
-              
-              setTimeout(() => {
-                if (window.parent !== window && window.parent.document.getElementById('main')) {
-                  loadHomePage();
-                } else {
-                  window.location.href = '/home';
-                }
-              }, 2000);
-            } else {
-              progressBar.classList.remove('bg-info', 'progress-bar-animated');
-              progressBar.classList.add('bg-danger');
-              progressBar.style.width = '100%';
-              progressBar.innerText = 'Lỗi!';
-              progressBar.setAttribute('aria-valuenow', 100);
-              
-              showAlert(response.error || response.message || 'Upload thất bại!');
-            }
-          } catch (e) {
-            console.error('JSON parsing error:', e);
-            console.error('Response text:', xhr.responseText);
-            
+
+        try {
+          const response = JSON.parse(xhr.responseText);
+          if (xhr.status >= 200 && xhr.status < 300 && response.success) {
             progressBar.classList.remove('bg-info', 'progress-bar-animated');
-            progressBar.classList.add('bg-danger');
-            progressBar.style.width = '100%';
-            progressBar.innerText = 'Lỗi!';
-            progressBar.setAttribute('aria-valuenow', 100);
-            
-            console.error('Response text:', xhr.responseText);
-            showAlert('Có lỗi xảy ra trong quá trình xử lý phản hồi!');
+            progressBar.classList.add('bg-success');
+            progressBar.innerText = '100% - Hoàn thành!';
+            showAlert('Upload thành công!', 'success');
+
+            setTimeout(() => {
+              if (window.parent !== window && window.parent.document.getElementById('main')) {
+                loadHomePage();
+              } else {
+                window.location.href = '/home';
+              }
+            }, 2000);
+          } else {
+            throw new Error(response.error || 'Upload thất bại!');
           }
-        } else {
-          console.error('HTTP error:', xhr.status, xhr.responseText);
-        
+        } catch (err) {
+          console.error('JSON parsing error:', err);
+            console.error('Response text:', xhr.responseText);
           progressBar.classList.remove('bg-info', 'progress-bar-animated');
           progressBar.classList.add('bg-danger');
-          progressBar.style.width = '100%';
           progressBar.innerText = 'Lỗi!';
-          progressBar.setAttribute('aria-valuenow', 100);
-          
-          try {
-            const response = JSON.parse(xhr.responseText);
-            showAlert(response.error || response.message || `Upload thất bại! (Mã lỗi: ${xhr.status})`);
-          } catch (e) {
-            showAlert(`Upload thất bại! (Mã lỗi: ${xhr.status})`);
-          }
+          showAlert(err.message || 'Có lỗi xảy ra trong quá trình xử lý phản hồi!');
         }
       }
     };
 
-
-    xhr.onerror = function() {
-      console.error('Network error occurred');
-      
+    xhr.onerror = function () {
+      isUploading = false;
       uploadBtn.disabled = false;
       backBtn.disabled = false;
       spinner.classList.add('d-none');
-      
       progressBar.classList.remove('bg-info', 'progress-bar-animated');
       progressBar.classList.add('bg-danger');
-      progressBar.style.width = '100%';
       progressBar.innerText = 'Lỗi kết nối!';
-      progressBar.setAttribute('aria-valuenow', 100);
-      
-      showAlert('Lỗi kết nối! Vui lòng kiểm tra mạng và thử lại.');
+      showAlert('Lỗi kết nối! Vui lòng thử lại.');
     };
 
-    xhr.ontimeout = function() {
-      console.error('Request timeout');
-      
+    xhr.ontimeout = function () {
+      isUploading = false;
       uploadBtn.disabled = false;
       backBtn.disabled = false;
       spinner.classList.add('d-none');
-      
       progressBar.classList.remove('bg-info', 'progress-bar-animated');
       progressBar.classList.add('bg-danger');
-      progressBar.style.width = '100%';
       progressBar.innerText = 'Timeout!';
-      progressBar.setAttribute('aria-valuenow', 100);
-      
       showAlert('Upload timeout! Vui lòng thử lại.');
     };
 
     xhr.open('POST', '/product/upload');
     xhr.timeout = 600000;
     xhr.send(formData);
-    
-    return false;
   }
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initUploadForm);
-} else {
-  initUploadForm();
-}
+// Safe export
 if (typeof window !== 'undefined') {
   window.initUploadForm = initUploadForm;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initUploadForm);
+  } else {
+    initUploadForm();
+  }
 }

@@ -34,20 +34,23 @@
 
         function initializeDynamicContent() {
           if (document.getElementById('uploadForm')) {
-            if (typeof window.initUploadForm !== 'function') {
-              const script = document.createElement('script');
-              script.src = '/javascripts/product/upload_Mediafile.js';
-              script.onload = () => {
-                if (typeof window.initUploadForm === 'function') {
-                  window.initUploadForm();
-                }
-              };
-              document.body.appendChild(script);
-            } else {
-              window.initUploadForm();
+            if (!window._uploadFormInitialized) {
+              if (typeof window.initUploadForm !== 'function') {
+                const script = document.createElement('script');
+                script.src = '/javascripts/product/upload_Mediafile.js';
+                script.onload = () => {
+                  if (typeof window.initUploadForm === 'function') {
+                    window.initUploadForm();
+                  }
+                };
+                document.body.appendChild(script);
+              } else {
+                window.initUploadForm();
+              }
             }
           }
         }
+
 
 
         document.querySelectorAll('.song-item').forEach(item => {
