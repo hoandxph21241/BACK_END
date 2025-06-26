@@ -79,8 +79,26 @@ var CategorySchema = new db.mongoose.Schema(
 );
 let CategoryModel = db.mongoose.model("CategoryModel", CategorySchema);
 
+var PlayHistorySchema = new db.mongoose.Schema(
+  {
+    userID: { type: String, required: true },
+    songID: { type: db.mongoose.Schema.Types.ObjectId, ref: "MP3", required: true },
+    playedAt: { type: Date, default: Date.now },
+    songName: { type: String, required: true },
+    songImage: { type: String, required: false }
+  },
+  {
+    collection: "PlayHistory",
+  }
+);
+// PlayHistorySchema.index({ userID: 1, playedAt: -1 });
+
+let PlayHistoryModel = db.mongoose.model("PlayHistoryModel", PlayHistorySchema);
+
+
 module.exports = {
   UserModel,
   MP3,
   CategoryModel,
+  PlayHistoryModel
 };

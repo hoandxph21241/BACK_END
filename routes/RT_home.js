@@ -1,15 +1,19 @@
 var express = require("express");
 var router = express.Router();
-var Contronlers = require("../controllers/CTL_home");
+var Controllers = require("../controllers/CTL_home");
 
-router.get("", Contronlers.Home);
-router.get("/pratical", Contronlers.Home_pratical);
-router.get("/ct_home", Contronlers.CT_Home);
-router.get("/test", Contronlers.Home_NEW);
-router.get("/find/:id", Contronlers.Find_ID);
+router.get("", Controllers.Home);
+router.get("/pratical", Controllers.Home_pratical);
+router.get("/ct_home", Controllers.CT_Home);
+router.get("/test", Controllers.Home_NEW);
+router.get("/find/:id", Controllers.Find_ID);
+router.get("/fetch", Controllers.Fetch);
+router.get("/category/:categoryId", Controllers.GetSongsByCategory);
 
-router.get("/fetch", Contronlers.Fetch);
-router.get("/category/:categoryId", Contronlers.GetSongsByCategory);
+
+router.post("/play-song", Controllers.PlaySong);
+router.get("/play-history", Controllers.GetPlayHistory);
+router.delete("/play-history", Controllers.ClearPlayHistory);
+router.delete("/play-history/:songId", Controllers.RemoveFromHistory);
 
 module.exports = router;
- 
