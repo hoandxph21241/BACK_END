@@ -380,14 +380,14 @@ function fetchAndPlayNextSong(mp3Id) {
     // Volume controls
     const volumeSliderContainer = document.getElementById('volumeSliderContainer');
     const otherBtns = document.querySelectorAll('.other-btn');
-
+    
     let volumeVisible = false;
-
+    
     volumeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-
+        
         volumeVisible = !volumeVisible;
-
+        
         if (volumeVisible) {
             volumeSliderContainer.style.display = 'block';
             volumeSliderContainer.classList.add('active');
@@ -400,8 +400,7 @@ function fetchAndPlayNextSong(mp3Id) {
             otherBtns.forEach(btn => btn.style.visibility = 'visible');
         }
     });
-
-
+    
     document.addEventListener('click', (e) => {
         if (volumeVisible && !volumeSliderContainer.contains(e.target) && !volumeBtn.contains(e.target)) {
             volumeVisible = false;
@@ -412,17 +411,22 @@ function fetchAndPlayNextSong(mp3Id) {
             otherBtns.forEach(btn => btn.style.visibility = 'visible');
         }
     });
-
+    
     const audio = document.getElementById('audioPlayer');
-
+    
+    function getLogarithmicVolume(sliderValue) {
+        return (Math.exp(parseFloat(sliderValue)) - 1) / (Math.E - 1);
+    }
+    
     volumeSlider.addEventListener('input', () => {
+        const sliderValue = volumeSlider.value;
+        const progress = (sliderValue * 100);
+        volumeSlider.style.setProperty('--progress', progress + '%');   
         if (audio) {
-            audio.volume = parseFloat(volumeSlider.value);
+            const actualVolume = getLogarithmicVolume(sliderValue);
+            audio.volume = actualVolume;
         }
     });
-
-
-
 
     const togglePlaylistBtn = document.getElementById('togglePlaylistBtn');
     const playlistPopup = document.getElementById('playlistPopup');

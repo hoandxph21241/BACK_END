@@ -7,6 +7,35 @@ const axios = require("axios");
 const IMGBB_API_KEY = process.env.IMGBB_API_KEY;
 const IMGBB_API_URL = process.env.IMGBB_API_URL;
 
+// Hàm fix UTF-8 encoding cho tên file tiếng Việt
+function fixVietnameseFileName(fileName) {
+  if (!fileName) return '';
+  
+  try {
+    // Nếu tên file đã bị encode sai thành Latin-1, decode lại
+    if (fileName.includes('Ã') || fileName.includes('º') || fileName.includes('á»') || 
+        fileName.includes('Ã¡') || fileName.includes('Ã©') || fileName.includes('Ã­') ||
+        fileName.includes('Ã³') || fileName.includes('Ãº') || fileName.includes('Ã¢') ||
+        fileName.includes('Ãª') || fileName.includes('Ã´') || fileName.includes('Ã¢') ||
+        fileName.includes('Ä') || fileName.includes('Æ°') || fileName.includes('Æ¡')) {
+      // Decode từ Latin-1 sang UTF-8
+      const buffer = Buffer.from(fileName, 'latin1');
+      const utf8String = buffer.toString('utf8');
+      return utf8String;
+    }
+    
+    // Nếu tên file là URL encoded
+    if (fileName.includes('%')) {
+      return decodeURIComponent(fileName);
+    }
+    
+    // Nếu tên file đã đúng UTF-8
+    return fileName;
+  } catch (error) {
+    console.error('Error fixing Vietnamese filename:', error);
+    return fileName; // Trả về tên gốc nếu không thể fix
+  }
+}
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -18,7 +47,9 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    // Fix UTF-8 cho originalname
+    const fixedOriginalName = fixVietnameseFileName(file.originalname);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(fixedOriginalName));
   }
 });
 
@@ -149,29 +180,12 @@ exports.saveMP3 = async (req, res) => {
 
     // Fix UTF-8 decoding for title
     if (!name || name.trim() === '') {
-      let originalFileName = path.parse(mp3File.originalname).name;
-      
-      // Decode UTF-8 properly for Vietnamese characters
-      try {
-        // Try to decode if it's URL encoded
-        originalFileName = decodeURIComponent(originalFileName);
-      } catch (e) {
-        // If decoding fails, keep original
-      }
-      
-      // Convert buffer to proper UTF-8 string if needed
-      try {
-        const buffer = Buffer.from(originalFileName, 'latin1');
-        const utf8String = buffer.toString('utf8');
-        // Check if conversion looks correct (contains Vietnamese chars)
-        if (/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđĐ]/.test(utf8String)) {
-          originalFileName = utf8String;
-        }
-      } catch (e) {
-        // If conversion fails, keep original
-      }
-      
-      name = originalFileName;
+      // Sử dụng hàm fix UTF-8 cho tên file gốc
+      const fixedOriginalName = fixVietnameseFileName(mp3File.originalname);
+      name = path.parse(fixedOriginalName).name;
+    } else {
+      // Fix name từ form input nếu cần
+      name = fixVietnameseFileName(name);
     }
 
     let imageData = null;
@@ -185,7 +199,7 @@ exports.saveMP3 = async (req, res) => {
           display_url: imgbbResult.data.display_url,
           delete_url: imgbbResult.data.delete_url,
           thumb: imgbbResult.data.thumb,
-          originalName: imageFile.originalname
+          originalName: fixVietnameseFileName(imageFile.originalname)
         };
         console.log('Image uploaded successfully to ImgBB:', imageData.url);
       } else {
@@ -208,7 +222,7 @@ exports.saveMP3 = async (req, res) => {
       name: name.trim(),
       categoryId: categoryId,
       data: mp3Data,
-      originalName: mp3File.originalname,
+      originalName: fixVietnameseFileName(mp3File.originalname),
       fileSize: mp3File.size,
       uploadDate: new Date(),
       image: imageData
@@ -278,7 +292,6 @@ exports.saveMP3 = async (req, res) => {
     });
   }
 };
-
 
 exports.handleMulterError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {

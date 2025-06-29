@@ -290,7 +290,7 @@
 }
 
 .song-history li:hover {
-  background: #ff6600;
+  background: hsla(0, 0%, 53%, 0.526);
 }
 
 .song-title {
