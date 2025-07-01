@@ -178,13 +178,10 @@ exports.saveMP3 = async (req, res) => {
       });
     }
 
-    // Fix UTF-8 decoding for title
     if (!name || name.trim() === '') {
-      // Sử dụng hàm fix UTF-8 cho tên file gốc
       const fixedOriginalName = fixVietnameseFileName(mp3File.originalname);
       name = path.parse(fixedOriginalName).name;
     } else {
-      // Fix name từ form input nếu cần
       name = fixVietnameseFileName(name);
     }
 
