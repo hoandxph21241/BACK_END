@@ -59,10 +59,8 @@ class NetworkStatusPopup {
     }
   }
   
-  // Khởi tạo
   const networkPopup = new NetworkStatusPopup();
   
-  // Expose for external use
   function hideNetworkPopup() {
     networkPopup.hidePopup();
   }
@@ -70,3 +68,4 @@ class NetworkStatusPopup {
   function showNetworkPopup(isOnline, message) {
     networkPopup.showNetworkStatus(isOnline, message);
   }
+  
