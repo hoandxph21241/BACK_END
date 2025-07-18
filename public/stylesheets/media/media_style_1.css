@@ -1,0 +1,331 @@
+/* Thanh điều khiển chính */
+.media-control-bar {
+  background: #232326;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  padding: 18px 24px;
+  min-width: 380px;
+  max-width: 480px;
+  margin: 0 auto;
+  color: #fff;
+  font-family: 'Inter', Arial, sans-serif;
+}
+
+/* Tên bài hát */
+.song-name-container {
+  background: transparent;
+  color: #fff;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #444;
+  margin-bottom: 8px;
+}
+
+/* Ảnh album */
+.album-cover {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  margin-right: 18px;
+}
+
+/* Nhóm nút điều khiển */
+.btn_media {
+  gap: 8px;
+}
+
+.btn_media .btn {
+  background: #232326;
+  border: none;
+  color: #fff;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.btn_media .btn:hover,
+.btn_media .btn:focus {
+  background: #ff5500;
+  color: #fff;
+  outline: none;
+}
+
+.other-btn svg {
+  transition: fill 0.2s;
+}
+
+#repeatBtn.active svg,
+#shuffleBtn.active svg {
+  fill: #ff5500 !important;
+}
+
+/* Thanh thời gian */
+.audio-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.seekbar {
+  width: 160px;
+  accent-color: #ff5500;
+  height: 4px;
+  border-radius: 2px;
+  background: #444;
+}
+
+.time-display {
+  font-size: 0.95em;
+  color: #bbb;
+  min-width: 70px;
+  text-align: center;
+}
+
+/* Volume */
+.volume-control {
+  margin-left: 10px;
+}
+
+#volumeSliderContainer {
+  background: #232326;
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  min-width: 120px;
+  right: 0;
+  top: 40px;
+}
+
+.volume-slider {
+  accent-color: #ff5500;
+  width: 100%;
+}
+
+/* Popup danh sách phát */
+.playlist-popup {
+  background: #232326;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.22);
+  color: #fff;
+  padding: 18px 20px;
+  min-width: 340px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.playlist-header {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ff5500;
+  margin-bottom: 10px;
+}
+
+.playlist-list,
+#playlist {
+  padding: 0;
+  margin: 0;
+}
+
+.playlist-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #333;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.playlist-item:hover,
+.playlist-item.current-playing {
+  background: #ff5500;
+  color: #fff;
+}
+
+.playlist-item img {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  object-fit: cover;
+  margin-right: 10px;
+}
+
+.song-title {
+  font-weight: 500;
+  font-size: 1rem;
+  color: #fff;
+}
+
+@media (max-width: 600px) {
+  .media-control-bar {
+    min-width: 100%;
+    max-width: 100%;
+    padding: 10px;
+  }
+  .playlist-popup {
+    min-width: 100%;
+    padding: 10px;
+  }
+}/* Nút điều khiển media */
+.btn_media .btn,
+#playPauseBtn,
+#repeatBtn,
+#shuffleBtn,
+#volumeBtn {
+    background: #232326;
+    border: none;
+    color: #fff;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.btn_media .btn:hover,
+#playPauseBtn:hover,
+#repeatBtn:hover,
+#shuffleBtn:hover,
+#volumeBtn:hover {
+    background: #ff5500;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(255,85,0,0.15);
+    transform: scale(1.08);
+}
+
+.btn_media .btn:active,
+#playPauseBtn:active,
+#repeatBtn:active,
+#shuffleBtn:active,
+#volumeBtn:active {
+    background: #d84315;
+    transform: scale(0.97);
+}
+
+#repeatBtn.active svg,
+#shuffleBtn.active svg {
+    fill: #ff5500 !important;
+    transition: fill 0.2s;
+}
+
+/* Seekbar hover */
+.seekbar {
+    accent-color: #ff5500;
+    transition: box-shadow 0.2s;
+}
+.seekbar:hover {
+    box-shadow: 0 2px 8px rgba(255,85,0,0.18);
+}
+
+/* Volume slider hover */
+.volume-slider {
+    accent-color: #ff5500;
+    transition: box-shadow 0.2s;
+}
+.volume-slider:hover {
+    box-shadow: 0 2px 8px rgba(255,85,0,0.18);
+}
+
+/* Album cover hover */
+#albumCover:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 18px rgba(255,85,0,0.18);
+    border: 2px solid #ff5500;
+}
+
+/* Playlist item hover & active */
+.playlist-body li {
+    transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+    cursor: pointer;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+}
+
+.playlist-body li:hover {
+    background: linear-gradient(135deg, rgba(255,85,0,0.18), rgba(32,201,151,0.10));
+    color: #fff;
+    transform: translateX(4px) scale(1.03);
+    box-shadow: 0 4px 12px rgba(255,85,0,0.12);
+    border-left: 3px solid #ff5500;
+}
+
+.playlist-body li:active {
+    background: #ff5500;
+    color: #fff;
+    transform: scale(0.98);
+    border-left: 4px solid #d84315;
+}
+
+.playlist-body li.current-playing {
+    background: linear-gradient(135deg, rgba(40,167,69,0.22), rgba(32,201,151,0.18)) !important;
+    border-left: 4px solid #28a745 !important;
+    box-shadow: 0 0 15px rgba(40,167,69,0.3);
+    animation: pulse 2s infinite;
+}
+
+.playlist-body li.current-playing::after {
+    content: "♪";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #28a745;
+    font-size: 16px;
+    animation: bounce 1s infinite;
+}
+
+/* Nút mở danh sách phát */
+.btnPlaylist {
+    background: none;
+    border: none;
+    color: #ff5500;
+    transition: color 0.2s, transform 0.2s;
+}
+.btnPlaylist:hover {
+    color: #fff;
+    transform: scale(1.15);
+}
+
+/* Popup playlist hiệu ứng */
+.playlist-popup {
+    background: #232326;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.22);
+    color: #fff;
+    padding: 18px 20px;
+    min-width: 340px;
+    max-height: 320px;
+    overflow-y: auto;
+    transition: box-shadow 0.2s;
+}
+.playlist-popup.show {
+    box-shadow: 0 8px 32px rgba(255,85,0,0.18);
+}
+
+/* Hiệu ứng cho các icon SVG */
+.btn_media svg,
+#playPauseBtn svg,
+#repeatBtn svg,
+#shuffleBtn svg,
+#volumeBtn svg {
+    transition: fill 0.2s, transform 0.2s;
+}
+.btn_media .btn:hover svg,
+#playPauseBtn:hover svg,
+#repeatBtn:hover svg,
+#shuffleBtn:hover svg,
+#volumeBtn:hover svg {
+    fill: #fff !important;
+    transform: scale(1.15);
+}

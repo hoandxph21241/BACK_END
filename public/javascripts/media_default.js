@@ -21,6 +21,7 @@ const accordionContainer = document.getElementById("playlistAccordion");
 const albumCoverElement = document.getElementById('albumCover');
 
 const repeatBtn = document.getElementById("repeatBtn");
+const shuffleBtn = document.getElementById("shuffleBtn");
 
 window.audioPlayer = audioPlayer;
 window.songNameElement = songNameElement;
@@ -45,6 +46,7 @@ window.accordionContainer = accordionContainer;
 window.albumCover = albumCover;
 
 window.repeatBtn = repeatBtn;
+window.shuffleBtn = shuffleBtn;
 
 
 document.addEventListener("DOMContentLoaded", function () {
