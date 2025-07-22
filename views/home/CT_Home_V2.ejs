@@ -9,9 +9,9 @@
   <link rel='stylesheet' href='/stylesheets/home/music-card.css' />
 </head>
 <body>
-  <div class="main-layout align-items-center flex-column ">
+  <div class="main-layout">
     <!-- Main Content Area -->
-    <div class="content-area col-10">
+    <div class="content-area">
       <% 
       // Sử dụng dữ liệu từ controller hoặc tạo fallback
       const displayTopRated = topRatedSongs || (mp3List ? mp3List.slice(0, 5) : []);

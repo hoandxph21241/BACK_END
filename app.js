@@ -72,6 +72,11 @@ app.use("/product", ProductRounter);
 app.get('/mediabar', (req, res) => {
   res.render('inc/mediabar');
 });
+// iframe Mediabar v2
+app.get('/mediabar_v2', (req, res) => {
+  res.render('inc/mediabar_v2');
+});
+
 app.get('/network-popup', (req, res) => {
   res.render('inc/Network');
 });

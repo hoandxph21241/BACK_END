@@ -24,8 +24,11 @@
       <main id="main">
       </main>
 
-      <div class="iframe-container" id="iframeContainer">
+      <!-- <div class="iframe-container" id="iframeContainer">
         <iframe src="/mediabar" id="mediaPlayerFrame"></iframe>
+      </div> -->
+      <div class="iframe-container" id="iframeContainer">
+        <iframe src="/mediabar_v2" id="mediaPlayerFrame"></iframe>
       </div>
 
       <script>
@@ -226,32 +229,160 @@
           }
         });
 
-        // Navigation with Axios
+        // // Navigation with Axios
+        // document.querySelectorAll('.nav-link').forEach(link => {
+        //   link.addEventListener('click', function (e) {
+        //     e.preventDefault();
+
+        //     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        //     this.classList.add('active');
+
+        //     const url = this.dataset.url;
+        //     document.getElementById('main').innerHTML = '<div class="text-center p-4"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+
+        //     axios.get(url)
+        //       .then(response => {
+        //         document.getElementById('main').innerHTML = response.data;
+        //         setTimeout(() => {
+        //           initializeDynamicContent();
+        //         }, 100);
+        //         history.pushState(null, '', url);
+        //       })
+        //       .catch(error => {
+        //         console.error('Lỗi tải trang:', error.response?.data || error.message);
+        //         document.getElementById('main').innerHTML = `
+        //           <div class="error-message">
+        //             <i class="fas fa-exclamation-triangle"></i>
+        //             <p>Không thể tải trang. Vui lòng thử lại.</p>
+        //             <button onclick="location.reload()">Tải lại</button>
+        //           </div>
+        //         `;
+        //       });
+        //   });
+        // });
+
+        function createSlidingIndicator() {
+          const navContainer = document.querySelector('.navbar-nav, .nav, .d-flex');
+          if (!navContainer) return null;
+
+          let indicator = document.querySelector('.nav-indicator');
+          if (indicator) return indicator;
+
+          indicator = document.createElement('div');
+          indicator.className = 'nav-indicator';
+          indicator.style.cssText = `
+    position: absolute;
+    top: 78%;
+    height: 3px;
+    background: linear-gradient(90deg, #ffffff, #ffffff);
+    transition: all 0.3s ease;
+    border-radius: 3px 3px 0 0;
+    z-index: 10;
+    opacity: 0;
+  `;
+
+          // Đảm bảo nav container có position relative
+          if (window.getComputedStyle(navContainer).position === 'static') {
+            navContainer.style.position = 'relative';
+          }
+
+          navContainer.appendChild(indicator);
+          return indicator;
+        }
+
+        // Cập nhật vị trí indicator
+        function updateIndicatorPosition(activeLink) {
+          const indicator = createSlidingIndicator();
+          if (!indicator || !activeLink) return;
+
+          const navContainer = activeLink.closest('.navbar-nav, .nav, .d-flex');
+          if (!navContainer) return;
+
+          // Sử dụng setTimeout để đảm bảo DOM đã render xong
+          setTimeout(() => {
+            const linkRect = activeLink.getBoundingClientRect();
+            const navRect = navContainer.getBoundingClientRect();
+
+            const left = linkRect.left - navRect.left;
+            const width = linkRect.width;
+
+            indicator.style.left = left + 'px';
+            indicator.style.width = width + 'px';
+            indicator.style.opacity = '1';
+
+            console.log('Indicator moved:', { left, width, text: activeLink.textContent.trim() });
+          }, 10);
+        }
+
         document.querySelectorAll('.nav-link').forEach(link => {
           link.addEventListener('click', function (e) {
             e.preventDefault();
+
+            document.querySelectorAll('.nav-link').forEach(l => {
+              l.classList.remove('active');
+            });
+            this.classList.add('active');
+            updateIndicatorPosition(this);
             const url = this.dataset.url;
             document.getElementById('main').innerHTML = '<div class="text-center p-4"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
-
             axios.get(url)
               .then(response => {
                 document.getElementById('main').innerHTML = response.data;
                 setTimeout(() => {
+                  updateIndicatorPosition(this);
                   initializeDynamicContent();
                 }, 100);
+
                 history.pushState(null, '', url);
               })
               .catch(error => {
                 console.error('Lỗi tải trang:', error.response?.data || error.message);
                 document.getElementById('main').innerHTML = `
-                  <div class="error-message">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>Không thể tải trang. Vui lòng thử lại.</p>
-                    <button onclick="location.reload()">Tải lại</button>
-                  </div>
-                `;
+          <div class="error-message">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>Không thể tải trang. Vui lòng thử lại.</p>
+            <button onclick="location.reload()">Tải lại</button>
+          </div>
+        `;
               });
           });
+        });
+
+        // Update indicator reload page
+        window.addEventListener('popstate', () => {
+          axios.get(location.pathname)
+            .then(response => {
+              document.getElementById('main').innerHTML = response.data;
+
+              // Update active link and indicator
+              const currentPath = location.pathname;
+              const matchingLink = document.querySelector(`.nav-link[data-url="${currentPath}"]`);
+
+              if (matchingLink) {
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                matchingLink.classList.add('active');
+                updateIndicatorPosition(matchingLink);
+              }
+
+              setTimeout(() => {
+                initializeDynamicContent();
+              }, 100);
+            })
+            .catch(error => {
+              console.error('Lỗi tải trang:', error.response?.data || error.message);
+            });
+        });
+
+        // Resize indicator on window resize
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+          clearTimeout(resizeTimeout);
+          resizeTimeout = setTimeout(() => {
+            const activeLink = document.querySelector('.nav-link.active');
+            if (activeLink) {
+              updateIndicatorPosition(activeLink);
+            }
+          }, 100);
         });
 
         // Handle browser back/forward
@@ -275,7 +406,7 @@
             const iframeContainer = document.getElementById('iframeContainer');
             if (iframeContainer) {
               if (window.isExpanded) {
-                iframeContainer.style.height = '67%';
+                iframeContainer.style.height = '73%';
               } else {
                 iframeContainer.style.height = '20%';
               }
@@ -301,6 +432,11 @@
         document.addEventListener('DOMContentLoaded', function () {
           setTimeout(() => {
             window.playHistoryAPI.updateSidebarHistory();
+
+            const activeLink = document.querySelector('.nav-link.active');
+            if (activeLink) {
+              updateIndicatorPosition(activeLink);
+            }
           }, 500);
         });
 

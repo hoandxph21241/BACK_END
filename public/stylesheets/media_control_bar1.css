@@ -158,88 +158,6 @@ audio {
     width: 98%;
 }
 
-/* 
-.volume-control {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-#volumeBtn {
-    transition: background 0.2s ease;
-}
-
-.slider-container {
-    display: none;
-    position: absolute;
-    top: 50%;
-    left: 100%;
-    transform: translateY(-50%);
-    width: 120px;
-    height: 32px;
-    padding: 5px 10px;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    opacity: 0;
-    pointer-events: none;
-    transition:
-        transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-        opacity 0.4s ease;
-}
-
-.slider-container.active {
-    opacity: 1;
-    transform: translateY(-50%) translateX(0);
-    pointer-events: auto;
-}
-
-.other-controls {
-    transition: transform 0.4s ease, opacity 0.4s ease;
-}
-
-.other-controls.hidden {
-    opacity: 0;
-    transform: translateX(-20px);
-    pointer-events: none;
-}
-
-.volume-slider {
-    -webkit-appearance: none;
-    max-width: 70px;
-    height: 5px;
-    position: absolute;
-    left: 5px; 
-    margin-top: 10px;
-    cursor: pointer;
-    background: linear-gradient(to right,
-            #ffd900 0%,
-            rgb(255, 0, 0) 100%);
-    background-repeat: no-repeat;       
-}
-
-.volume-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 12px;
-    height: 12px;
-    background: rgb(255, 0, 0);
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-.volume-slider::-moz-range-thumb {
-    width: 12px;
-    height: 12px;
-    background: rgb(255, 0, 0);
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-} */
-
-/* Giữ nguyên CSS cũ */
 .volume-control {
     position: relative;
     display: flex;
@@ -331,8 +249,10 @@ audio {
 .volume-slider::-moz-range-thumb {
     width: 16px;
     height: 16px;
-    background: white; /* Đổi thành màu trắng */
-    border: 2px solid #000000; /* Thêm border đen */
+    background: white;
+    /* Đổi thành màu trắng */
+    border: 2px solid #000000;
+    /* Thêm border đen */
     border-radius: 50%;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
@@ -405,6 +325,7 @@ audio {
 }
 
 img {
+    -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
@@ -479,7 +400,11 @@ img {
 }
 
 .no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
+    -webkit-touch-callout: none;
 }
 
 #playlist,

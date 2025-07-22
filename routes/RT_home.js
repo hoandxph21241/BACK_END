@@ -5,6 +5,7 @@ var Controllers = require("../controllers/CTL_home");
 router.get("", Controllers.Home);
 router.get("/pratical", Controllers.Home_pratical);
 router.get("/ct_home", Controllers.CT_Home);
+router.get("/ct_home_v2", Controllers.CT_Home);
 router.get("/test", Controllers.Home_NEW);
 router.get("/find/:id", Controllers.Find_ID);
 router.get("/fetch", Controllers.Fetch);

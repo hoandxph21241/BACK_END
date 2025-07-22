@@ -184,6 +184,96 @@ exports.CT_Home = async (req, res, next) => {
   }
 };
 
+
+exports.CT_Home_v2 = async (req, res, next) => {
+  try {
+    // Lấy tất cả MP3 với populate category và sắp xếp
+    const mp3List = await db.MP3.find()
+      .populate({
+        path: "categoryId",
+        select: "nameCategory",
+      })
+      .sort({ uploadDate: -1 })
+      .lean();
+
+    // Lấy danh sách categories
+    const categories = await db.CategoryModel.find()
+      .sort({ nameCategory: 1 })
+      .lean();
+
+    // Tạo object để group songs theo category
+    const songsByCategory = {};
+    
+    // Khởi tạo categories với thuộc tính cần thiết
+    categories.forEach(category => {
+      songsByCategory[category._id.toString()] = {
+        name: category.nameCategory,
+        songs: [],
+        _id: category._id
+      };
+    });
+
+    // Phân loại bài hát theo category (giới hạn 5 bài/category)
+    mp3List.forEach(song => {
+      if (song.categoryId && song.categoryId._id) {
+        const categoryId = song.categoryId._id.toString();
+        if (songsByCategory[categoryId] && songsByCategory[categoryId].songs.length < 5) {
+          songsByCategory[categoryId].songs.push(song);
+        }
+      }
+    });
+
+    // Loại bỏ categories không có bài hát
+    Object.keys(songsByCategory).forEach(categoryId => {
+      if (songsByCategory[categoryId].songs.length === 0) {
+        delete songsByCategory[categoryId];
+      }
+    });
+
+    // Tạo top rated songs (có thể thay đổi logic này)
+    const topRatedSongs = mp3List.slice(0, 5);
+
+    // Lấy thông tin user
+    const user = req.session.userLogin || { fullName: 'Guest' };
+    
+    // Lấy lịch sử phát nhạc
+    const historySongs = getPlayHistory(req, 4);
+
+    // Render với tất cả dữ liệu cần thiết
+    res.render("home/CT_Home_V2.ejs", {
+      mp3List,
+      songsByCategory,
+      topRatedSongs,
+      categories,
+      user,
+      historySongs,
+      // Thêm helper functions nếu cần
+      helpers: {
+        formatDate: (date) => new Date(date).toLocaleDateString(),
+        truncateString: (str, length = 50) => str.length > length ? str.substring(0, length) + '...' : str
+      }
+    });
+
+  } catch (err) {
+    console.error("Error in CT_Home:", err);
+    
+    // Render với dữ liệu mặc định khi có lỗi
+    res.status(500).render("home/CT_Home_V2.ejs", {
+      mp3List: [],
+      songsByCategory: {},
+      topRatedSongs: [],
+      categories: [],
+      user: { fullName: 'Guest' },
+      historySongs: [],
+      error: "Unable to load music library",
+      helpers: {
+        formatDate: (date) => new Date(date).toLocaleDateString(),
+        truncateString: (str, length = 50) => str.length > length ? str.substring(0, length) + '...' : str
+      }
+    });
+  }
+};
+
 exports.Home_NEW = async (req, res, next) => {
   try {
     const mp3List = await db.MP3.find()

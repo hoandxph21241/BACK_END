@@ -1,0 +1,134 @@
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link rel='stylesheet' href='/stylesheets/media/media_style_1.css' />
+<script src="/javascripts/media_default.js" defer></script>
+<script src="/javascripts/media_controls.js"></script>
+
+<body>
+
+  <div class="media-control-bar fixed-bottom d-flex justify-content-between align-items-center">
+
+    <div class="d-flex align-items-center" style="gap: 8px;">
+      <button id="backBtn" type="button" class="btn btn-outline-dark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-rewind-circle"
+          viewBox="0 0 16 16">
+          <path
+            d="M7.729 5.055a.5.5 0 0 0-.52.038l-3.5 2.5a.5.5 0 0 0 0 .814l3.5 2.5A.5.5 0 0 0 8 10.5V8.614l3.21 2.293A.5.5 0 0 0 12 10.5v-5a.5.5 0 0 0-.79-.407L8 7.386V5.5a.5.5 0 0 0-.271-.445" />
+          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8" />
+        </svg>
+      </button>
+      <button id="playPauseBtn" type="button" class="btn p-0 border-0">
+        <svg id="playPauseIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+          class="bi bi-play-circle" viewBox="0 0 16 16">
+          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+          <path
+            d="M6.271 5.055a.5.5 0 0 1 .52.038l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 6 10.5v-5a.5.5 0 0 1 .271-.445" />
+        </svg>
+      </button>
+      <button id="nextBtn" type="button" class="btn btn-outline-dark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+          class="bi bi-fast-forward-circle" viewBox="0 0 16 16">
+          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+          <path
+            d="M4.271 5.055a.5.5 0 0 1 .52.038L8 7.386V5.5a.5.5 0 0 1 .79-.407l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 8 10.5V8.614l-3.21 2.293A.5.5 0 0 1 4 10.5v-5a.5.5 0 0 1 .271-.445" />
+        </svg>
+      </button>
+
+      <!-- Shuffle, Repeat -->
+      <button id="shuffleBtn" class="btn p-0 border-0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-shuffle"
+          viewBox="0 0 16 16">
+          <path fill-rule="evenodd"
+            d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.6 9.6 0 0 0 7.556 8a9.6 9.6 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.6 10.6 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.6 9.6 0 0 0 6.444 8a9.6 9.6 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5" />
+          <path
+            d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192m0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192" />
+        </svg>
+      </button>
+      <button title="No Repeat" id="repeatBtn" type="button" class="btn p-0 border-0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+          <path
+            d="M11 5.466V4H5a4 4 0 0 0-3.584 5.777.5.5 0 1 1-.896.446A5 5 0 0 1 5 3h6V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192Zm3.81.086a.5.5 0 0 1 .67.225A5 5 0 0 1 11 13H5v1.466a.25.25 0 0 1-.41.192l-2.36-1.966a.25.25 0 0 1 0-.384l2.36-1.966a.25.25 0 0 1 .41.192V12h6a4 4 0 0 0 3.585-5.777.5.5 0 0 1 .225-.67Z" />
+        </svg>
+      </button>
+
+      <!-- Timeline -->
+      <span id="currentTime" class="time-display">00:00</span>
+      <div class="progress-container" style="width: 200px;">
+        <input id="seekbar" type="range" min="0" value="0" step="0.1" class="progress-bar">
+      </div>
+      <span id="endTime" class="time-display">00:00</span>
+
+      <!-- Volume -->
+      <div class="volume-control position-relative">
+        <button id="volumeBtn" type="button" class="btn p-0 border-0" aria-expanded="false" aria-haspopup="true"
+          aria-controls="volumeSliderContainer">
+          <!-- Volume SVG -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+            <path
+              d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z" />
+            <path
+              d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z" />
+            <path
+              d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 1 9.025 8 3.49 3.49 0 0 1 8 10.475l.707.707zM6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z" />
+          </svg>
+        </button>
+        <div id="volumeSliderContainer" class="volume-slider-container">
+          <input type="range" id="volumeSlider" min="0" max="100" value="100" class="volume-slider">
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Section: Album + Song Info -->
+    <div class="d-flex align-items-center" style="gap: 8px;">
+      <img id="albumCover" src="/images/chibi.gif" alt="Album cover">
+      <div>
+        <p class="mb-0 song-name" data-text="mp3Name">Tên bài hát</p>
+        <small class="text-secondary artist-name">Tên nghệ sĩ</small>
+      </div>
+      <div class="d-flex align-items-center ms-3 position-relative">
+        <button class="btn btn-link btn-sm text-secondary p-0 me-2">
+          <!-- Heart -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart"
+            viewBox="0 0 16 16">
+            <path
+              d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15" />
+          </svg>
+        </button>
+
+        <button id="togglePlaylistBtn" class="btn btn-link btn-sm text-secondary p-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+            class="bi bi-music-note-list" viewBox="0 0 16 16">
+            <path d="M12 13c0 1.105-1.12 2-2.5 2S7 14.105 7 13s1.12-2 2.5-2 2.5.895 2.5 2" />
+            <path fill-rule="evenodd" d="M12 3v10h-1V3z" />
+            <path d="M11 2.82a1 1 0 0 1 .804-.98l3-.6A1 1 0 0 1 16 2.22V4l-5 1z" />
+            <path fill-rule="evenodd"
+              d="M0 11.5a.5.5 0 0 1 .5-.5H4a.5.5 0 0 1 0 1H.5a.5.5 0 0 1-.5-.5m0-4A.5.5 0 0 1 .5 7H8a.5.5 0 0 1 0 1H.5a.5.5 0 0 1-.5-.5m0-4A.5.5 0 0 1 .5 3H8a.5.5 0 0 1 0 1H.5a.5.5 0 0 1-.5-.5" />
+          </svg>
+        </button>
+
+        <!-- Playlist Popup -->
+        <div id="playlistPopup" class="position-absolute rounded">
+          <div class="playlist-header">
+            <div class="d-flex align-items-center">
+              <span class="me-2">🎵</span>
+              <strong>Danh sách phát</strong>
+            </div>
+          </div>
+          <div class="playlist-body">
+            <ul id="playlist" class="playlist-list mb-0">
+              <li class="playlist-item d-flex align-items-center">
+                <div class="track-info">
+                  <span class="track-name">Chưa có bài hát nào</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden Audio -->
+    <audio id="audioPlayer" style="display: none;"></audio>
+
+  </div>
+
+</body>

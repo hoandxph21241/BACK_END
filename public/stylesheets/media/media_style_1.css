@@ -1,276 +1,317 @@
 /* Thanh điều khiển chính */
-.media-control-bar {
-  background: #232326;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-  padding: 18px 24px;
-  min-width: 380px;
-  max-width: 480px;
-  margin: 0 auto;
-  color: #fff;
-  font-family: 'Inter', Arial, sans-serif;
+body {
+  margin: 0;
+  padding: 0;
 }
-
-/* Tên bài hát */
-.song-name-container {
-  background: transparent;
-  color: #fff;
-  font-size: 1.1rem;
-  letter-spacing: 0.5px;
-  border-bottom: 1px solid #444;
-  margin-bottom: 8px;
+.media-control-bar {
+  background-color: #404040;
+  height: 48px !important;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
 }
 
 /* Ảnh album */
-.album-cover {
-  width: 80px;
-  height: 80px;
-  border-radius: 8px;
+#albumCover {
+  width: 35px !important;
+  height: 35px !important;
   object-fit: cover;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-  margin-right: 18px;
+  border-radius: 2px !important;
 }
 
-/* Nhóm nút điều khiển */
-.btn_media {
+/* Tên bài hát */
+.media-control-bar .song-name {
+  font-weight: 500;
+  font-size: 12px !important;
+  margin: 0;
+  color: #ffffff;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Nút điều khiển */
+.media-control-bar .btn {
+  background: transparent !important;
+  border: none !important;
+  color: #ffffff !important;
+  padding: 4px !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 4px;
+}
+
+.media-control-bar .btn:hover {
+  color: #f50 !important;
+}
+
+.media-control-bar .btn:hover svg {
+  fill: #f50 !important;
+  color: #f50 !important;
+}
+
+/* Left controls container */
+.media-control-bar .d-flex.align-items-center {
+  gap: 12px !important;
+  padding: 0 8px;
+}
+
+/* Play controls group */
+.media-control-bar .btn-group-controls {
+  display: flex;
+  align-items: center;
   gap: 8px;
 }
 
-.btn_media .btn {
-  background: #232326;
-  border: none;
-  color: #fff;
-  border-radius: 50%;
-  width: 38px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
-.btn_media .btn:hover,
-.btn_media .btn:focus {
-  background: #ff5500;
-  color: #fff;
-  outline: none;
-}
-
-.other-btn svg {
-  transition: fill 0.2s;
-}
-
-#repeatBtn.active svg,
-#shuffleBtn.active svg {
-  fill: #ff5500 !important;
-}
-
 /* Thanh thời gian */
-.audio-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 10px;
+#currentTime, #endTime {
+  color: #666 !important;
+  font-size: 11px !important;
+  font-family: "Interstate","Lucida Grande",Arial,sans-serif;
 }
 
-.seekbar {
-  width: 160px;
-  accent-color: #ff5500;
-  height: 4px;
-  border-radius: 2px;
-  background: #444;
+#seekbar {
+  height: 2px;
+  background: #ccc;
+  cursor: pointer;
+  width: 200px !important;
 }
 
-.time-display {
-  font-size: 0.95em;
-  color: #bbb;
-  min-width: 70px;
-  text-align: center;
+#seekbar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 8px;
+  height: 8px;
+  background: #f50;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-top: -3px;
 }
 
-/* Volume */
+/* Âm lượng */
 .volume-control {
-  margin-left: 10px;
+  position: relative;
 }
 
-#volumeSliderContainer {
-  background: #232326;
-  border-radius: 8px;
-  padding: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-  min-width: 120px;
+.volume-slider-container {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-90deg);
+  background: #333;
+  padding: 10px;
+  border-radius: 4px;
+  display: none;
+  width: 100px;
+  transform-origin: center;
+}
+
+.volume-slider-container.show {
+  display: block;
+}
+
+#volumeSlider {
+  width: 80px;
+  height: 4px;
+  -webkit-appearance: none;
+  background: #666;
+  outline: none;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+#volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: #f50;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 8px;
+  height: 8px;
+  background: #f50;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-top: -2px;
+}
+
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(40px); }
+}
+#playlistPopup.show {
+    display: block !important;
+    opacity: 1;
+    transform: translateY(0);
+}
+#playlistPopup.hide {
+    display: none !important;
+    opacity: 0;
+}
+
+
+/* Playlist Popup */
+#playlistPopup {
+  display: none;
+  position: absolute;
+  bottom: 100%;
   right: 0;
-  top: 40px;
+  width: 300px;
+  background-color: #2e2e2e;
+  border: 1px solid #404040;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  margin-bottom: 10px;
+  z-index: 1050;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.volume-slider {
-  accent-color: #ff5500;
-  width: 100%;
-}
-
-/* Popup danh sách phát */
-.playlist-popup {
-  background: #232326;
-  border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.22);
-  color: #fff;
-  padding: 18px 20px;
-  min-width: 340px;
-  max-height: 320px;
-  overflow-y: auto;
+#playlistPopup.show {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .playlist-header {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #ff5500;
-  margin-bottom: 10px;
+  padding: 12px;
+  border-bottom: 1px solid #e5e5e5;
+  color: #333;
 }
 
-.playlist-list,
-#playlist {
-  padding: 0;
+.playlist-body {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.playlist-list {
+  list-style: none;
   margin: 0;
+  padding: 0;
 }
 
 .playlist-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid #333;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f2f2f2;
+  transition: background-color 0.2s;
   cursor: pointer;
-  transition: background 0.18s;
 }
 
-.playlist-item:hover,
-.playlist-item.current-playing {
-  background: #ff5500;
-  color: #fff;
+.playlist-item:hover {
+  background-color: #f8f8f8;
 }
 
-.playlist-item img {
-  width: 38px;
-  height: 38px;
-  border-radius: 6px;
-  object-fit: cover;
-  margin-right: 10px;
+.track-info {
+  font-size: 12px;
+  color: #333;
 }
 
-.song-title {
-  font-weight: 500;
-  font-size: 1rem;
-  color: #fff;
+/* Additional styles */
+.artist-name {
+  font-size: 11px;
+  color: #999 !important;
 }
 
-@media (max-width: 600px) {
-  .media-control-bar {
-    min-width: 100%;
-    max-width: 100%;
-    padding: 10px;
-  }
-  .playlist-popup {
-    min-width: 100%;
-    padding: 10px;
-  }
-}/* Nút điều khiển media */
-.btn_media .btn,
-#playPauseBtn,
-#repeatBtn,
-#shuffleBtn,
-#volumeBtn {
-    background: #232326;
-    border: none;
-    color: #fff;
-    border-radius: 50%;
-    width: 38px;
-    height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s, box-shadow 0.2s, color 0.2s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+.btn svg {
+  transition: color 0.2s;
 }
 
-.btn_media .btn:hover,
-#playPauseBtn:hover,
-#repeatBtn:hover,
-#shuffleBtn:hover,
-#volumeBtn:hover {
-    background: #ff5500;
-    color: #fff;
-    box-shadow: 0 4px 16px rgba(255,85,0,0.15);
-    transform: scale(1.08);
+.btn.active svg {
+  color: #f50 !important;
 }
 
-.btn_media .btn:active,
-#playPauseBtn:active,
-#repeatBtn:active,
-#shuffleBtn:active,
-#volumeBtn:active {
-    background: #d84315;
-    transform: scale(0.97);
+/* Progress bar container */
+.progress-container {
+  position: relative;
+  height: 1px;
+  background: #e5e5e5;
+  border-radius: 2px;
+  overflow: hidden;
 }
 
-#repeatBtn.active svg,
-#shuffleBtn.active svg {
-    fill: #ff5500 !important;
-    transition: fill 0.2s;
+
+
+#volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 8px;
+  height: 8px;
+  background: #f50;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
-/* Seekbar hover */
-.seekbar {
-    accent-color: #ff5500;
-    transition: box-shadow 0.2s;
-}
-.seekbar:hover {
-    box-shadow: 0 2px 8px rgba(255,85,0,0.18);
+
+#playlist,
+#playlistItems,
+#playlist li,
+#playlistItems li {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
-/* Volume slider hover */
-.volume-slider {
-    accent-color: #ff5500;
-    transition: box-shadow 0.2s;
-}
-.volume-slider:hover {
-    box-shadow: 0 2px 8px rgba(255,85,0,0.18);
-}
-
-/* Album cover hover */
-#albumCover:hover {
-    transform: scale(1.08);
-    box-shadow: 0 6px 18px rgba(255,85,0,0.18);
-    border: 2px solid #ff5500;
-}
-
-/* Playlist item hover & active */
 .playlist-body li {
-    transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+    transition: all 0.3s ease;
     cursor: pointer;
     border-radius: 6px;
     position: relative;
     overflow: hidden;
 }
 
+.playlist-body li::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.1),
+            transparent);
+    transition: left 0.5s ease;
+}
+
+.playlist-body li:hover::before {
+    left: 100%;
+}
+
 .playlist-body li:hover {
-    background: linear-gradient(135deg, rgba(255,85,0,0.18), rgba(32,201,151,0.10));
-    color: #fff;
-    transform: translateX(4px) scale(1.03);
-    box-shadow: 0 4px 12px rgba(255,85,0,0.12);
-    border-left: 3px solid #ff5500;
+    background: linear-gradient(135deg,
+            rgba(255, 193, 7, 0.15),
+            rgba(0, 123, 255, 0.1));
+    transform: translateX(4px) scale(1.01);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-left: 3px solid #ffc107;
 }
 
 .playlist-body li:active {
-    background: #ff5500;
-    color: #fff;
-    transform: scale(0.98);
-    border-left: 4px solid #d84315;
+    transform: translateX(8px) scale(0.98);
+    transition: transform 0.1s ease;
 }
 
 .playlist-body li.current-playing {
-    background: linear-gradient(135deg, rgba(40,167,69,0.22), rgba(32,201,151,0.18)) !important;
+    background: linear-gradient(135deg,
+            rgba(40, 167, 69, 0.2),
+            rgba(32, 201, 151, 0.15)) !important;
     border-left: 4px solid #28a745 !important;
-    box-shadow: 0 0 15px rgba(40,167,69,0.3);
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
     animation: pulse 2s infinite;
 }
 
@@ -285,47 +326,216 @@
     animation: bounce 1s infinite;
 }
 
-/* Nút mở danh sách phát */
-.btnPlaylist {
-    background: none;
-    border: none;
-    color: #ff5500;
-    transition: color 0.2s, transform 0.2s;
-}
-.btnPlaylist:hover {
-    color: #fff;
-    transform: scale(1.15);
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(40, 167, 69, 0.5);
+    }
+
+    100% {
+        box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+    }
 }
 
-/* Popup playlist hiệu ứng */
-.playlist-popup {
-    background: #232326;
-    border-radius: 12px;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.22);
-    color: #fff;
-    padding: 18px 20px;
-    min-width: 340px;
-    max-height: 320px;
-    overflow-y: auto;
-    transition: box-shadow 0.2s;
-}
-.playlist-popup.show {
-    box-shadow: 0 8px 32px rgba(255,85,0,0.18);
+@keyframes bounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(-50%);
+    }
+
+    40% {
+        transform: translateY(-60%);
+    }
+
+    60% {
+        transform: translateY(-55%);
+    }
 }
 
-/* Hiệu ứng cho các icon SVG */
-.btn_media svg,
-#playPauseBtn svg,
-#repeatBtn svg,
+.media-control-bar svg,
+.media-control-bar button svg {
+  width: 20px;
+  height: 20px;
+  fill: #ffffff;
+  color: #ffffff;
+  transition: all 0.2s ease;
+  margin: 0 2px;
+}
+
+#playPauseBtn svg {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+
+#backBtn svg,
+#nextBtn svg,
 #shuffleBtn svg,
-#volumeBtn svg {
-    transition: fill 0.2s, transform 0.2s;
+#repeatBtn svg {
+  width: 22px;
+  height: 22px;
 }
-.btn_media .btn:hover svg,
-#playPauseBtn:hover svg,
-#repeatBtn:hover svg,
-#shuffleBtn:hover svg,
-#volumeBtn:hover svg {
-    fill: #fff !important;
-    transform: scale(1.15);
+
+
+#volumeBtn svg,
+.btn-link svg {
+  width: 18px;
+  height: 18px;
+}
+
+.media-control-bar .btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px !important;
+  margin: 0 2px;
+}
+
+#playlistPopup .playlist-list li {
+  padding: 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+#playlistPopup .playlist-list li:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+
+#playPauseBtn.playing #playPauseIcon {
+    transform: rotate(180deg);
+}
+
+#albumCover {
+    width: 100px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#albumCover:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#albumCover.loading {
+    opacity: 0.7;
+    filter: blur(1px);
+}
+
+#albumCover {
+    animation: fadeInImage 0.3s ease-in-out;
+}
+
+#albumCover:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+#albumCover.loading {
+    opacity: 0.7;
+    filter: blur(1px);
+}
+
+.playlist-popup {
+    display: none;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: none;
+    height: 385px;
+}
+
+.playlist-popup.show {
+    display: block;
+    animation: slideUp 0.3s ease forwards;
+}
+
+.playlist-popup.hide {
+    display: block;
+    animation: slideDown 0.3s ease forwards;
+}
+
+.playlist-popup.show {
+    display: block;
+    animation: slideUp 0.3s ease forwards;
+}
+
+.playlist-popup.hide {
+    display: block;
+    animation: slideDown 0.3s ease forwards;
+}
+
+.playlist-body li.current-playing {
+    background: linear-gradient(135deg,
+            rgba(40, 167, 69, 0.2),
+            rgba(32, 201, 151, 0.15)) !important;
+    border-left: 4px solid #28a745 !important;
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+    animation: pulse 2s infinite;
+}
+
+.playlist-body li.current-playing::after {
+    content: "♪";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #28a745;
+    font-size: 16px;
+    animation: bounce 1s infinite;
+}
+
+.playlist-body li.current-playing::after {
+    content: "♪";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #28a745;
+    font-size: 16px;
+    animation: bounce 1s infinite;
+}
+
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(40, 167, 69, 0.5);
+    }
+
+    100% {
+        box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+    }
+}
+
+@keyframes bounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(-50%);
+    }
+
+    40% {
+        transform: translateY(-60%);
+    }
+
+    60% {
+        transform: translateY(-55%);
+    }
 }
