@@ -3,6 +3,7 @@ body {
   margin: 0;
   padding: 0;
 }
+
 .media-control-bar {
   background-color: #404040;
   height: 48px !important;
@@ -17,8 +18,8 @@ body {
 
 /* Ảnh album */
 #albumCover {
-  width: 35px !important;
-  height: 35px !important;
+  width: 45px !important;
+  height: 45px !important;
   object-fit: cover;
   border-radius: 2px !important;
 }
@@ -68,29 +69,135 @@ body {
   gap: 8px;
 }
 
+
 /* Thanh thời gian */
-#currentTime, #endTime {
+#currentTime,
+#endTime {
   color: #666 !important;
   font-size: 11px !important;
-  font-family: "Interstate","Lucida Grande",Arial,sans-serif;
+  font-family: "Interstate", "Lucida Grande", Arial, sans-serif;
 }
 
-#seekbar {
-  height: 2px;
-  background: #ccc;
-  cursor: pointer;
-  width: 200px !important;
+
+/* Container cho timeline */
+.timeline-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
 }
 
-#seekbar::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 8px;
-  height: 8px;
-  background: #f50;
-  border-radius: 50%;
-  cursor: pointer;
-  margin-top: -3px;
+/* Time display styling */
+.time-display {
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+    min-width: 35px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
 }
+/* Container */
+.progress-container {
+    flex: 1;
+    position: relative;
+    height: 6px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* Background track */
+.progress-container::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 6px;
+    background: #e1e1e1;
+    border-radius: 3px;
+    z-index: 1;
+}
+
+/* Progress bar */
+.progress-container::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #ff7700 0%, #ff5500 100%);
+    border-radius: 3px;
+    width: var(--progress, 0%);
+    z-index: 2;
+    transition: width 0.1s ease;
+    box-shadow: 2px 0 0 0 #ff5500;
+}
+
+/* Seekbar transparent */
+.seekbar {
+    width: 100%;
+    height: 6px;
+    background: transparent;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    z-index: 3;
+    position: relative;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* Thumb (webkit) */
+.seekbar::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ff5500;
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+/* Thumb (moz) */
+.seekbar::-moz-range-thumb {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ff5500;
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+/* Hover */
+.progress-container:hover .seekbar::-webkit-slider-thumb,
+.progress-container:hover .seekbar::-moz-range-thumb {
+    opacity: 1;
+}
+.progress-container:hover::before {
+    background: #d5d5d5;
+}
+.progress-container:hover::after {
+    background: linear-gradient(90deg, #ff5500 0%, #ff3300 100%);
+}
+
+.progress-container::after {
+    position: relative;
+    border-radius: 10px;
+}
+
+.progress-container::after {
+    box-shadow: 2px 0 0 0 #ff5500;
+    border-radius: 10px;
+}
+.seekbar::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, #ff5500 0%, #ff5500 var(--progress, 0%), #e1e1e1 var(--progress, 0%), #e1e1e1 100%);
+    border-radius: 10px;
+}
+
+
+
 
 /* Âm lượng */
 .volume-control {
@@ -145,22 +252,38 @@ body {
 
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(40px); }
-    to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideDown {
-    from { opacity: 1; transform: translateY(0); }
-    to { opacity: 0; transform: translateY(40px); }
-}
-#playlistPopup.show {
-    display: block !important;
+  from {
     opacity: 1;
     transform: translateY(0);
-}
-#playlistPopup.hide {
-    display: none !important;
+  }
+
+  to {
     opacity: 0;
+    transform: translateY(40px);
+  }
+}
+
+#playlistPopup.show {
+  display: block !important;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#playlistPopup.hide {
+  display: none !important;
+  opacity: 0;
 }
 
 
@@ -174,7 +297,7 @@ body {
   background-color: #2e2e2e;
   border: 1px solid #404040;
   border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   margin-bottom: 10px;
   z-index: 1050;
   opacity: 0;
@@ -234,17 +357,6 @@ body {
   color: #f50 !important;
 }
 
-/* Progress bar container */
-.progress-container {
-  position: relative;
-  height: 1px;
-  background: #e5e5e5;
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-
-
 #volumeSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 8px;
@@ -259,104 +371,104 @@ body {
 #playlistItems,
 #playlist li,
 #playlistItems li {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .playlist-body li {
-    transition: all 0.3s ease;
-    cursor: pointer;
-    border-radius: 6px;
-    position: relative;
-    overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
 }
 
 .playlist-body li::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg,
-            transparent,
-            rgba(255, 255, 255, 0.1),
-            transparent);
-    transition: left 0.5s ease;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent);
+  transition: left 0.5s ease;
 }
 
 .playlist-body li:hover::before {
-    left: 100%;
+  left: 100%;
 }
 
 .playlist-body li:hover {
-    background: linear-gradient(135deg,
-            rgba(255, 193, 7, 0.15),
-            rgba(0, 123, 255, 0.1));
-    transform: translateX(4px) scale(1.01);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    border-left: 3px solid #ffc107;
+  background: linear-gradient(135deg,
+      rgba(255, 193, 7, 0.15),
+      rgba(0, 123, 255, 0.1));
+  transform: translateX(4px) scale(1.01);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-left: 3px solid #ffc107;
 }
 
 .playlist-body li:active {
-    transform: translateX(8px) scale(0.98);
-    transition: transform 0.1s ease;
+  transform: translateX(8px) scale(0.98);
+  transition: transform 0.1s ease;
 }
 
 .playlist-body li.current-playing {
-    background: linear-gradient(135deg,
-            rgba(40, 167, 69, 0.2),
-            rgba(32, 201, 151, 0.15)) !important;
-    border-left: 4px solid #28a745 !important;
-    box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
-    animation: pulse 2s infinite;
+  background: linear-gradient(135deg,
+      rgba(40, 167, 69, 0.2),
+      rgba(32, 201, 151, 0.15)) !important;
+  border-left: 4px solid #28a745 !important;
+  box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+  animation: pulse 2s infinite;
 }
 
 .playlist-body li.current-playing::after {
-    content: "♪";
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #28a745;
-    font-size: 16px;
-    animation: bounce 1s infinite;
+  content: "♪";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #28a745;
+  font-size: 16px;
+  animation: bounce 1s infinite;
 }
 
 @keyframes pulse {
-    0% {
-        box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
-    }
+  0% {
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+  }
 
-    50% {
-        box-shadow: 0 0 25px rgba(40, 167, 69, 0.5);
-    }
+  50% {
+    box-shadow: 0 0 25px rgba(40, 167, 69, 0.5);
+  }
 
-    100% {
-        box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
-    }
+  100% {
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+  }
 }
 
 @keyframes bounce {
 
-    0%,
-    20%,
-    50%,
-    80%,
-    100% {
-        transform: translateY(-50%);
-    }
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(-50%);
+  }
 
-    40% {
-        transform: translateY(-60%);
-    }
+  40% {
+    transform: translateY(-60%);
+  }
 
-    60% {
-        transform: translateY(-55%);
-    }
+  60% {
+    transform: translateY(-55%);
+  }
 }
 
 .media-control-bar svg,
@@ -411,131 +523,162 @@ body {
 
 
 #playPauseBtn.playing #playPauseIcon {
-    transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 
 #albumCover {
-    width: 100px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 #albumCover:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 #albumCover.loading {
-    opacity: 0.7;
-    filter: blur(1px);
+  opacity: 0.7;
+  filter: blur(1px);
 }
 
 #albumCover {
-    animation: fadeInImage 0.3s ease-in-out;
+  animation: fadeInImage 0.3s ease-in-out;
 }
 
 #albumCover:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 #albumCover.loading {
-    opacity: 0.7;
-    filter: blur(1px);
+  opacity: 0.7;
+  filter: blur(1px);
 }
 
 .playlist-popup {
-    display: none;
-    opacity: 0;
-    transform: translateY(40px);
-    transition: none;
-    height: 385px;
+  display: none;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: none;
+  height: 385px;
 }
 
 .playlist-popup.show {
-    display: block;
-    animation: slideUp 0.3s ease forwards;
+  display: block;
+  animation: slideUp 0.3s ease forwards;
 }
 
 .playlist-popup.hide {
-    display: block;
-    animation: slideDown 0.3s ease forwards;
+  display: block;
+  animation: slideDown 0.3s ease forwards;
 }
 
 .playlist-popup.show {
-    display: block;
-    animation: slideUp 0.3s ease forwards;
+  display: block;
+  animation: slideUp 0.3s ease forwards;
 }
 
 .playlist-popup.hide {
-    display: block;
-    animation: slideDown 0.3s ease forwards;
+  display: block;
+  animation: slideDown 0.3s ease forwards;
 }
 
 .playlist-body li.current-playing {
-    background: linear-gradient(135deg,
-            rgba(40, 167, 69, 0.2),
-            rgba(32, 201, 151, 0.15)) !important;
-    border-left: 4px solid #28a745 !important;
-    box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
-    animation: pulse 2s infinite;
+  background: linear-gradient(135deg,
+      rgba(40, 167, 69, 0.2),
+      rgba(32, 201, 151, 0.15)) !important;
+  border-left: 4px solid #28a745 !important;
+  box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+  animation: pulse 2s infinite;
 }
 
 .playlist-body li.current-playing::after {
-    content: "♪";
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #28a745;
-    font-size: 16px;
-    animation: bounce 1s infinite;
+  content: "♪";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #28a745;
+  font-size: 16px;
+  animation: bounce 1s infinite;
 }
 
 .playlist-body li.current-playing::after {
-    content: "♪";
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #28a745;
-    font-size: 16px;
-    animation: bounce 1s infinite;
+  content: "♪";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #28a745;
+  font-size: 16px;
+  animation: bounce 1s infinite;
 }
 
 
 @keyframes pulse {
-    0% {
-        box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
-    }
+  0% {
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+  }
 
-    50% {
-        box-shadow: 0 0 25px rgba(40, 167, 69, 0.5);
-    }
+  50% {
+    box-shadow: 0 0 25px rgba(40, 167, 69, 0.5);
+  }
 
-    100% {
-        box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
-    }
+  100% {
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
+  }
 }
 
 @keyframes bounce {
 
-    0%,
-    20%,
-    50%,
-    80%,
-    100% {
-        transform: translateY(-50%);
-    }
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(-50%);
+  }
 
-    40% {
-        transform: translateY(-60%);
-    }
+  40% {
+    transform: translateY(-60%);
+  }
 
-    60% {
-        transform: translateY(-55%);
-    }
+  60% {
+    transform: translateY(-55%);
+  }
+}
+
+
+/* Chia layout thành 3 phần */
+.left-controls {
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.center-controls {
+  flex: 1 1 auto;
+  gap: 8px;
+}
+
+.right-controls {
+  flex: 0 0 auto;
+  gap: 8px;
+  min-width: 250px;
+  max-width: 350px;
+}
+
+
+
+.media-control-bar .song-name {
+  display: inline-block;
+  min-width: 150px;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Hiện dấu "..." khi quá dài */
 }

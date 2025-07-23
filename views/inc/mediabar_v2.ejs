@@ -4,10 +4,10 @@
 <script src="/javascripts/media_controls.js"></script>
 
 <body>
+  <div class="media-control-bar fixed-bottom d-flex align-items-center">
 
-  <div class="media-control-bar fixed-bottom d-flex justify-content-between align-items-center">
-
-    <div class="d-flex align-items-center" style="gap: 8px;">
+    <!-- LEFT -->
+    <div class="left-controls d-flex align-items-center">
       <button id="backBtn" type="button" class="btn btn-outline-dark">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-rewind-circle"
           viewBox="0 0 16 16">
@@ -32,10 +32,12 @@
             d="M4.271 5.055a.5.5 0 0 1 .52.038L8 7.386V5.5a.5.5 0 0 1 .79-.407l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 8 10.5V8.614l-3.21 2.293A.5.5 0 0 1 4 10.5v-5a.5.5 0 0 1 .271-.445" />
         </svg>
       </button>
+    </div>
 
-      <!-- Shuffle, Repeat -->
+    <!-- CENTER -->
+    <div class="center-controls d-flex align-items-center flex-grow-1">
       <button id="shuffleBtn" class="btn p-0 border-0">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-shuffle"
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shuffle"
           viewBox="0 0 16 16">
           <path fill-rule="evenodd"
             d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.6 9.6 0 0 0 7.556 8a9.6 9.6 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.6 10.6 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.6 9.6 0 0 0 6.444 8a9.6 9.6 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5" />
@@ -44,24 +46,25 @@
         </svg>
       </button>
       <button title="No Repeat" id="repeatBtn" type="button" class="btn p-0 border-0">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-repeat"
+          viewBox="0 0 16 16">
           <path
-            d="M11 5.466V4H5a4 4 0 0 0-3.584 5.777.5.5 0 1 1-.896.446A5 5 0 0 1 5 3h6V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192Zm3.81.086a.5.5 0 0 1 .67.225A5 5 0 0 1 11 13H5v1.466a.25.25 0 0 1-.41.192l-2.36-1.966a.25.25 0 0 1 0-.384l2.36-1.966a.25.25 0 0 1 .41.192V12h6a4 4 0 0 0 3.585-5.777.5.5 0 0 1 .225-.67Z" />
+            d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41m-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9" />
+          <path fill-rule="evenodd"
+            d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5 5 0 0 0 8 3M3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9z" />
         </svg>
       </button>
 
-      <!-- Timeline -->
-      <span id="currentTime" class="time-display">00:00</span>
-      <div class="progress-container" style="width: 200px;">
-        <input id="seekbar" type="range" min="0" value="0" step="0.1" class="progress-bar">
-      </div>
-      <span id="endTime" class="time-display">00:00</span>
+<span id="currentTime" class="time-display">00:00</span>
+<div class="progress-container flex-grow-1">
+  <input id="seekbar" type="range" min="0" value="0" step="0.1" class="seekbar">
+</div>
+<span id="endTime" class="time-display">00:00</span>
 
-      <!-- Volume -->
+
       <div class="volume-control position-relative">
         <button id="volumeBtn" type="button" class="btn p-0 border-0" aria-expanded="false" aria-haspopup="true"
           aria-controls="volumeSliderContainer">
-          <!-- Volume SVG -->
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
             <path
               d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z" />
@@ -77,8 +80,8 @@
       </div>
     </div>
 
-    <!-- Right Section: Album + Song Info -->
-    <div class="d-flex align-items-center" style="gap: 8px;">
+    <!-- RIGHT -->
+    <div class="right-controls d-flex align-items-center">
       <img id="albumCover" src="/images/chibi.gif" alt="Album cover">
       <div>
         <p class="mb-0 song-name" data-text="mp3Name">Tên bài hát</p>
@@ -86,14 +89,12 @@
       </div>
       <div class="d-flex align-items-center ms-3 position-relative">
         <button class="btn btn-link btn-sm text-secondary p-0 me-2">
-          <!-- Heart -->
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart"
             viewBox="0 0 16 16">
             <path
               d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15" />
           </svg>
         </button>
-
         <button id="togglePlaylistBtn" class="btn btn-link btn-sm text-secondary p-0">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
             class="bi bi-music-note-list" viewBox="0 0 16 16">
@@ -104,8 +105,6 @@
               d="M0 11.5a.5.5 0 0 1 .5-.5H4a.5.5 0 0 1 0 1H.5a.5.5 0 0 1-.5-.5m0-4A.5.5 0 0 1 .5 7H8a.5.5 0 0 1 0 1H.5a.5.5 0 0 1-.5-.5m0-4A.5.5 0 0 1 .5 3H8a.5.5 0 0 1 0 1H.5a.5.5 0 0 1-.5-.5" />
           </svg>
         </button>
-
-        <!-- Playlist Popup -->
         <div id="playlistPopup" class="position-absolute rounded">
           <div class="playlist-header">
             <div class="d-flex align-items-center">
@@ -126,9 +125,6 @@
       </div>
     </div>
 
-    <!-- Hidden Audio -->
     <audio id="audioPlayer" style="display: none;"></audio>
-
   </div>
-
 </body>
