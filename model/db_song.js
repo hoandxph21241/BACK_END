@@ -8,6 +8,7 @@ var userSchema = new db.mongoose.Schema(
     userName: { type: String, require: false },
     fullName: { type: String, require: false },
     gmail: { type: String, require: false },
+    Authorization: { type: String, require: false },
     grender: { type: String, require: false },
     // Phân Quyền
     role: { type: Number, require: true, default: 1 },

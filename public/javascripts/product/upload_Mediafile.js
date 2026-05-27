@@ -15,8 +15,9 @@ function initUploadForm() {
   const progressBar = document.getElementById('uploadProgressBar');
   const alertContainer = document.getElementById('alertContainer');
   const spinner = uploadBtn.querySelector('.spinner-border');
-  const imagePreview = document.getElementById('imagePreview');
+  const previewContainer = document.getElementById('previewContainer');
   const previewImg = document.getElementById('previewImg');
+  const previewPlaceholder = previewContainer.querySelector('.preview-placeholder');
 
   // Tách wrapper để remove được
   function handleSubmitWrapper(event) {
@@ -67,6 +68,20 @@ function initUploadForm() {
   document.getElementById('mp3File').addEventListener('change', function (e) {
     const file = e.target.files[0];
     if (file) {
+      // Kiểm tra loại file
+      const allowedTypes = ['audio/mpeg', 'audio/mp4', 'audio/m4a'];
+      const allowedExtensions = ['.mp3', '.m4a'];
+      
+      const isValidType = allowedTypes.includes(file.type);
+      const isValidExtension = allowedExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+      
+      if (!isValidType && !isValidExtension) {
+        showAlert('Chỉ chấp nhận file MP3 hoặc M4A! File của bạn không hợp lệ.');
+        e.target.value = '';
+        return;
+      }
+      
+      // Kiểm tra kích thước
       const maxSize = 50 * 1024 * 1024;
       if (file.size > maxSize) {
         showAlert('File MP3 quá lớn! Vui lòng chọn file nhỏ hơn 50MB.');
@@ -83,27 +98,31 @@ function initUploadForm() {
       if (!file.type.startsWith('image/')) {
         showAlert('Vui lòng chọn file ảnh hợp lệ!');
         e.target.value = '';
-        imagePreview.style.display = 'none';
+        previewImg.style.display = 'none';
+        previewPlaceholder.style.display = 'block';
         return;
       }
 
-      const maxSize = 10 * 1024 * 1024;
+      const maxSize = 5 * 1024 * 1024;
       if (file.size > maxSize) {
-        showAlert('File ảnh quá lớn! Vui lòng chọn file nhỏ hơn 10MB.');
+        showAlert('File ảnh quá lớn! Vui lòng chọn file nhỏ hơn 5MB.');
         e.target.value = '';
-        imagePreview.style.display = 'none';
+        previewImg.style.display = 'none';
+        previewPlaceholder.style.display = 'block';
         return;
       }
 
       const reader = new FileReader();
       reader.onload = function (e) {
         previewImg.src = e.target.result;
-        imagePreview.style.display = 'block';
+        previewImg.style.display = 'block';
+        previewPlaceholder.style.display = 'none';
       };
       reader.readAsDataURL(file);
       alertContainer.innerHTML = '';
     } else {
-      imagePreview.style.display = 'none';
+      previewImg.style.display = 'none';
+      previewPlaceholder.style.display = 'block';
     }
   });
 

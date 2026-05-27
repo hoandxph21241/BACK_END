@@ -27,11 +27,11 @@
 }
 
 .nav-link:hover {
-  color: #ff5500 !important;
+  color: #ffffff !important;
 }
 
 .nav-link.active {
-  color: #ff5500 !important;
+  color: #ffffff !important;
   font-weight: 600;
 }
 
@@ -53,17 +53,6 @@
   position: relative;
 }
 
-/* Optional: thêm hiệu ứng hover cho nav links */
-.nav-link::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: rgba(255, 85, 0, 0.3);
-  transition: width 0.3s ease;
-}
 
 .nav-link:hover::before {
   width: 100%;

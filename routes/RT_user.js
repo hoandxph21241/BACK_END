@@ -17,4 +17,10 @@ router.get('/profile', check_login.yeu_cau_dang_nhap, userController.getProfile)
 router.get('/profile/edit', check_login.yeu_cau_dang_nhap, userController.getEditProfile);
 router.post('/profile/edit', check_login.yeu_cau_dang_nhap, userController.postEditProfile);
 
+// Danh sách yêu thích
+router.get('/likes', check_login.yeu_cau_dang_nhap, userController.getLikes);
+
+// Cài đặt
+router.get('/settings', check_login.yeu_cau_dang_nhap, userController.getSettings);
+
 module.exports = router;

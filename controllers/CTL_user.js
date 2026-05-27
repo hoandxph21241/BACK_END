@@ -46,3 +46,25 @@ exports.postEditProfile = async (req, res) => {
     res.status(500).send("Lỗi cập nhật hồ sơ");
   }
 };
+
+exports.getLikes = async (req, res) => {
+  try {
+    if (!req.session.userLogin) return res.redirect('/auth/signin');
+    const user = req.session.userLogin;
+    res.render('user/likes.ejs', { user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).render('error', { message: 'Lỗi tải danh sách yêu thích' });
+  }
+};
+
+exports.getSettings = async (req, res) => {
+  try {
+    if (!req.session.userLogin) return res.redirect('/auth/signin');
+    const user = req.session.userLogin;
+    res.render('user/settings.ejs', { user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).render('error', { message: 'Lỗi tải cài đặt' });
+  }
+};

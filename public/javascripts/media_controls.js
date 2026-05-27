@@ -164,21 +164,37 @@ document.addEventListener("DOMContentLoaded", () => {
     updateProgress(0, audioPlayer.duration, seekbar, currentTimeDisplay, endTimeDisplay);
   });
 
+  const progressContainer = seekbar.parentElement;
+
   // Khi người dùng kéo seekbar
   seekbar.addEventListener("input", () => {
     const seekTime = (seekbar.value / 100) * audioPlayer.duration;
     audioPlayer.currentTime = seekTime;
-    seekbar.style.setProperty('--progress', `${seekbar.value}%`);
+    const progressValue = `${seekbar.value}%`;
+    seekbar.style.setProperty('--progress', progressValue);
+    if (progressContainer) {
+      progressContainer.style.setProperty('--progress', progressValue);
+    }
   });
 }
 
 function updateProgress(currentTime, totalTime, seekbar, currentTimeDisplay, endTimeDisplay) {
-  if (!isNaN(totalTime)) {
+  if (!isNaN(totalTime) && totalTime > 0) {
     const percentage = (currentTime / totalTime) * 100;
     seekbar.value = percentage;
-    seekbar.style.setProperty('--progress', percentage + '%');
+    const progressValue = `${percentage}%`;
+    
+    // Cập nhật progress trên container
+    const progressContainer = seekbar.parentElement;
+    if (progressContainer) {
+      progressContainer.style.setProperty('--progress', progressValue);
+    }
+    
+    // Cập nhật time display
     currentTimeDisplay.textContent = formatTime(currentTime);
     endTimeDisplay.textContent = formatTime(totalTime);
+    
+    // console.log(`Progress: ${percentage.toFixed(1)}% - Time: ${formatTime(currentTime)}/${formatTime(totalTime)}`);
   }
 }
 
@@ -187,14 +203,6 @@ function formatTime(seconds) {
   const secs = Math.floor(seconds % 60);
   return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
 }
-
-
-
-  function formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
-  }
 
 
   function fetchAndPlayNextSong(mp3Id) {
@@ -862,5 +870,4 @@ function formatTime(seconds) {
 
 
 });
-
 

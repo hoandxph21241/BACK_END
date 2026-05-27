@@ -17,9 +17,9 @@
   <% let mp3data %>
     <%- include('../inc/top.ejs', { mp3List: mp3List }) %>
 
-      <iframe src="/network-popup" id="networkPopupFrame"
+      <!-- <iframe src="/network-popup" id="networkPopupFrame"
         style="position: fixed; top: 20px; right: 20px; width: 360px; height: 305px; border: none; z-index: 9999;">
-      </iframe>
+      </iframe> -->
 
       <main id="main">
       </main>
@@ -27,7 +27,8 @@
       <!-- <div class="iframe-container" id="iframeContainer">
         <iframe src="/mediabar" id="mediaPlayerFrame"></iframe>
       </div> -->
-      <div class="iframe-container" id="iframeContainer">
+      
+      <div class="iframe-container" id="iframeContainer_v2">
         <iframe src="/mediabar_v2" id="mediaPlayerFrame"></iframe>
       </div>
 
@@ -400,19 +401,154 @@
         });
 
         // Handle iframe messages
-        window.addEventListener('message', function (event) {
-          if (event.data && event.data.type === 'playlistState') {
-            window.isExpanded = event.data.isExpanded;
-            const iframeContainer = document.getElementById('iframeContainer');
-            if (iframeContainer) {
-              if (window.isExpanded) {
-                iframeContainer.style.height = '73%';
-              } else {
-                iframeContainer.style.height = '20%';
-              }
-            }
-          }
-        });
+        // window.addEventListener('message', function (event) {
+        //   if (event.data && event.data.type === 'playlistState') {
+        //     window.isExpanded = event.data.isExpanded;
+        //     const iframeContainer = document.getElementById('iframeContainer_v2');
+        //     if (iframeContainer) {
+        //       if (window.isExpanded) {
+        //         iframeContainer.style.height = '73%';
+        //       } else {
+        //         iframeContainer.style.height = '20%';
+        //       }
+        //     }
+        //   }
+        // });
+
+        // 🔍 KIỂM TRA VÀ SỬA IFRAME CONTAINER LOGIC
+
+window.addEventListener('message', function (event) {
+  if (event.data && event.data.type === 'playlistState') {
+    window.isExpanded = event.data.isExpanded;
+    
+    // 🔍 Kiểm tra container nào đang hoạt động
+    const iframeContainer_v1 = document.getElementById('iframeContainer');
+    const iframeContainer_v2 = document.getElementById('iframeContainer_v2');
+    
+    console.log('=== IFRAME CONTAINER CHECK ===');
+    console.log('v1 container exists:', !!iframeContainer_v1);
+    console.log('v2 container exists:', !!iframeContainer_v2);
+    console.log('v1 container visible:', iframeContainer_v1 ? window.getComputedStyle(iframeContainer_v1).display !== 'none' : false);
+    console.log('v2 container visible:', iframeContainer_v2 ? window.getComputedStyle(iframeContainer_v2).display !== 'none' : false);
+    
+    let activeContainer = null;
+    let containerType = '';
+    
+    // Xác định container nào đang active
+    if (iframeContainer_v2 && window.getComputedStyle(iframeContainer_v2).display !== 'none') {
+      activeContainer = iframeContainer_v2;
+      containerType = 'v2';
+    } else if (iframeContainer_v1 && window.getComputedStyle(iframeContainer_v1).display !== 'none') {
+      activeContainer = iframeContainer_v1;
+      containerType = 'v1';
+    }
+    
+    console.log('Active container:', containerType);
+    console.log('Is expanded:', window.isExpanded);
+    
+    if (activeContainer) {
+      if (containerType === 'v2') {
+        // 🎯 V2 - Sử dụng height 10% và 73%
+        if (window.isExpanded) {
+          activeContainer.style.height = '73%';
+          console.log('✅ V2 Container expanded to 73%');
+        } else {
+          activeContainer.style.height = '7%'; // ⚡ Thay đổi từ 20% thành 10%
+          console.log('✅ V2 Container collapsed to 7%');
+        }
+      } else {
+        // 🎯 V1 - Giữ logic cũ
+        if (window.isExpanded) {
+          activeContainer.style.height = '73%';
+          console.log('✅ V1 Container expanded to 73%');
+        } else {
+          activeContainer.style.height = '20%'; // ⚡ V1 giữ nguyên 20%
+          console.log('✅ V1 Container collapsed to 20%');
+        }
+      }
+      
+      // Smooth transition effect
+      activeContainer.style.transition = 'height 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+    } else {
+      console.warn('❌ Không tìm thấy active iframe container!');
+    }
+  }
+});
+
+// 🔧 DEBUG FUNCTION - Gọi trong console để kiểm tra
+window.checkIframeContainers = function() {
+  console.log('=== MANUAL IFRAME CHECK ===');
+  
+  const v1 = document.getElementById('iframeContainer');
+  const v2 = document.getElementById('iframeContainer_v2');
+  
+  console.log('V1 Container:', {
+    exists: !!v1,
+    display: v1 ? window.getComputedStyle(v1).display : 'N/A',
+    height: v1 ? window.getComputedStyle(v1).height : 'N/A',
+    innerHTML: v1 ? v1.innerHTML.substring(0, 100) + '...' : 'N/A'
+  });
+  
+  console.log('V2 Container:', {
+    exists: !!v2,
+    display: v2 ? window.getComputedStyle(v2).display : 'N/A', 
+    height: v2 ? window.getComputedStyle(v2).height : 'N/A',
+    innerHTML: v2 ? v2.innerHTML.substring(0, 100) + '...' : 'N/A'
+  });
+  
+  // Test animation
+  if (v2) {
+    console.log('🧪 Testing V2 animation...');
+    v2.style.height = '7%';
+    setTimeout(() => {
+      v2.style.height = '73%';
+      setTimeout(() => {
+        v2.style.height = '7%';
+        console.log('✅ V2 animation test completed');
+      }, 1000);
+    }, 1000);
+  }
+  
+  return { v1: !!v1, v2: !!v2 };
+};
+
+// 🎯 ENHANCED VERSION - Tự động detect và apply đúng logic
+window.smartIframeHandler = function(isExpanded) {
+  const containers = {
+    v1: document.getElementById('iframeContainer'),
+    v2: document.getElementById('iframeContainer_v2')
+  };
+  
+  // Tìm container active
+  let activeContainer = null;
+  let version = null;
+  
+  if (containers.v2 && window.getComputedStyle(containers.v2).display !== 'none') {
+    activeContainer = containers.v2;
+    version = 'v2';
+  } else if (containers.v1 && window.getComputedStyle(containers.v1).display !== 'none') {
+    activeContainer = containers.v1;
+    version = 'v1';
+  }
+  
+  if (activeContainer) {
+    const heights = {
+      v1: { collapsed: '20%', expanded: '73%' },
+      v2: { collapsed: '7%', expanded: '73%' } 
+    };
+    
+    const targetHeight = isExpanded ? heights[version].expanded : heights[version].collapsed;
+    
+    activeContainer.style.height = targetHeight;
+    activeContainer.style.transition = 'height 0.3s ease';
+    
+    console.log(`📱 ${version.toUpperCase()} container ${isExpanded ? 'expanded' : 'collapsed'} to ${targetHeight}`);
+    
+    return { success: true, version, height: targetHeight };
+  }
+  
+  return { success: false, error: 'No active container found' };
+};
 
         // Network popup message
         window.addEventListener('load', function () {

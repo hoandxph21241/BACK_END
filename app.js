@@ -43,6 +43,11 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Middleware truyền user vào views
+app.use((req, res, next) => {
+  res.locals.user = req.session.userLogin || null;
+  next();
+});
 
 app.use('/', indexRouter);
 

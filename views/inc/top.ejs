@@ -28,8 +28,8 @@
         align-items: center;
         height: 100%;
         width: 82%;
-        margin: 0 auto;     
-        padding: 0 15px;  
+        margin: 0 auto;
+        padding: 0 15px;
     }
 
     .nav-main .nav-item {
@@ -123,6 +123,7 @@
         color: #999;
         font-size: 14px;
         padding: 8px 20px;
+        padding-left: 35px;
     }
 
     .dropdown-menu .dropdown-item:hover {
@@ -200,66 +201,115 @@
 
                     <!-- User Navigation -->
                     <div class="nav-user">
-                        <!-- User Icon with Dropdown -->
-                        <li class="nav-item p-2 dropdown">
-                            <div class="text-center">
-                                <button type="button" class="btn btn-outline-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                        fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
-                                        <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
-                                        <path fill-rule="evenodd"
-                                            d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
-                                    </svg>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-dark">
-                                    <li><a class="dropdown-item nav-link d-inline p-0" href="/users/profile" data-url="/users/profile">Profile</a></li>
-                                    <li><a class="dropdown-item nav-link d-inline p-0" href="/users/likes" data-url="/users/likes">Likes</a></li>
-                                    <li><a class="dropdown-item nav-link d-inline p-0" href="/users/playlists" data-url="/users/playlists">Playlists</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item nav-link d-inline p-0" href="/users/settings" data-url="/users/settings">Settings</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item nav-link d-inline p-0" href="/auth/signout" data-url="/auth/signout">Sign out</a></li>
-                                </ul>
-                            </div>
-                        </li>
-
-
-                        <li class="nav-item p-2">
-                            <div class="text-center">
-                                <a href="" class="nav-link d-inline p-0" data-url="">
-                                    <button type="button" class="btn btn-outline-primary">
+                        <% if (user) { %>
+                            <!-- User Icon with Dropdown (Đã đăng nhập) -->
+                            <li class="nav-item p-2 dropdown">
+                                <div class="text-center">
+                                    <button type="button" class="btn btn-outline-warning dropdown-toggle"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                            fill="currentColor" class="bi bi-cloud-arrow-up-fill" viewBox="0 0 16 16">
-                                            <path
-                                                d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2m2.354 5.146a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0z" />
+                                            fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+                                            <path fill-rule="evenodd"
+                                                d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
                                         </svg>
                                     </button>
-                                </a>
-                            </div>
-                        </li>
+                                    <ul class="dropdown-menu dropdown-menu-dark px-3">
+                                        <li><a class="dropdown-item nav-link nav-load d-inline p-0"
+                                                href="/users/profile" data-url="/users/profile">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    fill="currentColor" class="bi bi-person-fill me-2"
+                                                    viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
+                                                </svg>Profile
+                                            </a></li>
+                                        <li><a class="dropdown-item nav-link nav-load d-inline p-0" href="/users/likes"
+                                                data-url="/users/likes">
 
-                        </ul>
-                    </div>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    fill="currentColor" class="bi bi-heart-fill me-2"
+                                                    viewBox="0 0 16 16">
+                                                    <path fill-rule="evenodd"
+                                                        d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314" />
+                                                </svg>Likes
+                                            </a></li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item nav-link nav-load d-inline p-0"
+                                                href="/users/settings" data-url="/users/settings">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    fill="currentColor" class="bi bi-gear-fill me-2"
+                                                    viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z" />
+                                                </svg>Settings
+                                            </a></li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item nav-link d-inline p-0" href="/auth/signout">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    fill="currentColor" class="bi bi-box-arrow-right me-2"
+                                                    viewBox="0 0 16 16">
+                                                    <path fill-rule="evenodd"
+                                                        d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z" />
+                                                    <path fill-rule="evenodd"
+                                                        d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z" />
+                                                </svg>Sign out
+                                            </a></li>
+                                    </ul>
+                                </div>
+                            </li>
 
-                    <!-- Notification Icon -->
-                    <button type="button" id="notification" class="me-3 btn btn-outline-warning"
-                        style="border: none; background-color: transparent">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                            class="bi bi-bell-fill" viewBox="0 0 16 16">
-                            <path
-                                d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901" />
-                        </svg>
-                    </button>
+                            <li class="nav-item p-2">
+                                <div class="text-center">
+                                    <a href="/product" class="nav-link d-inline p-0 nav-load" data-url="/product"
+                                        title="Upload">
+                                        <button type="button" class="btn btn-outline-primary">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                fill="currentColor" class="bi bi-cloud-arrow-up-fill"
+                                                viewBox="0 0 16 16">
+                                                <path
+                                                    d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2m2.354 5.146a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0z" />
+                                            </svg>
+                                        </button>
+                                    </a>
+                                </div>
+                            </li>
+                            <% } else { %>
+                                <!-- Login Link (Chưa đăng nhập) -->
+                                <li class="nav-item p-2">
+                                    <div class="text-center">
+                                        <a href="/auth/signin" class="btn btn-outline-warning">
+                                            <samp class="fw-bold">
+                                                Login
+                                            </samp>
+                                        </a>
+                                    </div>
+                                </li>
+                                <% } %>
 
-                    <!-- Mail Icon -->
-                    <button type="button" id="Mail" class="me-3 btn btn-outline-warning"
-                        style="border: none; background-color: transparent">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                            class="bi bi-envelope-fill" viewBox="0 0 16 16">
-                            <path
-                                d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414zM0 4.697v7.104l5.803-3.558zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586zm3.436-.586L16 11.801V4.697z" />
-                        </svg>
-                    </button>
+                                    <!-- Notification Icon -->
+                                    <button type="button" id="notification" class="me-3 btn "
+                                        style="border: none; background-color: transparent; color: rgb(255, 170, 0);">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                            fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
+                                            <path
+                                                d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901" />
+                                        </svg>
+                                    </button>
+
+                                    <!-- Mail Icon -->
+                                    <button type="button" id="mail" class="me-3 btn"
+                                        style="border: none; background-color: transparent; color: rgb(255, 170, 0);">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                            fill="currentColor" class="bi bi-envelope-fill" viewBox="0 0 16 16">
+                                            <path
+                                                d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414zM0 4.697v7.104l5.803-3.558zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586zm3.436-.586L16 11.801V4.697z" />
+                                        </svg>
+                                    </button>
             </nav>
         </div>
     </div>

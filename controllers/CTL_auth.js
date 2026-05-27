@@ -1,5 +1,6 @@
 var Model = require("../model/db_song");
 require("dotenv").config();
+const crypto = require("crypto");
 
 exports.Register = async (req, res, next) => {
   let msg = "";
@@ -29,6 +30,7 @@ exports.Register = async (req, res, next) => {
       nameAccount: req.body.nameAccount,
       namePassword: req.body.namePassword,
       role: 1,
+      Authorization: crypto.randomBytes(32).toString("hex"),
     });
     const savedUser = await user.save();
     console.log("Register Success!");

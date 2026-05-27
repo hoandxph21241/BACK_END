@@ -1,4 +1,4 @@
-/* #iframeContainer {
+#iframeContainer {
     position: fixed;
     bottom: 3%;
     right: 2%;
@@ -14,10 +14,10 @@
     border: none;
     position: relative;
     z-index: 1;
-} */
+}
 
-#iframeContainer {
-      background-color: #404040;
+#iframeContainer_v2 {
+    background-color: #404040;
     position: fixed;
     bottom: 0;
     width: 100%;
@@ -25,7 +25,7 @@
     z-index: 999;
 }
 
-#iframeContainer iframe {
+#iframeContainer_v2 iframe {
     position: fixed;
     bottom: 0;
     left: 50%;
