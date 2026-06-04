@@ -72,6 +72,10 @@ app.use("/dashboard", DashboardRounter);
 var ProductRounter = require("./routes/RT_product");
 app.use("/product", ProductRounter);
 
+// media API cho trang và iframe
+var MediaRouter = require("./routes/RT_media");
+app.use("/media", MediaRouter);
+
 
 // iframe Mediabar
 app.get('/mediabar', (req, res) => {
@@ -79,6 +83,10 @@ app.get('/mediabar', (req, res) => {
 });
 // iframe Mediabar v2
 app.get('/mediabar_v2', (req, res) => {
+  res.render('inc/mediabar_v2');
+});
+
+app.get('/mediabar_v3', (req, res) => {
   res.render('inc/mediabar_v2');
 });
 

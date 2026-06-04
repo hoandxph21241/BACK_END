@@ -36,3 +36,117 @@
     max-width: 1200px;
     transition: all 0.3s ease;
 }
+
+/* ===== PARENT VOLUME POPUP ===== */
+#parentVolumePopup {
+    position: fixed;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999 !important;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    width: 70px;
+    min-height: 180px;
+    pointer-events: all;
+    background: transparent;
+}
+
+#parentVolumePopup.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+.volume-popup-content {
+    background: linear-gradient(135deg, #333 0%, #404040 100%);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    min-width: 60px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.volume-header {
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+}
+
+.volume-header svg {
+    width: 18px;
+    height: 18px;
+    color: #ff7700;
+}
+
+.volume-slider-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 120px;
+    padding: 0;
+}
+
+.parent-volume-slider {
+    width: 4px;
+    height: 120px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(180deg, #ff7700 0%, #ff5500 100%);
+    outline: none;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    writing-mode: vertical-lr;
+    direction: rtl;
+}
+
+.parent-volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+}
+
+.parent-volume-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 2px 12px rgba(255, 119, 0, 0.5);
+}
+
+.parent-volume-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+}
+
+.parent-volume-slider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 2px 12px rgba(255, 119, 0, 0.5);
+}
+
+.volume-value {
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-align: center;
+    min-height: 16px;
+}

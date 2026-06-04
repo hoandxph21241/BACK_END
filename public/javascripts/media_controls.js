@@ -383,14 +383,60 @@ function formatTime(seconds) {
     }
   });
 
+  // ===== TAB SYNC LOGIC USING BroadcastChannel =====
+  // Lưu BroadcastChannel để gửi message giữa các tab
+  let audioSyncChannel = null;
+  try {
+    audioSyncChannel = new BroadcastChannel("audio_sync_channel");
+    console.log('✅ BroadcastChannel created for audio sync');
+    
+    // Lắng nghe message từ các tab khác
+    audioSyncChannel.addEventListener("message", (event) => {
+      console.log('[BroadcastChannel] Received message:', event.data);
+      
+      if (event.data.type === 'AUDIO_PLAY') {
+        // Tab khác đang phát - pause tab này
+        console.log('[BroadcastChannel] Tab khác đang phát, pause current tab');
+        if (isPlaying) {
+          audioPlayer.pause();
+        }
+      } else if (event.data.type === 'AUDIO_PAUSE') {
+        // Tab khác pause - không cần làm gì
+        console.log('[BroadcastChannel] Tab khác pause');
+      }
+    });
+  } catch (err) {
+    console.warn('BroadcastChannel not supported in this browser:', err);
+  }
+
   audioPlayer.addEventListener("play", () => {
     isPlaying = true;
     updatePlayPauseIcon();
+    
+    // Broadcast message để các tab khác pause
+    if (audioSyncChannel) {
+      audioSyncChannel.postMessage({
+        type: 'AUDIO_PLAY',
+        songId: currentSong?.id,
+        songName: currentSong?.name,
+        timestamp: Date.now()
+      });
+      console.log('[BroadcastChannel] Broadcasting AUDIO_PLAY');
+    }
   });
 
   audioPlayer.addEventListener("pause", () => {
     isPlaying = false;
     updatePlayPauseIcon();
+    
+    // Broadcast message để các tab khác biết
+    if (audioSyncChannel) {
+      audioSyncChannel.postMessage({
+        type: 'AUDIO_PAUSE',
+        timestamp: Date.now()
+      });
+      console.log('[BroadcastChannel] Broadcasting AUDIO_PAUSE');
+    }
   });
 
   function updatePlayPauseIcon() {
@@ -417,41 +463,128 @@ function formatTime(seconds) {
     }
   }
 
-  // Volume controls
-  const otherBtns = document.querySelectorAll(".other-btn");
+  // Volume controls - Hover based with postMessage
+  let volumeHideTimeout;
+  let volumeHovered = false;
 
-  let volumeVisible = false;
+  volumeBtn.addEventListener("mouseenter", () => {
+    clearTimeout(volumeHideTimeout);
+    volumeHovered = true;
+    const rect = volumeBtn.getBoundingClientRect();
+    console.log('iframe sending volumePopup show', rect, audioPlayer ? audioPlayer.volume : null);
 
-  volumeBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-
-    volumeVisible = !volumeVisible;
-
-    if (volumeVisible) {
-      volumeSliderContainer.style.display = "block";
-      volumeSliderContainer.classList.add("active");
-      otherBtns.forEach((btn) => (btn.style.visibility = "hidden"));
-    } else {
-      volumeSliderContainer.classList.remove("active");
-      setTimeout(() => {
-        volumeSliderContainer.style.display = "none";
-      }, 300);
-      otherBtns.forEach((btn) => (btn.style.visibility = "visible"));
-    }
+    window.parent.postMessage({
+      type: "volumePopup",
+      action: "show",
+      volume: audioPlayer ? (audioPlayer.volume * 100) : 100,
+      buttonRect: {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom
+      }
+    }, "*");
   });
 
-  document.addEventListener("click", (e) => {
-    if (
-      volumeVisible &&
-      !volumeSliderContainer.contains(e.target) &&
-      !volumeBtn.contains(e.target)
-    ) {
-      volumeVisible = false;
-      volumeSliderContainer.classList.remove("active");
-      setTimeout(() => {
-        volumeSliderContainer.style.display = "none";
-      }, 300);
-      otherBtns.forEach((btn) => (btn.style.visibility = "visible"));
+  volumeBtn.addEventListener("mouseleave", () => {
+    volumeHovered = false;
+    // Don't send hide message immediately
+    // Let parent check if cursor is still on button
+    console.log('iframe volumeBtn mouseleave - hovering=' + volumeHovered);
+  });
+
+  window.addEventListener("message", (event) => {
+    // Handle volume change from parent
+    if (event.data && event.data.type === "setVolume" && typeof event.data.value === "number") {
+      const newVolume = Math.max(0, Math.min(100, event.data.value)) / 100;
+      if (audioPlayer) {
+        audioPlayer.volume = newVolume;
+        console.log(`Volume updated from parent: ${newVolume * 100}%`);
+      }
+    }
+    
+    // Handle hover check from parent - respond if cursor still on volume button
+    if (event.data && event.data.type === "checkVolumeHover") {
+      console.log('iframe received checkVolumeHover, volumeHovered=' + volumeHovered);
+      // Send back whether volume button is still hovered
+      window.parent.postMessage({
+        type: "volumeHoverResponse",
+        isHovered: volumeHovered
+      }, "*");
+    }
+
+    // Handle keyboard controls from parent
+    if (event.data && event.data.type === "keyboardControl") {
+      const action = event.data.action;
+      console.log('[keyboardControl] Action:', action);
+
+      switch(action) {
+        case 'togglePlayPause':
+          if (audioPlayer) {
+            if (audioPlayer.paused) {
+              audioPlayer.play();
+            } else {
+              audioPlayer.pause();
+            }
+          }
+          break;
+
+        case 'nextSong':
+          if (nextBtn) nextBtn.click();
+          break;
+
+        case 'prevSong':
+          if (backBtn) backBtn.click();
+          break;
+
+        case 'seekForward':
+          if (audioPlayer) {
+            const seekAmount = event.data.seconds || 5;
+            audioPlayer.currentTime = Math.min(audioPlayer.currentTime + seekAmount, audioPlayer.duration);
+            console.log(`Seeked forward ${seekAmount}s to ${audioPlayer.currentTime}s`);
+          }
+          break;
+
+        case 'seekBackward':
+          if (audioPlayer) {
+            const seekAmount = event.data.seconds || 5;
+            audioPlayer.currentTime = Math.max(audioPlayer.currentTime - seekAmount, 0);
+            console.log(`Seeked backward ${seekAmount}s to ${audioPlayer.currentTime}s`);
+          }
+          break;
+
+        case 'toggleMute':
+          if (audioPlayer) {
+            if (audioPlayer.volume > 0) {
+              window.previousVolume = audioPlayer.volume;
+              audioPlayer.volume = 0;
+              console.log('Muted');
+            } else {
+              audioPlayer.volume = window.previousVolume || 0.5;
+              console.log('Unmuted, volume:', audioPlayer.volume);
+            }
+          }
+          break;
+
+        case 'volumeUp':
+          if (audioPlayer) {
+            const amount = (event.data.amount || 10) / 100;
+            audioPlayer.volume = Math.min(audioPlayer.volume + amount, 1);
+            console.log('Volume up:', audioPlayer.volume * 100 + '%');
+          }
+          break;
+
+        case 'volumeDown':
+          if (audioPlayer) {
+            const amount = (event.data.amount || 10) / 100;
+            audioPlayer.volume = Math.max(audioPlayer.volume - amount, 0);
+            console.log('Volume down:', audioPlayer.volume * 100 + '%');
+          }
+          break;
+
+        default:
+          console.warn('Unknown keyboard action:', action);
+      }
     }
   });
 

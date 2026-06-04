@@ -32,6 +32,23 @@
         <iframe src="/mediabar_v2" id="mediaPlayerFrame"></iframe>
       </div>
 
+      <!-- Parent Volume Popup -->
+      <div id="parentVolumePopup" class="volume-popup" style="display: none;">
+        <div class="volume-popup-content">
+          <div class="volume-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z" />
+              <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z" />
+              <path d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 1 9.025 8 3.49 3.49 0 0 1 8 10.475l.707.707zM6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z" />
+            </svg>
+          </div>
+          <div class="volume-slider-wrapper">
+            <input type="range" id="parentVolumeSlider" class="parent-volume-slider" min="0" max="100" value="100">
+          </div>
+          <div class="volume-value">100%</div>
+        </div>
+      </div>
+
       <script>
         axios.defaults.timeout = 10000;
         axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -179,6 +196,118 @@
           // Add to play history
           window.playHistoryAPI.playSong(mp3Id);
         }
+
+        // ===== VOLUME POPUP HANDLING =====
+        let volumePopupTimeout;
+        const volumePopup = document.getElementById('parentVolumePopup');
+        if (!volumePopup) {
+          console.error('❌ [FATAL] #parentVolumePopup DOM not found!');
+        } else {
+          console.log('✅ [INIT] #parentVolumePopup DOM found:', volumePopup);
+        }
+        const volumeSlider = document.getElementById('parentVolumeSlider');
+        if (!volumeSlider) {
+          console.error('❌ [FATAL] #parentVolumeSlider DOM not found!');
+        }
+        const volumeValue = volumePopup ? volumePopup.querySelector('.volume-value') : null;
+        if (!volumeValue) {
+          console.error('❌ [FATAL] .volume-value DOM not found!');
+        }
+
+        function showVolumePopup(volume, buttonRect) {
+          try {
+            clearTimeout(volumePopupTimeout);
+            console.log('[showVolumePopup] Called with volume:', volume, 'buttonRect:', buttonRect);
+
+            if (!volumePopup) {
+              console.error('[showVolumePopup] ❌ volumePopup is null or undefined!');
+              return;
+            }
+
+            // Update slider value
+            volumeSlider.value = volume;
+            volumeValue.textContent = Math.round(volume) + '%';
+
+            // Position popup relative to the parent page using iframe position
+            const iframe = document.getElementById('mediaPlayerFrame');
+            let pageLeft = buttonRect.left;
+            let pageTop = buttonRect.top;
+
+            if (iframe) {
+              const iframeRect = iframe.getBoundingClientRect();
+              pageLeft = iframeRect.left + buttonRect.left;
+              pageTop = iframeRect.top + buttonRect.top;
+            }
+
+            // Position popup ABOVE the button (not below, which goes off-screen)
+            // Popup height is ~180px, button is ~34px tall, add 10px gap
+            const popupHeight = 180;
+            const positionTop = pageTop - popupHeight - 10;
+
+            console.log('[showVolumePopup] Position: left=' + pageLeft + 'px, top=' + positionTop + 'px');
+            volumePopup.style.left = `${pageLeft}px`;
+            volumePopup.style.top = `${positionTop}px`;
+            volumePopup.style.display = 'flex';
+            volumePopup.style.visibility = 'visible';
+            volumePopup.style.opacity = '1';
+            volumePopup.classList.add('show');
+            console.log('[showVolumePopup] ✅ Style applied, display=' + volumePopup.style.display);
+          } catch (err) {
+            console.error('[showVolumePopup] ❌ Error:', err);
+          }
+        }
+
+        function hideVolumePopup() {
+          clearTimeout(volumePopupTimeout);
+          // Kiểm tra xem chuột có còn ở icon không bằng cách gửi message tới iframe
+          const iframe = document.getElementById('mediaPlayerFrame');
+          if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({
+              type: 'checkVolumeHover'
+            }, '*');
+          } else {
+            // Nếu không có iframe, ẩn popup ngay
+            volumePopup.classList.remove('show');
+            setTimeout(() => {
+              volumePopup.style.display = 'none';
+            }, 300);
+          }
+        }
+
+        // Lắng nghe phản hồi từ iframe về trạng thái hover
+        window.volumeHoverCheckListener = (shouldHidePopup) => {
+          if (shouldHidePopup) {
+            volumePopup.classList.remove('show');
+            setTimeout(() => {
+              volumePopup.style.display = 'none';
+            }, 300);
+          }
+        };
+
+        // Prevent popup from hiding when hovering over it
+        volumePopup.addEventListener('mouseenter', () => {
+          clearTimeout(volumePopupTimeout);
+          console.log('popup mouseenter - will stay visible');
+        });
+
+        volumePopup.addEventListener('mouseleave', () => {
+          console.log('popup mouseleave - checking if cursor on icon');
+          hideVolumePopup();
+        });
+
+        // Send volume change to iframe
+        volumeSlider.addEventListener('input', (e) => {
+          const newVolume = parseInt(e.target.value);
+          volumeValue.textContent = newVolume + '%';
+
+          const iframe = document.getElementById('mediaPlayerFrame');
+          if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({
+              type: 'setVolume',
+              value: newVolume
+            }, '*');
+          }
+        });
 
         // Initialize dynamic content
         function initializeDynamicContent() {
@@ -418,6 +547,30 @@
         // 🔍 KIỂM TRA VÀ SỬA IFRAME CONTAINER LOGIC
 
 window.addEventListener('message', function (event) {
+  // Handle volume popup messages
+  if (event.data && event.data.type === 'volumePopup') {
+    console.log('parent received volumePopup', event.data);
+    if (event.data.action === 'show') {
+      showVolumePopup(event.data.volume, event.data.buttonRect);
+    } else if (event.data.action === 'hide') {
+      hideVolumePopup();
+    }
+  }
+
+  // Handle volume hover check response from iframe
+  if (event.data && event.data.type === 'volumeHoverResponse') {
+    console.log('parent received volumeHoverResponse, isHovered=' + event.data.isHovered);
+    // Only hide popup if cursor is NOT on volume button
+    if (!event.data.isHovered) {
+      volumePopup.classList.remove('show');
+      setTimeout(() => {
+        volumePopup.style.display = 'none';
+      }, 300);
+    }
+    // If isHovered is true, keep popup visible (no action needed)
+  }
+
+  // Handle playlist state
   if (event.data && event.data.type === 'playlistState') {
     window.isExpanded = event.data.isExpanded;
     
@@ -598,6 +751,111 @@ window.smartIframeHandler = function(isExpanded) {
               isOnline: false,
               message: 'Mất kết nối mạng!'
             }, '*');
+          }
+        });
+
+        // ===== KEYBOARD SHORTCUTS FOR MEDIA CONTROL =====
+        document.addEventListener('keydown', (event) => {
+          const iframe = document.getElementById('mediaPlayerFrame');
+          if (!iframe || !iframe.contentWindow) {
+            console.warn('mediaPlayerFrame not found');
+            return;
+          }
+
+          // Ignore if user is typing in input/textarea
+          if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+            return;
+          }
+
+          let handled = false;
+
+          // Space: Play/Pause
+          if (event.code === 'Space') {
+            event.preventDefault();
+            iframe.contentWindow.postMessage({
+              type: 'keyboardControl',
+              action: 'togglePlayPause'
+            }, '*');
+            console.log('[Keyboard] Space pressed → togglePlayPause');
+            handled = true;
+          }
+          // Arrow Right: Next song or seek forward
+          else if (event.code === 'ArrowRight') {
+            event.preventDefault();
+            if (event.ctrlKey) {
+              // Ctrl+Right: Next song
+              iframe.contentWindow.postMessage({
+                type: 'keyboardControl',
+                action: 'nextSong'
+              }, '*');
+              console.log('[Keyboard] Ctrl+Right pressed → nextSong');
+            } else {
+              // Right arrow: Seek forward 5 seconds
+              iframe.contentWindow.postMessage({
+                type: 'keyboardControl',
+                action: 'seekForward',
+                seconds: 5
+              }, '*');
+              console.log('[Keyboard] Right pressed → seekForward 5s');
+            }
+            handled = true;
+          }
+          // Arrow Left: Previous song or seek backward
+          else if (event.code === 'ArrowLeft') {
+            event.preventDefault();
+            if (event.ctrlKey) {
+              // Ctrl+Left: Previous song
+              iframe.contentWindow.postMessage({
+                type: 'keyboardControl',
+                action: 'prevSong'
+              }, '*');
+              console.log('[Keyboard] Ctrl+Left pressed → prevSong');
+            } else {
+              // Left arrow: Seek backward 5 seconds
+              iframe.contentWindow.postMessage({
+                type: 'keyboardControl',
+                action: 'seekBackward',
+                seconds: 5
+              }, '*');
+              console.log('[Keyboard] Left pressed → seekBackward 5s');
+            }
+            handled = true;
+          }
+          // M: Mute toggle
+          else if (event.code === 'KeyM') {
+            event.preventDefault();
+            iframe.contentWindow.postMessage({
+              type: 'keyboardControl',
+              action: 'toggleMute'
+            }, '*');
+            console.log('[Keyboard] M pressed → toggleMute');
+            handled = true;
+          }
+          // Arrow Up: Volume up
+          else if (event.code === 'ArrowUp') {
+            event.preventDefault();
+            iframe.contentWindow.postMessage({
+              type: 'keyboardControl',
+              action: 'volumeUp',
+              amount: 10
+            }, '*');
+            console.log('[Keyboard] Up pressed → volumeUp');
+            handled = true;
+          }
+          // Arrow Down: Volume down
+          else if (event.code === 'ArrowDown') {
+            event.preventDefault();
+            iframe.contentWindow.postMessage({
+              type: 'keyboardControl',
+              action: 'volumeDown',
+              amount: 10
+            }, '*');
+            console.log('[Keyboard] Down pressed → volumeDown');
+            handled = true;
+          }
+
+          if (handled) {
+            console.log('[Keyboard] Shortcut handled');
           }
         });
       </script>
