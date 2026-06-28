@@ -39,11 +39,13 @@ let UserModel = db.mongoose.model("UserModel", userSchema);
 
 const MP3Schema = new db.mongoose.Schema({
   name: String,
+  artist: String,
   data: { type: Buffer },
   categoryId: { type: db.mongoose.Schema.Types.ObjectId, ref: "CategoryModel" },
   userID:{type:String, require:false},
   originalName: String,
   fileSize: Number,
+  duration: Number,
   uploadDate: {
     type: Date,
     default: Date.now

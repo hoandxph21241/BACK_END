@@ -1,4 +1,9 @@
 var db = require("../model/db_song");
+const {
+  SONG_SUMMARY_SELECT,
+  formatSongSummary,
+  formatSongSummaries,
+} = require("../utils/songResponse");
 
 const ensureNotifications = (req) => {
   if (!req.session.notifications) {
@@ -10,10 +15,12 @@ const ensureNotifications = (req) => {
 exports.GetSongs = async (req, res, next) => {
   try {
     const mp3List = await db.MP3.find()
+      .select(SONG_SUMMARY_SELECT)
       .populate({ path: "categoryId", select: "nameCategory" })
+      .sort({ uploadDate: -1 })
       .lean();
 
-    res.json({ success: true, data: mp3List });
+    res.json({ success: true, data: formatSongSummaries(mp3List) });
   } catch (err) {
     res.status(500).json({ success: false, error: "Lỗi lấy danh sách nhạc" });
   }
@@ -23,6 +30,7 @@ exports.GetSongById = async (req, res, next) => {
   try {
     const mp3Id = req.params.id;
     const song = await db.MP3.findById(mp3Id)
+      .select(SONG_SUMMARY_SELECT)
       .populate({ path: "categoryId", select: "nameCategory" })
       .lean();
 
@@ -30,7 +38,7 @@ exports.GetSongById = async (req, res, next) => {
       return res.status(404).json({ success: false, error: "Không tìm thấy bài hát" });
     }
 
-    res.json({ success: true, data: song });
+    res.json({ success: true, data: formatSongSummary(song) });
   } catch (err) {
     res.status(500).json({ success: false, error: "Lỗi lấy thông tin bài hát" });
   }

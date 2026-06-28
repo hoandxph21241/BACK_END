@@ -1,4 +1,9 @@
 var db = require("../model/db_song");
+const {
+  SONG_SUMMARY_SELECT,
+  formatSongSummary,
+  formatSongSummaries,
+} = require("../utils/songResponse");
 
 // Thêm các hàm helper cho lịch sử phát nhạc
 const addToPlayHistory = (req, songId, songName, songImage) => {
@@ -299,8 +304,14 @@ exports.Fetch = async (req, res, next) => {
   const limit = 6;
   const offset = req.query.offset ? Number(req.query.offset) : 0;
   try {
-    const mp3List = await db.MP3.find().skip(offset).limit(limit);
-    res.json(mp3List);
+    const mp3List = await db.MP3.find()
+      .select(SONG_SUMMARY_SELECT)
+      .populate({ path: "categoryId", select: "nameCategory" })
+      .sort({ uploadDate: -1 })
+      .skip(offset)
+      .limit(limit)
+      .lean();
+    res.json(formatSongSummaries(mp3List));
   } catch (err) {
     res.status(500).json({ error: "Error fetching MP3 list" });
   }
@@ -310,7 +321,8 @@ exports.Find_ID = async (req, res, next) => {
   const id = req.params.id;
   try {
     const data = await db.MP3.findById(id)
-      .select('-userID')
+      .select(SONG_SUMMARY_SELECT)
+      .populate({ path: "categoryId", select: "nameCategory" })
       .lean();
 
     console.log("Router Find_ID:", {
@@ -318,7 +330,7 @@ exports.Find_ID = async (req, res, next) => {
       image: data?.image?.url || 'No image',
     });
 
-    res.status(200).json(data);
+    res.status(200).json(formatSongSummary(data));
   } catch (error) {
     console.error("Error in Find_ID:", error);
     res.status(500).json({ error: "Error data" });
@@ -330,10 +342,11 @@ exports.GetSongsByCategory = async (req, res, next) => {
   try {
     console.log(categoryId);
     const songs = await db.MP3.find({ categoryId: categoryId }) 
-      .select('_id name image')
+      .select(SONG_SUMMARY_SELECT)
+      .populate({ path: "categoryId", select: "nameCategory" })
       .lean();
     console.log(songs.name);
-    res.json(songs);
+    res.json(formatSongSummaries(songs));
   } catch (error) {
     res.status(500).json({ error: "Lỗi khi lấy danh sách bài hát" });
   }

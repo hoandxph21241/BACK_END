@@ -136,7 +136,7 @@ exports.uploadFiles = upload.fields([
 
 exports.saveMP3 = async (req, res) => {
   try {
-    let { name } = req.body;
+    let { name, artist, duration } = req.body;
     const { categoryId } = req.body;
     const mp3File = req.files?.mp3File?.[0];
     const imageFile = req.files?.imageFile?.[0];
@@ -217,10 +217,12 @@ exports.saveMP3 = async (req, res) => {
 
     const newMP3 = new db.MP3({
       name: name.trim(),
+      artist: artist?.trim() || null,
       categoryId: categoryId,
       data: mp3Data,
       originalName: fixVietnameseFileName(mp3File.originalname),
       fileSize: mp3File.size,
+      duration: duration ? Number(duration) : null,
       uploadDate: new Date(),
       image: imageData
     });
@@ -245,7 +247,9 @@ exports.saveMP3 = async (req, res) => {
       data: {
         id: savedMP3._id,
         name: savedMP3.name,
+        artist: savedMP3.artist,
         categoryId: savedMP3.categoryId,
+        duration: savedMP3.duration,
         imageUrl: imageData?.url || null
       }
     });

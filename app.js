@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const cors = require('cors');
 
 //session
 var session = require('express-session')
@@ -25,6 +26,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(cors({ origin: 'http://localhost:51394' }));
 
 app.listen(() => {
   console.log(`✅ Server đang chạy tại http://localhost:3000/home`);
@@ -95,11 +97,9 @@ app.get('/network-popup', (req, res) => {
 });
 
 
-
-// //api
-// var apiRouter = require("./routes/api_Rounters");
-// app.use("/api", apiRouter);
-
+// API
+var apiRouter = require("./routes/api_Rounters");
+app.use("/api", apiRouter);
 
 app.get('/profile', (req, res) => {
   if (!req.isAuthenticated()) {
