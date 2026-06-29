@@ -1,4 +1,4 @@
-var db = require("../model/db_song");
+﻿var db = require("../model/db_song");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
@@ -6,30 +6,32 @@ const axios = require("axios");
 
 const IMGBB_API_KEY = process.env.IMGBB_API_KEY;
 const IMGBB_API_URL = process.env.IMGBB_API_URL;
+const MP3_MAX_SIZE = 50 * 1024 * 1024;
+const IMAGE_MAX_SIZE = 5 * 1024 * 1024;
 
-// Hàm fix UTF-8 encoding cho tên file tiếng Việt
+// Hàm fix UTF-8 encoding cho tiếng việt
 function fixVietnameseFileName(fileName) {
   if (!fileName) return '';
   
   try {
-    // Nếu tên file đã bị encode sai thành Latin-1, decode lại
-    if (fileName.includes('Ã') || fileName.includes('º') || fileName.includes('á»') || 
-        fileName.includes('Ã¡') || fileName.includes('Ã©') || fileName.includes('Ã­') ||
-        fileName.includes('Ã³') || fileName.includes('Ãº') || fileName.includes('Ã¢') ||
-        fileName.includes('Ãª') || fileName.includes('Ã´') || fileName.includes('Ã¢') ||
-        fileName.includes('Ä') || fileName.includes('Æ°') || fileName.includes('Æ¡')) {
-      // Decode từ Latin-1 sang UTF-8
+  // Nếu tên file đã bị encode sai thành Latin-1, decode lại
+    if (fileName.includes('Ãƒ') || fileName.includes('Âº') || fileName.includes('Ã¡Â»') || 
+        fileName.includes('ÃƒÂ¡') || fileName.includes('ÃƒÂ©') || fileName.includes('ÃƒÂ­') ||
+        fileName.includes('ÃƒÂ³') || fileName.includes('ÃƒÂº') || fileName.includes('ÃƒÂ¢') ||
+        fileName.includes('ÃƒÂª') || fileName.includes('ÃƒÂ´') || fileName.includes('ÃƒÂ¢') ||
+        fileName.includes('Ã„') || fileName.includes('Ã†Â°') || fileName.includes('Ã†Â¡')) {
+      // Decode tá»« Latin-1 sang UTF-8
       const buffer = Buffer.from(fileName, 'latin1');
       const utf8String = buffer.toString('utf8');
       return utf8String;
     }
     
-    // Nếu tên file là URL encoded
+    // Nếu tên đã URL encoded
     if (fileName.includes('%')) {
       return decodeURIComponent(fileName);
     }
     
-    // Nếu tên file đã đúng UTF-8
+    // Nếu tên đã đúng UTF-8
     return fileName;
   } catch (error) {
     console.error('Error fixing Vietnamese filename:', error);
@@ -58,16 +60,16 @@ const fileFilter = (req, file, cb) => {
     if (file.mimetype === 'audio/mpeg' || file.mimetype === 'audio/mp3') {
       cb(null, true);
     } else {
-      cb(new Error('Chỉ chấp nhận file MP3!'), false);
+      cb(new Error('Chá»‰ cháº¥p nháº­n file MP3!'), false);
     }
   } else if (file.fieldname === 'imageFile') {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Chỉ chấp nhận file ảnh!'), false);
+      cb(new Error('Chá»‰ cháº¥p nháº­n file áº£nh!'), false);
     }
   } else {
-    cb(new Error('Field không hợp lệ!'), false);
+    cb(new Error('Field khÃ´ng há»£p lá»‡!'), false);
   }
 };
 
@@ -75,7 +77,7 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 50 * 1024 * 1024
+    fileSize: MP3_MAX_SIZE
   }
 });
 
@@ -129,8 +131,150 @@ exports.Product = async (req, res, next) => {
   }
 };  
 
+function normalizeEmpty(value) {
+  if (value === undefined || value === null) return null;
+  const trimmed = String(value).trim();
+  return trimmed === '' ? null : trimmed;
+}
+
+function parseOptionalNumber(value) {
+  const normalized = normalizeEmpty(value);
+  if (normalized === null) return null;
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseOptionalDate(value) {
+  const normalized = normalizeEmpty(value);
+  if (normalized === null) return null;
+  const parsed = new Date(normalized);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function buildImageUpdate(body, existingImage) {
+  return {
+    url: normalizeEmpty(body.imageUrl),
+    display_url: normalizeEmpty(body.imageDisplayUrl),
+    delete_url: normalizeEmpty(body.imageDeleteUrl),
+    thumb: {
+      filename: normalizeEmpty(body.imageThumbFilename),
+      name: normalizeEmpty(body.imageThumbName),
+      mime: normalizeEmpty(body.imageThumbMime),
+      extension: normalizeEmpty(body.imageThumbExtension),
+      url: normalizeEmpty(body.imageThumbUrl),
+    },
+    originalName: normalizeEmpty(body.imageOriginalName) || existingImage?.originalName || null,
+  };
+}
+
+exports.EditSongsPage = async (req, res) => {
+  try {
+    const [songs, categories] = await Promise.all([
+      db.MP3.find()
+        .select('name artist categoryId userID originalName fileSize duration uploadDate image')
+        .populate({ path: 'categoryId', select: 'nameCategory' })
+        .sort({ uploadDate: -1 })
+        .lean(),
+      db.CategoryModel.find().sort({ nameCategory: 1 }).lean(),
+    ]);
+
+    res.render('product/V_update_songs.ejs', {
+      songs,
+      categories,
+      success: req.query.success || '',
+      error: req.query.error || '',
+    });
+  } catch (error) {
+    console.error('Error loading update songs page:', error);
+    res.status(500).render('error', { message: 'Unable to load songs update page' });
+  }
+};
+
+exports.UpdateSong = async (req, res) => {
+  try {
+    const song = await db.MP3.findById(req.params.id);
+    const imageFile = req.files?.imageFile?.[0];
+    if (!song) {
+      if (imageFile && fs.existsSync(imageFile.path)) {
+        fs.unlinkSync(imageFile.path);
+      }
+      return res.redirect('/product/update?error=Song%20not%20found');
+    }
+
+    const categoryId = normalizeEmpty(req.body.categoryId);
+    if (categoryId) {
+      const categoryExists = await db.CategoryModel.exists({ _id: categoryId });
+      if (!categoryExists) {
+        if (imageFile && fs.existsSync(imageFile.path)) {
+          fs.unlinkSync(imageFile.path);
+        }
+        return res.redirect('/product/update?error=Category%20not%20found');
+      }
+    }
+
+    const uploadDate = parseOptionalDate(req.body.uploadDate);
+    let imageUpdate = buildImageUpdate(req.body, song.image);
+
+    if (imageFile) {
+      if (imageFile.size > IMAGE_MAX_SIZE) {
+        if (fs.existsSync(imageFile.path)) {
+          fs.unlinkSync(imageFile.path);
+        }
+        return res.redirect('/product/update?error=Image%20must%20be%20under%205MB');
+      }
+
+      const imgbbResult = await uploadImageToImgBB(imageFile.path);
+      if (!imgbbResult.success) {
+        if (fs.existsSync(imageFile.path)) {
+          fs.unlinkSync(imageFile.path);
+        }
+        return res.redirect('/product/update?error=Image%20upload%20failed');
+      }
+
+      imageUpdate = {
+        url: imgbbResult.data.url,
+        display_url: imgbbResult.data.display_url,
+        delete_url: imgbbResult.data.delete_url,
+        thumb: imgbbResult.data.thumb,
+        originalName: fixVietnameseFileName(imageFile.originalname),
+      };
+
+      if (fs.existsSync(imageFile.path)) {
+        fs.unlinkSync(imageFile.path);
+      }
+    }
+
+    const updateData = {
+      name: normalizeEmpty(req.body.name) || song.name,
+      artist: normalizeEmpty(req.body.artist),
+      categoryId: categoryId,
+      userID: normalizeEmpty(req.body.userID),
+      originalName: normalizeEmpty(req.body.originalName),
+      fileSize: parseOptionalNumber(req.body.fileSize),
+      duration: parseOptionalNumber(req.body.duration),
+      image: imageUpdate,
+    };
+
+    if (uploadDate) {
+      updateData.uploadDate = uploadDate;
+    }
+
+    await db.MP3.findByIdAndUpdate(req.params.id, updateData, { runValidators: true });
+    res.redirect('/product/update?success=Song updated');
+  } catch (error) {
+    if (req.files?.imageFile?.[0]?.path && fs.existsSync(req.files.imageFile[0].path)) {
+      fs.unlinkSync(req.files.imageFile[0].path);
+    }
+    console.error('Error updating song:', error);
+    res.redirect('/product/update?error=Update%20failed');
+  }
+};
 exports.uploadFiles = upload.fields([
   { name: 'mp3File', maxCount: 1 },
+  { name: 'imageFile', maxCount: 1 }
+]);
+
+exports.updateImageFile = upload.fields([
   { name: 'imageFile', maxCount: 1 }
 ]);
 
@@ -148,6 +292,32 @@ exports.saveMP3 = async (req, res) => {
       return res.status(400).json({ 
         success: false, 
         error: "Vui lòng chọn file MP3!" 
+      });
+    }
+
+    if (mp3File.size > MP3_MAX_SIZE) {
+      if (mp3File && fs.existsSync(mp3File.path)) {
+        fs.unlinkSync(mp3File.path);
+      }
+      if (imageFile && fs.existsSync(imageFile.path)) {
+        fs.unlinkSync(imageFile.path);
+      }
+      return res.status(400).json({
+        success: false,
+        error: 'File MP3 qua lon! Toi da 50MB.'
+      });
+    }
+
+    if (imageFile && imageFile.size > IMAGE_MAX_SIZE) {
+      if (mp3File && fs.existsSync(mp3File.path)) {
+        fs.unlinkSync(mp3File.path);
+      }
+      if (imageFile && fs.existsSync(imageFile.path)) {
+        fs.unlinkSync(imageFile.path);
+      }
+      return res.status(400).json({
+        success: false,
+        error: 'File anh qua lon! Toi da 5MB.'
       });
     }
 
@@ -269,7 +439,7 @@ exports.saveMP3 = async (req, res) => {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({ 
         success: false, 
-        error: "File quá lớn! Tối đa 50MB." 
+        error: "File quá lớn! MP3 tối đa 50MB, ảnh tối đa 5MB." 
       });
     }
 
@@ -299,7 +469,7 @@ exports.handleMulterError = (err, req, res, next) => {
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({ 
         success: false, 
-        error: "File quá lớn! Tối đa 50MB." 
+        error: "File quá lớn! MP3 tối đa 50MB, ảnh tối đa 5MB." 
       });
     }
     return res.status(400).json({ 
@@ -317,3 +487,6 @@ exports.handleMulterError = (err, req, res, next) => {
   
   next(err);
 };
+
+
+

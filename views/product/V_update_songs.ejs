@@ -1,0 +1,158 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Update Songs</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/stylesheets/CSS_Products/update_songs.css">
+</head>
+<body>
+  <main class="update-page">
+    <div class="page-shell">
+      <div class="page-header">
+        <div>
+          <h1>Update Songs</h1>
+          <p>Edit MP3 metadata stored in MongoDB.</p>
+        </div>
+        <div class="header-actions">
+          <a class="btn btn-outline-secondary" href="/product">Upload</a>
+          <a class="btn btn-outline-primary" href="/home">Home</a>
+        </div>
+      </div>
+
+      <% if (success) { %>
+        <div class="alert alert-success"><%= success %></div>
+      <% } %>
+      <% if (error) { %>
+        <div class="alert alert-danger"><%= error %></div>
+      <% } %>
+
+      <section class="song-list">
+        <% if (!songs || songs.length === 0) { %>
+          <div class="empty-state">No songs found.</div>
+        <% } %>
+
+        <% songs.forEach(function(song) { %>
+          <% const image = song.image || {}; %>
+          <% const thumb = image.thumb || {}; %>
+          <% const imageUrl = image.url || image.display_url || thumb.url || ''; %>
+          <article class="song-editor">
+            <div class="song-summary">
+              <div class="cover-wrap">
+                <% if (imageUrl) { %>
+                  <img class="cover-preview" src="<%= imageUrl %>" alt="<%= song.name || 'Song cover' %>">
+                <% } else { %>
+                  <div class="cover-placeholder">No Image</div>
+                <% } %>
+              </div>
+              <div class="song-meta">
+                <h2><%= song.name || 'Untitled song' %></h2>
+                <p><%= song.artist || 'Unknown artist' %></p>
+                <span>ID: <%= song._id %></span>
+              </div>
+            </div>
+
+            <form method="post" action="/product/update/<%= song._id %>" class="song-form" enctype="multipart/form-data">
+              <div class="form-grid">
+                <div class="field">
+                  <label>Name</label>
+                  <input class="form-control" type="text" name="name" value="<%= song.name || '' %>" required>
+                </div>
+                <div class="field">
+                  <label>Artist</label>
+                  <input class="form-control" type="text" name="artist" value="<%= song.artist || '' %>">
+                </div>
+                <div class="field">
+                  <label>Category</label>
+                  <select class="form-select" name="categoryId">
+                    <option value="">No category</option>
+                    <% categories.forEach(function(category) { %>
+                      <% const selected = song.categoryId && String(song.categoryId._id || song.categoryId) === String(category._id); %>
+                      <option value="<%= category._id %>" <%= selected ? 'selected' : '' %>><%= category.nameCategory %></option>
+                    <% }) %>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>User ID</label>
+                  <input class="form-control" type="text" name="userID" value="<%= song.userID || '' %>">
+                </div>
+                <div class="field">
+                  <label>Original Name</label>
+                  <input class="form-control" type="text" name="originalName" value="<%= song.originalName || '' %>">
+                </div>
+                <div class="field">
+                  <label>File Size</label>
+                  <input class="form-control" type="number" min="0" step="1" name="fileSize" value="<%= song.fileSize || '' %>">
+                </div>
+                <div class="field">
+                  <label>Duration (seconds)</label>
+                  <input class="form-control" type="number" min="0" step="0.01" name="duration" value="<%= song.duration || '' %>">
+                </div>
+                <div class="field">
+                  <label>Upload Date</label>
+                  <input class="form-control" type="datetime-local" name="uploadDate" value="<%= song.uploadDate ? new Date(song.uploadDate).toISOString().slice(0, 16) : '' %>">
+                </div>
+                <div class="field wide">
+                  <label>Replace Image</label>
+                  <input class="form-control update-image-input" type="file" name="imageFile" accept="image/*">
+                  <div class="form-text">Choose a new cover image, max 5MB.</div>
+                </div>
+              </div>
+
+              <details class="image-details">
+                <summary>Image fields</summary>
+                <div class="form-grid image-grid">
+                  <div class="field wide">
+                    <label>Image URL</label>
+                    <input class="form-control" type="url" name="imageUrl" value="<%= image.url || '' %>">
+                  </div>
+                  <div class="field wide">
+                    <label>Display URL</label>
+                    <input class="form-control" type="url" name="imageDisplayUrl" value="<%= image.display_url || '' %>">
+                  </div>
+                  <div class="field wide">
+                    <label>Delete URL</label>
+                    <input class="form-control" type="url" name="imageDeleteUrl" value="<%= image.delete_url || '' %>">
+                  </div>
+                  <div class="field">
+                    <label>Image Original Name</label>
+                    <input class="form-control" type="text" name="imageOriginalName" value="<%= image.originalName || '' %>">
+                  </div>
+                  <div class="field">
+                    <label>Thumb URL</label>
+                    <input class="form-control" type="url" name="imageThumbUrl" value="<%= thumb.url || '' %>">
+                  </div>
+                  <div class="field">
+                    <label>Thumb Filename</label>
+                    <input class="form-control" type="text" name="imageThumbFilename" value="<%= thumb.filename || '' %>">
+                  </div>
+                  <div class="field">
+                    <label>Thumb Name</label>
+                    <input class="form-control" type="text" name="imageThumbName" value="<%= thumb.name || '' %>">
+                  </div>
+                  <div class="field">
+                    <label>Thumb MIME</label>
+                    <input class="form-control" type="text" name="imageThumbMime" value="<%= thumb.mime || '' %>">
+                  </div>
+                  <div class="field">
+                    <label>Thumb Extension</label>
+                    <input class="form-control" type="text" name="imageThumbExtension" value="<%= thumb.extension || '' %>">
+                  </div>
+                </div>
+              </details>
+
+              <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Save Changes</button>
+              </div>
+            </form>
+          </article>
+        <% }) %>
+      </section>
+    </div>
+  </main>
+  <script src="/javascripts/product/update_songs.js"></script>
+</body>
+</html>
+
+

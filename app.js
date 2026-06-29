@@ -26,7 +26,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(cors({ origin: 'http://localhost:51394' }));
+app.use(cors({ origin: 'http://localhost:61398' }));
 
 app.listen(() => {
   console.log(`✅ Server đang chạy tại http://localhost:3000/home`);
