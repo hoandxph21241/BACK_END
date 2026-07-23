@@ -1,15 +1,19 @@
 var db = require("./db");
 var userSchema = new db.mongoose.Schema(
   {
-    userID: { type: String, require: true },
-    nameAccount: { type: String, require: true },
-    namePassword: { type: String, require: true },
-    imageAccount: { type: String, require: false },
-    userName: { type: String, require: false },
-    fullName: { type: String, require: false },
-    gmail: { type: String, require: false },
-    Authorization: { type: String, require: false },
-    grender: { type: String, require: false },
+    userID: { type: String, required: true },
+    nameAccount: { type: String, required: true },
+    namePassword: { type: String, required: true },
+    imageAccount: { type: String, required: false },
+    userName: { type: String, required: false },
+    fullName: { type: String, required: false },
+    gmail: { type: String, required: false },
+    Authorization: { type: String, required: false },
+    refreshToken: {
+      type: String,
+      default: "",
+    },
+    grender: { type: String, required: false },
     // Phân Quyền
     role: { type: Number, require: true, default: 1 },
     // OTP đổi mật khẩu
@@ -17,7 +21,7 @@ var userSchema = new db.mongoose.Schema(
   },
   {
     collection: "User",
-  }
+  },
 );
 let UserModel = db.mongoose.model("UserModel", userSchema);
 // var mp3Schema = new db.mongoose.Schema(
@@ -42,13 +46,13 @@ const MP3Schema = new db.mongoose.Schema({
   artist: String,
   data: { type: Buffer },
   categoryId: { type: db.mongoose.Schema.Types.ObjectId, ref: "CategoryModel" },
-  userID:{type:String, require:false},
+  userID: { type: String, require: false },
   originalName: String,
   fileSize: Number,
   duration: Number,
   uploadDate: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   image: {
     url: String,
@@ -59,14 +63,13 @@ const MP3Schema = new db.mongoose.Schema({
       name: String,
       mime: String,
       extension: String,
-      url: String
+      url: String,
     },
-    originalName: String
-  }
+    originalName: String,
+  },
 });
 
-const MP3 = db.mongoose.model('MP3', MP3Schema);
-
+const MP3 = db.mongoose.model("MP3", MP3Schema);
 
 // Bổ sung Table
 var CategorySchema = new db.mongoose.Schema(
@@ -78,30 +81,33 @@ var CategorySchema = new db.mongoose.Schema(
   },
   {
     collection: "Category",
-  }
+  },
 );
 let CategoryModel = db.mongoose.model("CategoryModel", CategorySchema);
 
 var PlayHistorySchema = new db.mongoose.Schema(
   {
     userID: { type: String, required: true },
-    songID: { type: db.mongoose.Schema.Types.ObjectId, ref: "MP3", required: true },
+    songID: {
+      type: db.mongoose.Schema.Types.ObjectId,
+      ref: "MP3",
+      required: true,
+    },
     playedAt: { type: Date, default: Date.now },
     songName: { type: String, required: true },
-    songImage: { type: String, required: false }
+    songImage: { type: String, required: false },
   },
   {
     collection: "PlayHistory",
-  }
+  },
 );
 // PlayHistorySchema.index({ userID: 1, playedAt: -1 });
 
 let PlayHistoryModel = db.mongoose.model("PlayHistoryModel", PlayHistorySchema);
 
-
 module.exports = {
   UserModel,
   MP3,
   CategoryModel,
-  PlayHistoryModel
+  PlayHistoryModel,
 };

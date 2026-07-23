@@ -1,32 +1,32 @@
-var db = require("../model/db_song");
+﻿var db = require("../model/db_song");
 const {
   SONG_SUMMARY_SELECT,
   formatSongSummary,
   formatSongSummaries,
 } = require("../utils/songResponse");
 
-// Thêm các hàm helper cho lịch sử phát nhạc
+// ThÃªm cÃ¡c hÃ m helper cho lá»‹ch sá»­ phÃ¡t nháº¡c
 const addToPlayHistory = (req, songId, songName, songImage) => {
   if (!req.session.playHistory) {
     req.session.playHistory = [];
   }
   
-  // Tạo object lịch sử
+  // Táº¡o object lá»‹ch sá»­
   const historyItem = {
     songId: songId,
     name: songName,
     image: songImage,
     playedAt: new Date(),
-    playedAtRelative: 'Vừa xong'
+    playedAtRelative: 'Vá»«a xong'
   };
   
-  // Loại bỏ bài hát cũ nếu đã tồn tại
+  // Loáº¡i bá» bÃ i hÃ¡t cÅ© náº¿u Ä‘Ã£ tá»“n táº¡i
   req.session.playHistory = req.session.playHistory.filter(item => item.songId !== songId);
   
-  // Thêm vào đầu danh sách
+  // ThÃªm vÃ o Ä‘áº§u danh sÃ¡ch
   req.session.playHistory.unshift(historyItem);
   
-  // Giới hạn số lượng (giữ 20 bài gần nhất)
+  // Giá»›i háº¡n sá»‘ lÆ°á»£ng (giá»¯ 20 bÃ i gáº§n nháº¥t)
   if (req.session.playHistory.length > 20) {
     req.session.playHistory = req.session.playHistory.slice(0, 20);
   }
@@ -37,7 +37,7 @@ const getPlayHistory = (req, limit = 4) => {
     return [];
   }
   
-  // Cập nhật thời gian tương đối
+  // Cáº­p nháº­t thá»i gian tÆ°Æ¡ng Ä‘á»‘i
   const now = new Date();
   return req.session.playHistory.slice(0, limit).map(item => {
     const diff = now - new Date(item.playedAt);
@@ -46,10 +46,10 @@ const getPlayHistory = (req, limit = 4) => {
     const days = Math.floor(diff / 86400000);
     
     let playedAtRelative;
-    if (minutes < 1) playedAtRelative = 'Vừa xong';
-    else if (minutes < 60) playedAtRelative = `${minutes} phút trước`;
-    else if (hours < 24) playedAtRelative = `${hours} giờ trước`;
-    else if (days < 7) playedAtRelative = `${days} ngày trước`;
+    if (minutes < 1) playedAtRelative = 'Vá»«a xong';
+    else if (minutes < 60) playedAtRelative = `${minutes} phÃºt trÆ°á»›c`;
+    else if (hours < 24) playedAtRelative = `${hours} giá» trÆ°á»›c`;
+    else if (days < 7) playedAtRelative = `${days} ngÃ y trÆ°á»›c`;
     else playedAtRelative = new Date(item.playedAt).toLocaleDateString('vi-VN');
     
     return {
@@ -68,7 +68,7 @@ exports.Home = async (req, res, next) => {
       })
       .lean();
 
-    // Lấy lịch sử phát nhạc
+    // Láº¥y lá»‹ch sá»­ phÃ¡t nháº¡c
     const historySongs = getPlayHistory(req, 4);
 
     res.render("home/Home.ejs", { 
@@ -102,7 +102,7 @@ exports.Home_pratical = async (req, res, next) => {
 
 exports.CT_Home = async (req, res, next) => {
   try {
-    // Lấy tất cả MP3 với populate category và sắp xếp
+    // Láº¥y táº¥t cáº£ MP3 vá»›i populate category vÃ  sáº¯p xáº¿p
     const mp3List = await db.MP3.find()
       .populate({
         path: "categoryId",
@@ -111,15 +111,15 @@ exports.CT_Home = async (req, res, next) => {
       .sort({ uploadDate: -1 })
       .lean();
 
-    // Lấy danh sách categories
+    // Láº¥y danh sÃ¡ch categories
     const categories = await db.CategoryModel.find()
       .sort({ nameCategory: 1 })
       .lean();
 
-    // Tạo object để group songs theo category
+    // Táº¡o object Ä‘á»ƒ group songs theo category
     const songsByCategory = {};
     
-    // Khởi tạo categories với thuộc tính cần thiết
+    // Khá»Ÿi táº¡o categories vá»›i thuá»™c tÃ­nh cáº§n thiáº¿t
     categories.forEach(category => {
       songsByCategory[category._id.toString()] = {
         name: category.nameCategory,
@@ -128,7 +128,7 @@ exports.CT_Home = async (req, res, next) => {
       };
     });
 
-    // Phân loại bài hát theo category (giới hạn 5 bài/category)
+    // PhÃ¢n loáº¡i bÃ i hÃ¡t theo category (giá»›i háº¡n 5 bÃ i/category)
     mp3List.forEach(song => {
       if (song.categoryId && song.categoryId._id) {
         const categoryId = song.categoryId._id.toString();
@@ -138,23 +138,23 @@ exports.CT_Home = async (req, res, next) => {
       }
     });
 
-    // Loại bỏ categories không có bài hát
+    // Loáº¡i bá» categories khÃ´ng cÃ³ bÃ i hÃ¡t
     Object.keys(songsByCategory).forEach(categoryId => {
       if (songsByCategory[categoryId].songs.length === 0) {
         delete songsByCategory[categoryId];
       }
     });
 
-    // Tạo top rated songs (có thể thay đổi logic này)
+    // Táº¡o top rated songs (cÃ³ thá»ƒ thay Ä‘á»•i logic nÃ y)
     const topRatedSongs = mp3List.slice(0, 5);
 
-    // Lấy thông tin user
+    // Láº¥y thÃ´ng tin user
     const user = req.session.userLogin || { fullName: 'Guest' };
     
-    // Lấy lịch sử phát nhạc
+    // Láº¥y lá»‹ch sá»­ phÃ¡t nháº¡c
     const historySongs = getPlayHistory(req, 4);
 
-    // Render với tất cả dữ liệu cần thiết
+    // Render vá»›i táº¥t cáº£ dá»¯ liá»‡u cáº§n thiáº¿t
     res.render("home/CT_Home.ejs", {
       mp3List,
       songsByCategory,
@@ -162,7 +162,7 @@ exports.CT_Home = async (req, res, next) => {
       categories,
       user,
       historySongs,
-      // Thêm helper functions nếu cần
+      // ThÃªm helper functions náº¿u cáº§n
       helpers: {
         formatDate: (date) => new Date(date).toLocaleDateString(),
         truncateString: (str, length = 50) => str.length > length ? str.substring(0, length) + '...' : str
@@ -172,7 +172,7 @@ exports.CT_Home = async (req, res, next) => {
   } catch (err) {
     console.error("Error in CT_Home:", err);
     
-    // Render với dữ liệu mặc định khi có lỗi
+    // Render vá»›i dá»¯ liá»‡u máº·c Ä‘á»‹nh khi cÃ³ lá»—i
     res.status(500).render("home/CT_Home.ejs", {
       mp3List: [],
       songsByCategory: {},
@@ -192,7 +192,7 @@ exports.CT_Home = async (req, res, next) => {
 
 exports.CT_Home_v2 = async (req, res, next) => {
   try {
-    // Lấy tất cả MP3 với populate category và sắp xếp
+    // Láº¥y táº¥t cáº£ MP3 vá»›i populate category vÃ  sáº¯p xáº¿p
     const mp3List = await db.MP3.find()
       .populate({
         path: "categoryId",
@@ -201,15 +201,15 @@ exports.CT_Home_v2 = async (req, res, next) => {
       .sort({ uploadDate: -1 })
       .lean();
 
-    // Lấy danh sách categories
+    // Láº¥y danh sÃ¡ch categories
     const categories = await db.CategoryModel.find()
       .sort({ nameCategory: 1 })
       .lean();
 
-    // Tạo object để group songs theo category
+    // Táº¡o object Ä‘á»ƒ group songs theo category
     const songsByCategory = {};
     
-    // Khởi tạo categories với thuộc tính cần thiết
+    // Khá»Ÿi táº¡o categories vá»›i thuá»™c tÃ­nh cáº§n thiáº¿t
     categories.forEach(category => {
       songsByCategory[category._id.toString()] = {
         name: category.nameCategory,
@@ -218,7 +218,7 @@ exports.CT_Home_v2 = async (req, res, next) => {
       };
     });
 
-    // Phân loại bài hát theo category (giới hạn 5 bài/category)
+    // PhÃ¢n loáº¡i bÃ i hÃ¡t theo category (giá»›i háº¡n 5 bÃ i/category)
     mp3List.forEach(song => {
       if (song.categoryId && song.categoryId._id) {
         const categoryId = song.categoryId._id.toString();
@@ -228,23 +228,23 @@ exports.CT_Home_v2 = async (req, res, next) => {
       }
     });
 
-    // Loại bỏ categories không có bài hát
+    // Loáº¡i bá» categories khÃ´ng cÃ³ bÃ i hÃ¡t
     Object.keys(songsByCategory).forEach(categoryId => {
       if (songsByCategory[categoryId].songs.length === 0) {
         delete songsByCategory[categoryId];
       }
     });
 
-    // Tạo top rated songs (có thể thay đổi logic này)
+    // Táº¡o top rated songs (cÃ³ thá»ƒ thay Ä‘á»•i logic nÃ y)
     const topRatedSongs = mp3List.slice(0, 5);
 
-    // Lấy thông tin user
+    // Láº¥y thÃ´ng tin user
     const user = req.session.userLogin || { fullName: 'Guest' };
     
-    // Lấy lịch sử phát nhạc
+    // Láº¥y lá»‹ch sá»­ phÃ¡t nháº¡c
     const historySongs = getPlayHistory(req, 4);
 
-    // Render với tất cả dữ liệu cần thiết
+    // Render vá»›i táº¥t cáº£ dá»¯ liá»‡u cáº§n thiáº¿t
     res.render("home/CT_Home_V2.ejs", {
       mp3List,
       songsByCategory,
@@ -252,7 +252,7 @@ exports.CT_Home_v2 = async (req, res, next) => {
       categories,
       user,
       historySongs,
-      // Thêm helper functions nếu cần
+      // ThÃªm helper functions náº¿u cáº§n
       helpers: {
         formatDate: (date) => new Date(date).toLocaleDateString(),
         truncateString: (str, length = 50) => str.length > length ? str.substring(0, length) + '...' : str
@@ -262,7 +262,7 @@ exports.CT_Home_v2 = async (req, res, next) => {
   } catch (err) {
     console.error("Error in CT_Home:", err);
     
-    // Render với dữ liệu mặc định khi có lỗi
+    // Render vá»›i dá»¯ liá»‡u máº·c Ä‘á»‹nh khi cÃ³ lá»—i
     res.status(500).render("home/CT_Home_V2.ejs", {
       mp3List: [],
       songsByCategory: {},
@@ -320,17 +320,36 @@ exports.Fetch = async (req, res, next) => {
 exports.Find_ID = async (req, res, next) => {
   const id = req.params.id;
   try {
-    const data = await db.MP3.findById(id)
-      .select(SONG_SUMMARY_SELECT)
+    // IMPORTANT: The media player calls this endpoint to play audio.
+    // Do not use SONG_SUMMARY_SELECT here because it excludes the MP3 Buffer field `data`.
+    const song = await db.MP3.findById(id)
+      .select("name artist image categoryId duration data")
       .populate({ path: "categoryId", select: "nameCategory" })
       .lean();
 
+    if (!song) {
+      return res.status(404).json({ error: "Song not found" });
+    }
+
     console.log("Router Find_ID:", {
-      name: data?.name,
-      image: data?.image?.url || 'No image',
+      name: song?.name,
+      hasAudioData: Boolean(song?.data),
+      image: song?.image?.url || 'No image',
     });
 
-    res.status(200).json(formatSongSummary(data));
+    const formattedSong = formatSongSummary(song);
+    res.status(200).json({
+      ...formattedSong,
+      // The frontend expects `data` to be a base64 string for data:audio/mpeg playback.
+      data: (() => {
+        if (!song.data) return null;
+        if (Buffer.isBuffer(song.data)) return song.data.toString("base64");
+        if (song.data.buffer) return Buffer.from(song.data.buffer).toString("base64");
+        if (Array.isArray(song.data.data)) return Buffer.from(song.data.data).toString("base64");
+        if (typeof song.data === "string") return song.data;
+        return null;
+      })(),
+    });
   } catch (error) {
     console.error("Error in Find_ID:", error);
     res.status(500).json({ error: "Error data" });
@@ -348,7 +367,7 @@ exports.GetSongsByCategory = async (req, res, next) => {
     console.log(songs.name);
     res.json(formatSongSummaries(songs));
   } catch (error) {
-    res.status(500).json({ error: "Lỗi khi lấy danh sách bài hát" });
+    res.status(500).json({ error: "Lá»—i khi láº¥y danh sÃ¡ch bÃ i hÃ¡t" });
   }
 };
 
@@ -437,3 +456,5 @@ exports.RemoveFromHistory = async (req, res, next) => {
     });
   }
 };
+
+

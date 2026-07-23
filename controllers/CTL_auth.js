@@ -135,8 +135,6 @@ exports.googleCallback = (req, res, next) => {
   })(req, res, next);
 };
 
-
-
 exports.SignOut = async (req, res, next) => {
   try {
     // Kiểm tra session

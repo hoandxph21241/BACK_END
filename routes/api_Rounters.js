@@ -6,6 +6,7 @@ const {
   formatSongSummary,
   formatSongSummaries,
 } = require('../utils/songResponse');
+const AuthController = require('../service/auth/AuthService');
 
 // MP3 endpoints
 router.get('/mp3', async (req, res) => {
@@ -241,5 +242,18 @@ router.post('/play-history', async (req, res) => {
     res.status(500).json({ status: 'error', message: err.message });
   }
 });
+
+
+router.post("/register", AuthController.register);
+
+router.post("/login", AuthController.login);
+
+router.post("/refresh-token", AuthController.refreshToken);
+
+router.post("/logout", AuthController.logout);
+
+router.get("/google", AuthController.googleLogin);
+
+router.get("/google/callback", AuthController.googleCallback);
 
 module.exports = router;

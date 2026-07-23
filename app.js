@@ -26,7 +26,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(cors({ origin: 'http://localhost:61398' }));
+app.use(cors({ origin: 'http://localhost:5000' }));
 
 app.listen(() => {
   console.log(`✅ Server đang chạy tại http://localhost:3000/home`);
@@ -100,6 +100,10 @@ app.get('/network-popup', (req, res) => {
 // API
 var apiRouter = require("./routes/api_Rounters");
 app.use("/api", apiRouter);
+
+
+const ApiAuthRouter = require("./routes/api_Rounters");
+app.use("/api/auth", ApiAuthRouter);
 
 app.get('/profile', (req, res) => {
   if (!req.isAuthenticated()) {

@@ -1,0 +1,222 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel='stylesheet' href='/stylesheets/home/music-card.css' />
+
+<body>
+
+
+
+  <div id="mainContent">
+  <div class="main-layout align-items-center flex-column ">
+
+    
+  <p class="text-capitalize text-center fs-7 font-monospace fw-bold">Feed</p>
+    <!-- Main Content Area -->
+    <div class="content-area col-10">
+      <% 
+      // Sử dụng dữ liệu từ controller hoặc tạo fallback
+      const displayTopRated = topRatedSongs || (mp3List ? mp3List.slice(0, 5) : []);
+      const displayCategories = songsByCategory || {};
+      %>
+      
+      <% if (mp3List && mp3List.length > 0) { %>
+        <!-- Top Rated Section -->
+        <div class="section">
+          <div class="section-header">
+            <h2 class="section-title  text-light">
+              <i class="fas fa-star top-rated-icon"></i>
+              Top Rated
+            </h2>
+            <a href="/top-rated" class="view-all-btn">
+              View All <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+          
+          <div class="scroll-container">
+            <% displayTopRated.forEach(song => { %>
+              <div class="music-card song-item" 
+                   data-id="<%= song._id %>" 
+                   data-name="<%= song.name %>" 
+                   data-category="<%= song.categoryId ? song.categoryId._id : '' %>">
+                <div class="music-thumbnail">
+                  <% if (song.image && song.image.url) { %>
+                    <img src="<%= song.image.url %>" alt="<%= song.name %>">
+                  <% } else { %>
+                    <i class="fas fa-music"></i>
+                  <% } %>
+                </div>
+                
+                <div class="music-info">
+                  <div class="music-title" title="<%= song.name %>">
+                    <%= song.name %>
+                  </div>
+                  <div class="music-category">
+                    <i class="fas fa-tag"></i>
+                    <%= song.categoryId ? song.categoryId.nameCategory : 'Unknown' %>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+        
+        <!-- Categories Sections -->
+        <% Object.keys(displayCategories).forEach((categoryId) => { 
+           const categoryData = displayCategories[categoryId];
+           if (categoryData.songs && categoryData.songs.length > 0) { %>
+      
+          <div class="section">
+            <div class="section-header">
+              <h2 class="section-title text-light">
+                <i class="fas fa-music category-icon"></i>
+                <%= categoryData.name %>
+              </h2>
+              <a href="/category/<%= categoryId %>" class="view-all-btn">
+                View All <i class="fas fa-arrow-right"></i>
+              </a>
+            </div>
+            
+            <div class="scroll-container">
+              <% categoryData.songs.forEach(song => { %>
+                <div class="music-card song-item" 
+                     data-id="<%= song._id %>" 
+                     data-name="<%= song.name %>" 
+                     data-category="<%= song.categoryId._id %>">
+                  <div class="music-thumbnail">
+                    <% if (song.image && song.image.url) { %>
+                      <img src="<%= song.image.url %>" alt="<%= song.name %>">
+                    <% } else { %>
+                      <i class="fas fa-music"></i>
+                    <% } %>
+                  </div>
+                  <div class="music-info">
+                    <div class="music-title" title="<%= song.name %>">
+                      <%= song.name %>
+                    </div>
+                    <div class="music-category">
+                      <i class="fas fa-tag"></i>
+                      <%= categoryData.name %>
+                    </div>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+          </div>
+        <% } }); %>
+        
+      <% } else { %>
+        <div class="empty-state">
+          <i class="fas fa-music"></i>
+          <h3>No Music Found</h3>
+          <p>There are no songs available at the moment.</p>
+          <a href="/product" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Upload Music
+          </a>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="sidebar-area">
+      <div class="greeting">
+        <h5>Hey, <%= user.fullName || 'Guest' %> 👋</h5>
+        <p>How are you today?</p>
+      </div>
+
+      <div class="history-section">
+        <h6>
+          <i class="fas fa-history"></i>
+          Recently Played
+        </h6>
+        <% if (historySongs && historySongs.length > 0) { %>
+          <ul class="song-history">
+            <% historySongs.slice(0, 4).forEach(song => { %>
+              <li>
+                <span class="song-title"><%= song.name %></span>
+                <small class="played-time"><%= song.playedAtRelative || 'Just now' %></small>
+              </li>
+            <% }) %>
+          </ul>
+        <% } else { %>
+          <p style="color: #6c757d; font-size: 0.85rem; margin: 0;">No recent plays</p>
+        <% } %>
+      </div>
+
+      <div class="language-section">
+        <label for="langSelect">
+          <i class="fas fa-globe"></i> Language
+        </label>
+        <select id="langSelect">
+          <option value="en">English</option>
+          <option value="vi">Tiếng Việt</option>
+          <option value="ja">日本語</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    document.querySelectorAll('.scroll-container').forEach(container => {
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+
+      container.addEventListener('mousedown', (e) => {
+        isDown = true;
+        container.style.cursor = 'grabbing';
+        startX = e.pageX - container.offsetLeft;
+        scrollLeft = container.scrollLeft;
+      });
+
+      container.addEventListener('mouseleave', () => {
+        isDown = false;
+        container.style.cursor = 'grab';
+      });
+
+      container.addEventListener('mouseup', () => {
+        isDown = false;
+        container.style.cursor = 'grab';
+      });
+
+      container.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - container.offsetLeft;
+        const walk = (x - startX) * 2;
+        container.scrollLeft = scrollLeft - walk;
+      });
+    });
+    document.querySelectorAll('.song-item').forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const mp3Id = this.dataset.id;
+        const mp3Name = this.dataset.name;
+        const categoryId = this.dataset.category;
+        
+        this.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          this.style.transform = '';
+        }, 150);
+
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({
+            type: 'songSelected',
+            mp3Id,
+            mp3Name,
+            categoryId
+          }, '*');
+        }
+        
+        console.log('Song selected:', { mp3Id, mp3Name, categoryId });
+      });
+    });
+
+    document.getElementById('langSelect').addEventListener('change', function(e) {
+      console.log('Language changed to:', e.target.value);
+    });
+  </script>
+</div>
+</body>
+</html>
