@@ -9,10 +9,18 @@ var userSchema = new db.mongoose.Schema(
     fullName: { type: String, required: false },
     gmail: { type: String, required: false },
     Authorization: { type: String, required: false },
-    refreshToken: {
-      type: String,
-      default: "",
-    },
+    // refreshToken: {
+    //   type: String,
+    //   default: "",
+    // },
+    refreshTokens: [
+      {
+        token: String,
+        device: String,
+        createdAt: Date,
+        expiresAt: Date,
+      },
+    ],
     grender: { type: String, required: false },
     // Phân Quyền
     role: { type: Number, require: true, default: 1 },

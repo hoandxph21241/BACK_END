@@ -1,0 +1,35 @@
+const { HttpStatus } = require("../constants");
+
+class ApiResponse {
+  static success(
+    res,
+    data = null,
+    message = "Success",
+    status = HttpStatus.OK,
+    meta,
+  ) {
+    const response = {
+      success: true,
+      statusCode: status,
+      message,
+      data,
+      timestamp: new Date().toISOString(),
+    };
+    if (meta) {
+      response.meta = meta;
+    }
+    return res.status(status).json(response);
+  }
+  static error(res, error) {
+    return res.status(error.status).json({
+      success: false,
+      statusCode: error.status,
+      message: error.message,
+      error: {
+        code: error.code,
+      },
+      timestamp: new Date().toISOString(),
+    });
+  }
+}
+module.exports = ApiResponse;

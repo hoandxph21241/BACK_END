@@ -60,16 +60,16 @@ const fileFilter = (req, file, cb) => {
     if (file.mimetype === 'audio/mpeg' || file.mimetype === 'audio/mp3') {
       cb(null, true);
     } else {
-      cb(new Error('Chá»‰ cháº¥p nháº­n file MP3!'), false);
+      cb(new Error('Chỉ chấp nhận file MP3!'), false);
     }
   } else if (file.fieldname === 'imageFile') {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Chá»‰ cháº¥p nháº­n file áº£nh!'), false);
+      cb(new Error('Chỉ chấp nhận file ảnh!'), false);
     }
   } else {
-    cb(new Error('Field khÃ´ng há»£p lá»‡!'), false);
+    cb(new Error('Field không hợp lệ!'), false);
   }
 };
 

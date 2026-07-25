@@ -1,17 +1,14 @@
-const Model = require("./UserService");
-const jwt = require("../jwt_service");
-const PasswordService = require("./PasswordService");
-const SessionService = require("./SessionService");
+const Model = require("../../model/db_song");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const passport = require("passport");
+const { token } = require("morgan");
 
 class AuthService {
   async register(req) {
     try {
-      let { nameAccount, namePassword, confirmPassword, fullName, gmail } =
+      const { nameAccount, namePassword, confirmPassword, fullName, gmail } =
         req.body;
-      nameAccount = nameAccount?.trim().toLowerCase();
-      gmail = gmail?.trim().toLowerCase();
       if (!nameAccount || !namePassword) {
         return {
           success: false,
@@ -24,15 +21,18 @@ class AuthService {
           message: "Password confirmation does not match.",
         };
       }
-      const exists = await UserService.findByAccount(nameAccount);
+      const exists = await Model.UserModel.findOne({
+        nameAccount,
+      });
+
       if (exists) {
         return {
           success: false,
           message: "Account already exists.",
         };
       }
-      const hashPassword = await PasswordService.hash(namePassword);
-      const user = await UserService.create({
+      const hashPassword = await bcrypt.hash(namePassword, 10);
+      const user = await Model.UserModel.create({
         userID: crypto.randomUUID(),
         nameAccount,
         namePassword: hashPassword,
@@ -57,36 +57,65 @@ class AuthService {
       };
     }
   }
+
   async login(req) {
     try {
-      let { nameAccount, namePassword } = req.body;
-      nameAccount = nameAccount.trim().toLowerCase();
+      console.log(process.env.JWT_ACCESS_EXPIRES);
+      console.log(process.env.JWT_REFRESH_EXPIRES);
+      const { nameAccount, namePassword } = req.body;
       if (!nameAccount || !namePassword) {
         return {
           success: false,
           message: "Please enter account and password.",
         };
       }
-      const user = await UserService.findByAccount(nameAccount);
+      const user = await Model.UserModel.findOne({
+        nameAccount,
+      });
       if (!user) {
         return {
           success: false,
           message: "Account does not exist.",
         };
       }
-      const isMatch = await PasswordService.compare(
-        namePassword,
-        user.namePassword,
-      );
+      const isMatch = await bcrypt.compare(namePassword, user.namePassword);
       if (!isMatch) {
         return {
           success: false,
           message: "Incorrect password.",
         };
       }
-      const accessToken = JwtService.generateAccessToken(user);
-      const refreshToken = JwtService.generateRefreshToken(user);
-      await SessionService.create(user, refreshToken, req);
+      const accessToken = jwt.sign(
+        {
+          id: user._id,
+          userID: user.userID,
+          role: user.role,
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: process.env.JWT_ACCESS_EXPIRES,
+        },
+      );
+      const refreshToken = jwt.sign(
+        {
+          id: user._id,
+          userID: user.userID,
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: process.env.JWT_REFRESH_EXPIRES,
+        },
+      );
+      user.refreshTokens = user.refreshTokens.filter(
+        (item) => item.expiresAt > new Date(),
+      );
+      user.refreshTokens.push({
+        token: refreshToken,
+        device: req.headers["user-agent"] || "Unknown Device",
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      });
+      await user.save();
       return {
         success: true,
         message: "Login successfully.",
@@ -109,6 +138,7 @@ class AuthService {
       };
     }
   }
+
   async refreshToken(req) {
     try {
       const { refreshToken } = req.body;
@@ -120,37 +150,26 @@ class AuthService {
       }
       let payload;
       try {
-        payload = JwtService.verify(refreshToken);
+        payload = jwt.verify(refreshToken, process.env.JWT_SECRET);
       } catch (err) {
         return {
           success: false,
           message: "Refresh token is invalid.",
         };
       }
-      const user = await UserService.findById(payload.id);
+      const user = await Model.UserModel.findById(payload.id);
       if (!user) {
         return {
           success: false,
           message: "User not found.",
         };
       }
-      const tokenExists = SessionService.verify(user, refreshToken);
-      if (!tokenExists) {
-        return {
-          success: false,
-          message: "Refresh token not found.",
-        };
+      const exists = user.refreshTokens.find(
+        (item) => item.token === refreshToken,
+      );
+      if (!exists) {
+        return { success: false, message: "Refresh token is invalid." };
       }
-      // Token đã hết hạn trong DB
-      if (tokenExists.expiresAt < new Date()) {
-        await SessionService.remove(user, refreshToken);
-        await user.save();
-        return {
-          success: false,
-          message: "Refresh token expired.",
-        };
-      }
-      // Chỉ sinh Access Token mới
       const accessToken = jwt.sign(
         {
           id: user._id,
@@ -162,6 +181,15 @@ class AuthService {
           expiresIn: process.env.JWT_ACCESS_EXPIRES,
         },
       );
+      const newRefreshToken = jwt.sign(
+        {
+          id: user._id,
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: process.env.JWT_EXPIRES,
+        },
+      );
       return {
         success: true,
         message: "Refresh token successfully.",
@@ -171,11 +199,11 @@ class AuthService {
     } catch (err) {
       return {
         success: false,
-
         message: err.message,
       };
     }
   }
+
   async logout(req) {
     try {
       const { refreshToken } = req.body;
@@ -194,7 +222,10 @@ class AuthService {
           message: "User not found.",
         };
       }
-      await SessionService.remove(user, refreshToken);
+      user.refreshTokens = user.refreshTokens.filter(
+        (item) => item.token !== refreshToken,
+      );
+      await user.save();
       return {
         success: true,
         message: "Logout successfully.",
@@ -206,12 +237,14 @@ class AuthService {
       };
     }
   }
+
   async googleLogin(req, res, next) {
     return passport.authenticate("google", {
       scope: ["profile", "email"],
       session: false,
     })(req, res, next);
   }
+
   async googleCallback(req) {
     try {
       const googleUser = req.user;
@@ -221,22 +254,49 @@ class AuthService {
           message: "Google authentication failed.",
         };
       }
-      let user = await UserService.findByGmail(googleUser.gmail.toLowerCase());
+      let user = await Model.UserModel.findOne({
+        gmail: googleUser.gmail,
+      });
       if (!user) {
-        user = await UserService.create({
+        user = await Model.UserModel.create({
           userID: crypto.randomUUID(),
-          nameAccount: googleUser.gmail.toLowerCase(),
-          namePassword: await PasswordService.hash(crypto.randomUUID()),
-          gmail: googleUser.gmail.toLowerCase(),
+          nameAccount: googleUser.gmail,
+          namePassword: "",
+          gmail: googleUser.gmail,
           fullName: googleUser.fullName,
           imageAccount: googleUser.imageAccount,
+          Authorization: "",
           refreshTokens: [],
           role: 1,
         });
       }
-      const accessToken = JwtService.generateAccessToken(user);
-      const refreshToken = JwtService.generateRefreshToken(user);
-      await SessionService.create(user, refreshToken, req);
+      const accessToken = jwt.sign(
+        {
+          id: user._id,
+          userID: user.userID,
+          role: user.role,
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: process.env.JWT_ACCESS_EXPIRES,
+        },
+      );
+      const refreshToken = jwt.sign(
+        {
+          id: user._id,
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: process.env.JWT_EXPIRES,
+        },
+      );
+      user.refreshTokens.push({
+        token: refreshToken,
+        device: req.headers["user-agent"] || "Google Login",
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      });
+      await user.save();
       return {
         success: true,
         message: "Google login successfully.",
@@ -259,10 +319,11 @@ class AuthService {
       };
     }
   }
+
   async profile(req) {
     try {
       const payload = req.user;
-      const user = await UserService.findById(payload.id, "-namePassword -refreshTokens");
+      const user = await Model.UserModel.findById(payload.id);
       if (!user) {
         return {
           success: false,
