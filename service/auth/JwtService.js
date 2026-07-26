@@ -1,47 +1,40 @@
 const jwt = require("jsonwebtoken");
+const { TokenType } = require("../../constants");
 
 class JwtService {
 
-    generateAccessToken(user) {
+    static sign(payload, expires) {
 
         return jwt.sign(
-            {
-                id: user._id,
-                userID: user.userID,
-                role: user.role,
-            },
+
+            payload,
+
             process.env.JWT_SECRET,
+
             {
-                expiresIn: process.env.JWT_ACCESS_EXPIRES,
+
+                expiresIn: expires,
+
             }
+
         );
 
     }
 
-    generateRefreshToken(user) {
+    static verify(token, type = TokenType.ACCESS) {
 
-        return jwt.sign(
-            {
-                id: user._id,
-                userID: user.userID,
-            },
-            process.env.JWT_SECRET,
-            {
-                expiresIn: process.env.JWT_REFRESH_EXPIRES,
-            }
-        );
+        const payload = jwt.verify(
 
-    }
-
-    verify(token) {
-
-        return jwt.verify(
             token,
+
             process.env.JWT_SECRET
+
         );
+
+        return payload;
 
     }
 
 }
 
-module.exports = new JwtService();
+module.exports = JwtService;

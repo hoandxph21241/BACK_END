@@ -1,45 +1,47 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-const cors = require('cors');
+var createError = require("http-errors");
+var express = require("express");
+var path = require("path");
+var cookieParser = require("cookie-parser");
+var logger = require("morgan");
+const cors = require("cors");
 
 //session
-var session = require('express-session')
+var session = require("express-session");
 
-const passport = require('passport');
-require('dotenv').config({ path: '../env/B_E_S.env' });
-require('./config/passport');
+const passport = require("passport");
+require("dotenv").config({ path: "../env/B_E_S.env" });
+require("./config/passport");
+const { requestLogger } = require("./middleware");
 
-var indexRouter = require('./routes/index');
-
+app.use(requestLogger);
+var indexRouter = require("./routes/index");
 
 var app = express();
 
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "ejs");
 
-app.use(logger('dev'));
+app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
-app.use(cors({ origin: 'http://localhost:5000' }));
+app.use(cors({ origin: "http://localhost:5000" }));
 
 app.listen(() => {
   console.log(`✅ Server đang chạy tại http://localhost:3000/home`);
 });
 
 //session check
-app.use(session({
-  secret: 'AAAAAAAAABBBBBBBBBCCCCCCCDDDDDDD',
-  resave: false,
-  saveUninitialized: true,
-//  cookie: { secure: true },
-}))
-
+app.use(
+  session({
+    secret: "AAAAAAAAABBBBBBBBBCCCCCCCDDDDDDD",
+    resave: false,
+    saveUninitialized: true,
+    //  cookie: { secure: true },
+  }),
+);
 
 // Passport
 app.use(passport.initialize());
@@ -51,11 +53,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/', indexRouter);
+app.use("/", indexRouter);
 
 //user
-var usersRouter = require('./routes/RT_user');
-app.use('/users', usersRouter);
+var usersRouter = require("./routes/RT_user");
+app.use("/users", usersRouter);
 
 //home
 var HomeRounter = require("./routes/RT_home");
@@ -64,7 +66,6 @@ app.use("/home", HomeRounter);
 //auth
 var AuthRounter = require("./routes/RT_auth");
 app.use("/auth", AuthRounter);
-
 
 //dashboard
 var DashboardRounter = require("./routes/RT_dashboard");
@@ -78,42 +79,38 @@ app.use("/product", ProductRounter);
 var MediaRouter = require("./routes/RT_media");
 app.use("/media", MediaRouter);
 
-
 // iframe Mediabar
-app.get('/mediabar', (req, res) => {
-  res.render('inc/mediabar');
+app.get("/mediabar", (req, res) => {
+  res.render("inc/mediabar");
 });
 // iframe Mediabar v2
-app.get('/mediabar_v2', (req, res) => {
-  res.render('inc/mediabar_v2');
+app.get("/mediabar_v2", (req, res) => {
+  res.render("inc/mediabar_v2");
 });
 
-app.get('/mediabar_v3', (req, res) => {
-  res.render('inc/mediabar_v2');
+app.get("/mediabar_v3", (req, res) => {
+  res.render("inc/mediabar_v2");
 });
 
-app.get('/network-popup', (req, res) => {
-  res.render('inc/Network');
+app.get("/network-popup", (req, res) => {
+  res.render("inc/Network");
 });
-
 
 // API
 var apiRouter = require("./routes/api_Rounters");
 app.use("/api", apiRouter);
 
-
 const ApiAuthRouter = require("./routes/api_Rounters");
 app.use("/api/auth", ApiAuthRouter);
 
-app.get('/profile', (req, res) => {
+app.get("/profile", (req, res) => {
   if (!req.isAuthenticated()) {
-    return res.redirect('/login');
+    return res.redirect("/login");
   }
   res.send(`Welcome ${req.user.displayName}`);
 });
 
-
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 app.use(function (err, req, res, next) {
@@ -131,6 +128,5 @@ app.use(function (err, req, res, next) {
     return res.render("error");
   }
 });
-
 
 module.exports = app;
