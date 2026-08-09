@@ -1,103 +1,68 @@
 const ApiResponse = require("../../utils/ApiResponse");
 
 class BaseController {
+  constructor(service, mapper) {
+    this.service = service;
+    this.mapper = mapper;
+  }
 
-    constructor(service, mapper) {
+  //------------------------------------
+  // Success
+  //------------------------------------
 
-        this.service = service;
+  success(res, data) {
+    return ApiResponse.success(res, data);
+  }
 
-        this.mapper = mapper;
+  //------------------------------------
+  // Get All
+  //------------------------------------
 
-    }
+  getAll = async (req, res) => {
+    const data = await this.service.getAll();
 
-    getAll = async (req, res) => {
+    return this.success(res, this.mapper.list(data));
+  };
 
-        const data = await this.service.getAll();
+  //------------------------------------
+  // Get By ID
+  //------------------------------------
 
-        return ApiResponse.success(
+  getById = async (req, res) => {
+    const data = await this.service.getById(req.params.id);
 
-            res,
+    return this.success(res, this.mapper.detail(data));
+  };
 
-            this.mapper.list(data)
+  //------------------------------------
+  // Create
+  //------------------------------------
 
-        );
+  create = async (req, res) => {
+    const data = await this.service.create(req.body);
 
-    };
+    return this.success(res, this.mapper.detail(data));
+  };
 
-    getById = async (req, res) => {
+  //------------------------------------
+  // Update
+  //------------------------------------
 
-        const data = await this.service.getById(
+  update = async (req, res) => {
+    const data = await this.service.update(req.params.id, req.body);
 
-            req.params.id
+    return this.success(res, this.mapper.detail(data));
+  };
 
-        );
+  //------------------------------------
+  // Delete
+  //------------------------------------
 
-        return ApiResponse.success(
+  delete = async (req, res) => {
+    await this.service.delete(req.params.id);
 
-            res,
-
-            this.mapper.detail(data)
-
-        );
-
-    };
-
-    create = async (req, res) => {
-
-        const data = await this.service.create(
-
-            req.body
-
-        );
-
-        return ApiResponse.success(
-
-            res,
-
-            this.mapper.detail(data)
-
-        );
-
-    };
-
-    update = async (req, res) => {
-
-        const data = await this.service.update(
-
-            req.params.id,
-
-            req.body
-
-        );
-
-        return ApiResponse.success(
-
-            res,
-
-            this.mapper.detail(data)
-
-        );
-
-    };
-
-    delete = async (req, res) => {
-
-        await this.service.delete(
-
-            req.params.id
-
-        );
-
-        return ApiResponse.success(
-
-            res,
-
-            null
-
-        );
-
-    };
-
+    return this.success(res, null);
+  };
 }
 
 module.exports = BaseController;

@@ -17,6 +17,7 @@ class BaseValidate{
             throw new ApiError(error);
 
         }
+        return value;
 
     }
 

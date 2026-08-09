@@ -1,155 +1,112 @@
-const BaseService = require("../../common/BaseService");
+const BaseService = require("../../../common/service/BaseService");
 
-const SongRepository = require("../../repository/SongRepository");
-const CategoryRepository = require("../../repository/CategoryRepository");
+const SongRepository = require("../repository/SongRepository");
 
-const ApiError = require("../../utils/ApiError");
-const { ErrorCode } = require("../../constants");
+const CategoryRepository = require("../../category/repository/CategoryRepository");
+
+const SongValidator = require("../validator/SongValidator");
+
+const ApiError = require("../../../utils/ApiError");
+
+const { ErrorCode } = require("../../../constants");
 
 class SongService extends BaseService {
+  constructor() {
+    super(
+      SongRepository,
 
-    constructor() {
+      ErrorCode.SONG.NOT_FOUND,
+    );
+  }
 
-        super(
+  //------------------------------------
+  // Upload Song
+  //------------------------------------
 
-            SongRepository,
+  async Upload(id, data) {
+    if (data.categoryId) {
+      const category = await CategoryRepository.findById(data.categoryId);
 
-            ErrorCode.SONG.NOT_FOUND,
-
-        );
-
+      if (!category) {
+        throw new ApiError(ErrorCode.CATEGORY.NOT_FOUND);
+      }
     }
 
-    //------------------------------------
-    // Upload Song
-    //------------------------------------
+    return super.Upload(id, data);
+  }
 
-    async upload(data) {
+  //------------------------------------
+  // Search
+  //------------------------------------
 
-        if (!data.name) {
-
-            throw new ApiError(
-                ErrorCode.SONG.NAME_REQUIRED
-            );
-
-        }
-
-        if (!data.data) {
-
-            throw new ApiError(
-                ErrorCode.SONG.FILE_REQUIRED
-            );
-
-        }
-
-        if (data.categoryId) {
-
-            const category =
-                await CategoryRepository.findById(
-                    data.categoryId
-                );
-
-            if (!category) {
-
-                throw new ApiError(
-                    ErrorCode.CATEGORY.NOT_FOUND
-                );
-
-            }
-
-        }
-
-        return this.create({
-
-            ...data,
-
-            uploadDate: new Date(),
-
-        });
-
+  async search(keyword) {
+    if (!keyword?.trim()) {
+      return [];
     }
+    return this.repository.search(keyword.trim());
+  }
 
-    //------------------------------------
-    // Search
-    //------------------------------------
+  //------------------------------------
+  // Get By Category
+  //------------------------------------
 
-    async search(keyword) {
-
-        if (!keyword?.trim()) {
-
-            return [];
-
-        }
-
-        return this.repository.search(keyword);
-
+  async getByCategory(categoryId) {
+    const category = await CategoryRepository.findById(categoryId);
+    if (!category) {
+      throw new ApiError(ErrorCode.CATEGORY.NOT_FOUND);
     }
+    return this.repository.findByCategory(categoryId);
+  }
 
-    //------------------------------------
-    // Category
-    //------------------------------------
+  //------------------------------------
+  // Newest
+  //------------------------------------
 
-    async getByCategory(categoryId) {
+  async newest(limit = 10) {
+    return this.repository.newest({}, limit);
+  }
 
-        const category =
-            await CategoryRepository.findById(
-                categoryId
-            );
+  //------------------------------------
+  // Trending
+  //------------------------------------
 
-        if (!category) {
+  async trending(limit = 10) {
+    return this.repository.trending({}, limit);
+  }
 
-            throw new ApiError(
-                ErrorCode.CATEGORY.NOT_FOUND
-            );
+  //------------------------------------
+  // Random
+  //------------------------------------
 
-        }
+  async random(limit = 10) {
+    return this.repository.random({}, limit);
+  }
 
-        return this.repository.findByCategory(
-            categoryId
-        );
+  //------------------------------------
+  // Update Song
+  //------------------------------------
 
+  async update(id, data) {
+    SongValidator.update(data);
+    //--------------------------------
+    // Check Category
+    //--------------------------------
+    if (data.categoryId) {
+      const category = await CategoryRepository.findById(data.categoryId);
+      if (!category) {
+        throw new ApiError(ErrorCode.CATEGORY.NOT_FOUND);
+      }
     }
+    return super.update(id, data);
+  }
 
-    //------------------------------------
-    // New Release
-    //------------------------------------
+  //------------------------------------
+  // Stream
+  //------------------------------------
 
-    async newest() {
-
-        return this.repository.newest();
-
-    }
-
-    //------------------------------------
-    // Trending
-    //------------------------------------
-
-    async trending() {
-
-        return this.repository.trending();
-
-    }
-
-    //------------------------------------
-    // Random
-    //------------------------------------
-
-    async random() {
-
-        return this.repository.random();
-
-    }
-
-    //------------------------------------
-    // Stream
-    //------------------------------------
-
-    async stream(id) {
-
-        return this.getById(id);
-
-    }
-
+  async stream(id) {
+    return this.getById(id);
+  }
 }
 
 module.exports = new SongService();

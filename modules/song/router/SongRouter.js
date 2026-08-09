@@ -1,28 +1,47 @@
 const express = require("express");
 const router = express.Router();
-const verifyToken = require("../middlewares/verifyToken");
 
+const SongController = require("../controller/SongController");
+const SongValidator = require("../validator/SongValidator");
+const validate = require("../../../middlewares/validate/validate");
+const { verifyAccessToken, uploadSong } = require("../../../middlewares");
 
+//------------------------------------
+// Public
+//------------------------------------
 router.get("/", SongController.getAll);
-
 router.get("/newest", SongController.newest);
-
 router.get("/trending", SongController.trending);
-
 router.get("/random", SongController.random);
-
 router.get("/search", SongController.search);
-
 router.get("/category/:categoryId", SongController.getByCategory);
-
+router.get("/:id/stream", SongController.stream);
 router.get("/:id", SongController.getById);
 
-router.post("/", verifyToken, SongController.create);
+//------------------------------------
+// Upload
+//------------------------------------
+router.post(
+  "/",
+  verifyAccessToken,
+  uploadSong,
+  validate(SongValidator.upload),
+  SongController.upload
+);
 
-router.put("/:id", verifyToken, SongController.update);
+//------------------------------------
+// Update
+//------------------------------------
+router.put(
+  "/:id",
+  verifyAccessToken,
+  validate(SongValidator.update),
+  SongController.update
+);
 
-router.delete("/:id", verifyToken, SongController.delete);
-
-router.get("/:id/stream", SongController.stream);
+//------------------------------------
+// Delete
+//------------------------------------
+router.delete("/:id", verifyAccessToken, SongController.delete);
 
 module.exports = router;

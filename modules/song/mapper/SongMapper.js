@@ -1,6 +1,14 @@
-class SongResponse {
+class SongMapper {
+
+    //------------------------------------
+    // Summary
+    //------------------------------------
 
     static summary(song) {
+
+        if (!song) {
+            return null;
+        }
 
         return {
 
@@ -18,7 +26,15 @@ class SongResponse {
 
     }
 
+    //------------------------------------
+    // Detail
+    //------------------------------------
+
     static detail(song) {
+
+        if (!song) {
+            return null;
+        }
 
         return {
 
@@ -44,7 +60,17 @@ class SongResponse {
 
     }
 
+    //------------------------------------
+    // List
+    //------------------------------------
+
     static list(songs) {
+
+        if (!Array.isArray(songs)) {
+
+            return [];
+
+        }
 
         return songs.map(
 
@@ -56,4 +82,4 @@ class SongResponse {
 
 }
 
-module.exports = SongResponse;
+module.exports = SongMapper;

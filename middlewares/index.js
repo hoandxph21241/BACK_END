@@ -1,25 +1,25 @@
-module.exports={
-    optionalAuth:require("./auth/optionalAuth"),
-    verifyAccessToken:require("./auth/verifyAccessToken"),
-    verifyRefeshToken:require("./auth/verifyRefreshToken"),
-    verifyRole:require("./auth/verifyRole"),
+module.exports = {
+  optionalAuth: require('./auth/optionalAuth'),
+  verifyAccessToken: require('./auth/verifyAccessToken'),
+  verifyRefeshToken: require('./auth/verifyRefreshToken'),
+  verifyRole: require('./auth/verifyRole'),
 
-    errorHandler:require("./error/errorHandler"),
-    notFoundHandler:require("./error/notFoundHandler"),
+  errorHandler: require('./error/errorHandler'),
+  notFoundHandler: require('./error/notFoundHandler'),
 
-    requestLogger:require("./logger/requestLogger"),
+  requestLogger: require('./logger/requestLogger'),
 
-    apiRateLimiter:require("./ratelimit/apiRateLimiter"),
-    authRateLimiter:require("./ratelimit/authRateLimiter"),
-    uploadRateLimiter:require("./ratelimit/uploadRateLimiter"),
+  apiRateLimiter: require('./ratelimit/apiRateLimiter'),
+  authRateLimiter: require('./ratelimit/authRateLimiter'),
+  uploadRateLimiter: require('./ratelimit/uploadRateLimiter'),
 
-    uploadImage:require("./upload/uploadImage"),
-    uploadSong:require("./upload/uploadSong"),
+  uploadImage: require('./upload/uploadImage'),
+  uploadSong: require('./upload/uploadSong'),
 
-    BaseValidator:require("./validate/BaseValidator"),
-    validate:require("./validate/validate"),
+  BaseValidator: require('./validate/BaseValidator'),
+  validate: require('./validate/validate'),
 
-    check_jwt:require("./check_jwt"),
-    check_login:require("./check_login"),
-    verifyToken:require("./verifyToken"),
+  check_jwt: require('./check_jwt'),
+  check_login: require('./check_login'),
+  verifyToken: require('./verifyToken')
 };
