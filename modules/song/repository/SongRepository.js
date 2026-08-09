@@ -57,7 +57,7 @@ class SongRepository extends BaseRepository {
     // Newest
     //------------------------------------
 
-    async newest(limit = 10) {
+    async newest(filter = {},limit = 10) {
 
         return this.model
 
@@ -75,7 +75,7 @@ class SongRepository extends BaseRepository {
     // Trending
     //------------------------------------
 
-    async trending(limit = 10) {
+    async trending(filter = {},limit = 10) {
 
         return this.model
 
@@ -95,7 +95,7 @@ class SongRepository extends BaseRepository {
     // Random
     //------------------------------------
 
-    async random(limit = 10) {
+    async random(filter = {},limit = 10) {
 
         return this.model.aggregate([
 

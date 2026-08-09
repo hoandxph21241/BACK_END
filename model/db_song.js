@@ -25,7 +25,18 @@ var userSchema = new db.mongoose.Schema(
     // Phân Quyền
     role: { type: Number, require: true, default: 1 },
     // OTP đổi mật khẩu
-    otp: { type: String, require: false },
+    otp: {
+      code: { type: String, required: false },
+      expiredAt: Date,
+      attempts: {
+        type: Number,
+        default: 0,
+      },
+      verified: {
+        type: Boolean,
+        default: false,
+      },
+    },
   },
   {
     collection: "User",
@@ -195,7 +206,6 @@ MP3Schema.index({
 });
 
 let MP3 = db.mongoose.model("MP3", MP3Schema);
-
 
 // Bổ sung Table
 var CategorySchema = new db.mongoose.Schema(

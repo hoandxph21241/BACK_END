@@ -11,9 +11,7 @@ var session = require("express-session");
 const passport = require("passport");
 require("dotenv").config({ path: "../env/B_E_S.env" });
 require("./config/passport");
-const { requestLogger } = require("./middleware");
 
-app.use(requestLogger);
 var indexRouter = require("./routes/index");
 
 var app = express();
@@ -26,6 +24,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+
+
+const requestLogger = require("./middlewares/logger/requestLogger");
+
+app.use(requestLogger);
+
 
 app.use(cors({ origin: "http://localhost:5000" }));
 

@@ -1,34 +1,32 @@
+const BaseService = require("../../common/BaseService");
+
 const SongRepository = require("../../repository/SongRepository");
 const CategoryRepository = require("../../repository/CategoryRepository");
 
 const ApiError = require("../../utils/ApiError");
 const { ErrorCode } = require("../../constants");
 
-class SongService {
+class SongService extends BaseService {
+
+    constructor() {
+
+        super(
+
+            SongRepository,
+
+            ErrorCode.SONG.NOT_FOUND,
+
+        );
+
+    }
 
     //------------------------------------
-    // Create
+    // Upload Song
     //------------------------------------
 
-    async create(req) {
+    async upload(data) {
 
-        const {
-            name,
-            artist,
-            categoryId,
-            userID,
-            originalName,
-            fileSize,
-            duration,
-            image,
-            data,
-        } = req.body;
-
-        //------------------------------------
-        // Validate
-        //------------------------------------
-
-        if (!name) {
+        if (!data.name) {
 
             throw new ApiError(
                 ErrorCode.SONG.NAME_REQUIRED
@@ -36,7 +34,7 @@ class SongService {
 
         }
 
-        if (!data) {
+        if (!data.data) {
 
             throw new ApiError(
                 ErrorCode.SONG.FILE_REQUIRED
@@ -44,14 +42,12 @@ class SongService {
 
         }
 
-        //------------------------------------
-        // Check Category
-        //------------------------------------
-
-        if (categoryId) {
+        if (data.categoryId) {
 
             const category =
-                await CategoryRepository.findById(categoryId);
+                await CategoryRepository.findById(
+                    data.categoryId
+                );
 
             if (!category) {
 
@@ -63,21 +59,10 @@ class SongService {
 
         }
 
-        //------------------------------------
-        // Create
-        //------------------------------------
+        return this.create({
 
-        return await SongRepository.create({
+            ...data,
 
-            name,
-            artist,
-            categoryId,
-            userID,
-            originalName,
-            fileSize,
-            duration,
-            image,
-            data,
             uploadDate: new Date(),
 
         });
@@ -85,105 +70,18 @@ class SongService {
     }
 
     //------------------------------------
-    // Get All
-    //------------------------------------
-
-    async getAll() {
-
-        return await SongRepository.find();
-
-    }
-
-    //------------------------------------
-    // Detail
-    //------------------------------------
-
-    async getById(req) {
-
-        const { id } = req.params;
-
-        const song =
-            await SongRepository.findById(id);
-
-        if (!song) {
-
-            throw new ApiError(
-                ErrorCode.SONG.NOT_FOUND
-            );
-
-        }
-
-        return song;
-
-    }
-
-    //------------------------------------
-    // Update
-    //------------------------------------
-
-    async update(req) {
-
-        const { id } = req.params;
-
-        const song =
-            await SongRepository.update(
-                id,
-                req.body,
-            );
-
-        if (!song) {
-
-            throw new ApiError(
-                ErrorCode.SONG.NOT_FOUND
-            );
-
-        }
-
-        return song;
-
-    }
-
-    //------------------------------------
-    // Delete
-    //------------------------------------
-
-    async delete(req) {
-
-        const { id } = req.params;
-
-        const song =
-            await SongRepository.delete(id);
-
-        if (!song) {
-
-            throw new ApiError(
-                ErrorCode.SONG.NOT_FOUND
-            );
-
-        }
-
-        return true;
-
-    }
-
-    //------------------------------------
     // Search
     //------------------------------------
 
-    async search(req) {
+    async search(keyword) {
 
-        const keyword =
-            req.query.keyword?.trim();
-
-        if (!keyword) {
+        if (!keyword?.trim()) {
 
             return [];
 
         }
 
-        return await SongRepository.search(
-            keyword
-        );
+        return this.repository.search(keyword);
 
     }
 
@@ -191,12 +89,12 @@ class SongService {
     // Category
     //------------------------------------
 
-    async getByCategory(req) {
-
-        const { categoryId } = req.params;
+    async getByCategory(categoryId) {
 
         const category =
-            await CategoryRepository.findById(categoryId);
+            await CategoryRepository.findById(
+                categoryId
+            );
 
         if (!category) {
 
@@ -206,7 +104,7 @@ class SongService {
 
         }
 
-        return await SongRepository.findByCategory(
+        return this.repository.findByCategory(
             categoryId
         );
 
@@ -218,7 +116,7 @@ class SongService {
 
     async newest() {
 
-        return await SongRepository.newest();
+        return this.repository.newest();
 
     }
 
@@ -228,7 +126,7 @@ class SongService {
 
     async trending() {
 
-        return await SongRepository.trending();
+        return this.repository.trending();
 
     }
 
@@ -238,7 +136,7 @@ class SongService {
 
     async random() {
 
-        return await SongRepository.random();
+        return this.repository.random();
 
     }
 
@@ -246,22 +144,9 @@ class SongService {
     // Stream
     //------------------------------------
 
-    async stream(req) {
+    async stream(id) {
 
-        const { id } = req.params;
-
-        const song =
-            await SongRepository.findById(id);
-
-        if (!song) {
-
-            throw new ApiError(
-                ErrorCode.SONG.NOT_FOUND
-            );
-
-        }
-
-        return song;
+        return this.getById(id);
 
     }
 

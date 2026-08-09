@@ -1,5 +1,5 @@
 const ApiError = require("../../utils/ApiError");
-
+const Joi = require("joi");
 class BaseValidate {
 
     static required(value, error) {
@@ -69,6 +69,22 @@ class BaseValidate {
         }
 
     }
+
+
+    rules() {
+        return {};
+    }
+    schema() {
+        return Joi.object(this.rules());
+    }
+    validate(data) {
+        return this.schema().validate(data, {
+            abortEarly: false,
+            stripUnknown: true,
+            allowUnknown: false,
+        });
+    }
+
 
 }
 

@@ -1,19 +1,27 @@
-module.exports = (Validator) => {
+const ApiError = require("../../utils/ApiError");
 
-    return (req, res, next) => {
+const { ErrorCode } = require("../../constants");
 
-        try {
+module.exports = (validator) => {
+  return (req, res, next) => {
+    const {
+      error,
 
-            Validator.validate(req);
+      value,
+    } = validator.validate(req.body);
 
-            next();
+    if (error) {
+      return next(
+        new ApiError({
+          ...ErrorCode.VALIDATION_ERROR,
 
-        } catch (err) {
+          message: error.details.map((x) => x.message).join(", "),
+        }),
+      );
+    }
 
-            next(err);
+    req.body = value;
 
-        }
-
-    };
-
+    next();
+  };
 };
