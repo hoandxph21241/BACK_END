@@ -7,13 +7,8 @@ const verifyToken = require("../../../middlewares/verifyToken");
 const router = express.Router();
 
 //------------------------------------
-// GET
+// GET - Specific routes
 //------------------------------------
-
-router.get(
-  "/",
-  CategoryController.getAll
-);
 
 router.get(
   "/search",
@@ -23,6 +18,15 @@ router.get(
 router.get(
   "/newest",
   CategoryController.newest
+);
+
+//------------------------------------
+// GET - General routes
+//------------------------------------
+
+router.get(
+  "/",
+  CategoryController.getAll
 );
 
 router.get(

@@ -102,16 +102,22 @@ app.get("/network-popup", (req, res) => {
 
 // API
 var apiRouter = require("./routes/api_Rounters");
-app.use("/api", apiRouter);
+//app.use("/api", apiRouter);
 
 const ApiAuthRouter = require("./routes/api_Rounters");
-app.use("/api/auth", ApiAuthRouter);
+//app.use("/api/auth", ApiAuthRouter);
 
 const CategoryRouter = require("./modules/category/router/CategoryRouter");
 app.use("/api/categories", CategoryRouter);
 
 const SongRouter = require("./modules/song/router/SongRouter");
 app.use("/api/songs", SongRouter);
+
+const UserRouter = require("./modules/user/router/UserRouter");
+app.use("/api/users", UserRouter);
+
+const AuthRouter = require("./modules/auth/router/AuthRouter");
+app.use("/api/auth", AuthRouter);
 
 app.get("/profile", (req, res) => {
   if (!req.isAuthenticated()) {

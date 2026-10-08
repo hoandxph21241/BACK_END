@@ -1,7 +1,17 @@
+const crypto = require("crypto");
+
 const TokenBlacklistService = require("./TokenBlacklistService");
 const JwtService = require("./JwtService");
 const PasswordService = require("./PasswordService");
+const SessionService = require("./SessionService");
+const UserService = require("../../user/service/UserService");
+const GoogleAuthService = require("./GoogleAuthService");
 
+const UserRepository = require("../../user/repository/UserRepository");
+const UserMapper = require("../mapper/UserMapper");
+
+const ApiError = require("../../../utils/ApiError");
+const { ErrorCode } = require("../../../constants");
 class AuthService {
   async login(req) {
     const { nameAccount, namePassword } = req.body;
@@ -38,7 +48,7 @@ class AuthService {
       namePassword: password,
       gmail,
       fullName,
-      role: UserRole.USER,
+      role: 1,
     });
 
     const tokens = await SessionService.createSession(user);
@@ -116,3 +126,4 @@ class AuthService {
     return SessionService.verify(token);
   }
 }
+module.exports = new AuthService();

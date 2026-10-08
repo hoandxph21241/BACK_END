@@ -1,18 +1,22 @@
 const JwtService = require("./JwtService");
-const UserRepository = require("../../repository/UserRepository");
 
 class SessionService {
-
     async createSession(user, device = "Unknown Device") {
+        if (!user || typeof user.save !== "function") {
+            throw new Error(
+                "SessionService.createSession: user must be a Mongoose document",
+            );
+        }
 
         const accessToken = JwtService.generateAccessToken(user);
-
         const refreshToken = JwtService.generateRefreshToken(user);
 
-        user.refreshTokens = user.refreshTokens.filter(
-            (item) => item.expiresAt > new Date(),
+        // Loại bỏ refresh token đã hết hạn.
+        user.refreshTokens = (user.refreshTokens || []).filter(
+            (item) => new Date(item.expiresAt) > new Date(),
         );
 
+        // Thêm refresh token mới.
         user.refreshTokens.push({
             token: refreshToken,
             device,
@@ -22,15 +26,15 @@ class SessionService {
             ),
         });
 
-        await UserRepository.save(user);
+        // Lưu trực tiếp Mongoose document.
+        await user.save();
 
         return {
             accessToken,
             refreshToken,
         };
-
     }
-
 }
 
 module.exports = new SessionService();
+

@@ -1,15 +1,10 @@
 const BaseRepository = require("../../../common/repository/BaseRepository");
-
-const { CategoryModel } = require("../../../model/db");
+const { CategoryModel } = require("../../../model/db_song");
 
 class CategoryRepository extends BaseRepository {
   constructor() {
     super(CategoryModel);
   }
-
-  //------------------------------------
-  // Search
-  //------------------------------------
 
   async search(keyword) {
     return this.model.find({
@@ -20,19 +15,9 @@ class CategoryRepository extends BaseRepository {
     });
   }
 
-  //------------------------------------
-  // Find By Category ID
-  //------------------------------------
-
   async findByCategoryID(categoryID) {
-    return this.model.findOne({
-      categoryID,
-    });
+    return this.model.findOne({ categoryID });
   }
-
-  //------------------------------------
-  // Newest
-  //------------------------------------
 
   async newest(limit = 10) {
     return this.model

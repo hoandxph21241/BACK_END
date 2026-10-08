@@ -1,7 +1,7 @@
 const crypto = require("crypto");
 
-const UserService = require("./UserService");
-const UserRepository = require("../repository/UserRepository");
+const UserService = require("../../user/service/UserService");
+const UserRepository = require("../../user/repository/UserRepository");
 
 const ApiError = require("../../../utils/ApiError");
 

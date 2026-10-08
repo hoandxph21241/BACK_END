@@ -39,6 +39,13 @@ class BaseController {
 
     return this.success(res, null);
   };
+
+  save = async (document) => {
+    if (!document) {
+      throw new Error("Document is required.");
+    }
+    return await document.save();
+  };
 }
 
 module.exports = BaseController;
