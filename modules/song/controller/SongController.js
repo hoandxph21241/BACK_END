@@ -2,11 +2,11 @@ const BaseController = require("../../../common/controller/BaseController");
 
 const SongService = require("../service/SongService");
 
-const SongResponse = require("../response/SongResponse");
+const SongMapper = require("../mapper/SongMapper");
 
 class SongController extends BaseController {
   constructor() {
-    super(SongService, SongResponse);
+    super(SongService, SongMapper);
   }
 
   //------------------------------------
@@ -16,8 +16,11 @@ class SongController extends BaseController {
   upload = async (req, res) => {
     const data = await this.service.upload({
       ...req.body,
-
-      data: req.file,
+      data: req.file.buffer,
+      originalName: req.file.originalname,
+      fileSize: req.file.size,
+      duration: req.body.duration,
+      image: req.body.image,
     });
 
     return this.success(res, this.mapper.detail(data));

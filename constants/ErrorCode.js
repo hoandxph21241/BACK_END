@@ -132,6 +132,13 @@ const ErrorCode = Object.freeze({
             message: "Song delete failed.",
         },
 
+        // Added for file validation
+        INVALID_FILE_TYPE: {
+            code: "SONG_007",
+            status: HttpStatus.BAD_REQUEST,
+            message: "Invalid song file type.",
+        },
+
     },
 
     //------------------------------------
@@ -230,6 +237,27 @@ const ErrorCode = Object.freeze({
             code: "VALIDATION_002",
             status: HttpStatus.BAD_REQUEST,
             message: "Invalid request.",
+        },
+
+        // Added for Joi validation
+        INVALID_TYPE: {
+            code: "VALIDATION_003",
+            status: HttpStatus.BAD_REQUEST,
+            message: "Invalid data type.",
+        },
+
+        // Added for invalid data format
+        INVALID_FORMAT: {
+            code: "VALIDATION_004",
+            status: HttpStatus.BAD_REQUEST,
+            message: "Invalid data format.",
+        },
+
+        // General validation error
+        FAILED: {
+            code: "VALIDATION_005",
+            status: HttpStatus.BAD_REQUEST,
+            message: "Validation failed.",
         },
 
     },

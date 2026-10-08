@@ -211,9 +211,9 @@ let MP3 = db.mongoose.model("MP3", MP3Schema);
 var CategorySchema = new db.mongoose.Schema(
   {
     categoryID: { type: String, required: true },
-    nameCategory: { type: String, require: false },
-    image: { type: String, require: false },
-    color: { type: String, require: false },
+    nameCategory: { type: String, required: false },
+    image: { type: String, required: false },
+    color: { type: String, required: false },
   },
   {
     collection: "Category",

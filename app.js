@@ -107,6 +107,12 @@ app.use("/api", apiRouter);
 const ApiAuthRouter = require("./routes/api_Rounters");
 app.use("/api/auth", ApiAuthRouter);
 
+const CategoryRouter = require("./modules/category/router/CategoryRouter");
+app.use("/api/categories", CategoryRouter);
+
+const SongRouter = require("./modules/song/router/SongRouter");
+app.use("/api/songs", SongRouter);
+
 app.get("/profile", (req, res) => {
   if (!req.isAuthenticated()) {
     return res.redirect("/login");

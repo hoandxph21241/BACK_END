@@ -4,24 +4,18 @@ const { ErrorCode } = require("../../constants");
 
 module.exports = (validator) => {
   return (req, res, next) => {
-    const {
-      error,
-
-      value,
-    } = validator.validate(req.body);
-
+    const { error,value,} = validator.validate(req.body);
     if (error) {
       return next(
         new ApiError({
-          ...ErrorCode.VALIDATION_ERROR,
-
-          message: error.details.map((x) => x.message).join(", "),
+          ...ErrorCode.VALIDATION.FAILED,
+          message: error.details.map(
+            (x) => x.message)
+            .join(", "),
         }),
       );
     }
-
     req.body = value;
-
     next();
   };
 };

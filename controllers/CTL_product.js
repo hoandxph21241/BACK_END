@@ -3,6 +3,7 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
+const crypto = require("crypto");
 
 const IMGBB_API_KEY = process.env.IMGBB_API_KEY;
 const IMGBB_API_URL = process.env.IMGBB_API_URL;
@@ -386,6 +387,7 @@ exports.saveMP3 = async (req, res) => {
     const mp3Data = fs.readFileSync(mp3File.path);
 
     const newMP3 = new db.MP3({
+      songID:crypto.randomUUID(),
       name: name.trim(),
       artist: artist?.trim() || null,
       categoryId: categoryId,
