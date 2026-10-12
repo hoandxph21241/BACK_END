@@ -1,73 +1,70 @@
-const jwt = require("jsonwebtoken");
-const Model = require("../model/db_song");
+
+const JwtService = require("../modules/auth/service/JwtService");
+const { UserModel } = require("../model/db_song");
+const ApiError = require("../utils/ApiError");
+const { ErrorCode } = require("../constants");
 
 module.exports = async (req, res, next) => {
   try {
-    //---------------------------------------
-    // Authorization Header
-    //---------------------------------------
-
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-      return res.status(401).json({
-        success: false,
-        message: "Authorization header is required.",
-      });
+      throw new ApiError(ErrorCode.AUTH.UNAUTHORIZED);
     }
 
-    //---------------------------------------
-    // Bearer Token
-    //---------------------------------------
+    const [scheme, token, ...extra] = authHeader.trim().split(/\s+/);
 
-    const token = authHeader.startsWith("Bearer ")
-      ? authHeader.substring(7)
-      : authHeader;
+    if (
+      scheme?.toLowerCase() !== "bearer" ||
+      !token ||
+      extra.length > 0
+    ) {
+      throw new ApiError(ErrorCode.AUTH.INVALID_TOKEN);
+    }
 
-    //---------------------------------------
-    // Verify JWT
-    //---------------------------------------
+    const payload = JwtService.verifyAccessToken(token);
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    if (!payload.id) {
+      throw new ApiError(ErrorCode.AUTH.INVALID_TOKEN);
+    }
 
-    //---------------------------------------
-    // Find User
-    //---------------------------------------
-
-    const user = await Model.UserModel.findById(payload.id);
+    const user = await UserModel.findById(payload.id);
 
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "User does not exist.",
-      });
+      throw new ApiError(ErrorCode.USER.NOT_FOUND);
     }
-
-    //---------------------------------------
-    // Save User
-    //---------------------------------------
 
     req.user = user;
-
-    next();
+    return next();
   } catch (err) {
-    if (err.name === "TokenExpiredError") {
-      return res.status(401).json({
+    if (
+      err instanceof ApiError ||
+      err.name === "TokenExpiredError" ||
+      err.name === "JsonWebTokenError" ||
+      err.name === "NotBeforeError"
+    ) {
+      const isExpired = err.name === "TokenExpiredError";
+      const error = err instanceof ApiError
+        ? err
+        : new ApiError(ErrorCode.AUTH.INVALID_TOKEN);
+
+      return res.status(error.status).json({
         success: false,
-        message: "Access Token expired.",
+        code: error.code,
+        message: isExpired
+          ? "Access token expired."
+          : error.message,
       });
     }
 
-    if (err.name === "JsonWebTokenError") {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid Access Token.",
-      });
-    }
+    console.error("verifyToken error:", err);
 
-    return res.status(500).json({
+    const error = new ApiError(ErrorCode.SYSTEM.INTERNAL);
+
+    return res.status(error.status).json({
       success: false,
-      message: err.message,
+      code: error.code,
+      message: error.message,
     });
   }
 };

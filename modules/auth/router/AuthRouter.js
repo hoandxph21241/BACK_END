@@ -36,11 +36,7 @@ router.post("/refresh-token", AuthController.refreshToken);
 */
 
 // Current user profile
-router.get(
-  "/profile",
-  verifyToken,
-  AuthController.profile
-);
+router.get("/profile", verifyToken, AuthController.profile);
 
 // Update current user profile
 // router.put(
@@ -50,17 +46,9 @@ router.get(
 // );
 
 // Change password
-router.put(
-  "/change-password",
-  verifyToken,
-  AuthController.changePassword
-);
+router.put("/change-password", verifyToken, AuthController.changePassword);
 
 // Logout
-router.post(
-  "/logout",
-  verifyToken,
-  AuthController.logout
-);
+router.post("/logout", verifyToken, AuthController.logout);
 
 module.exports = router;

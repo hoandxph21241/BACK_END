@@ -1,4 +1,3 @@
-
 const BaseRepository = require("../../../common/repository/BaseRepository");
 const { UserModel } = require("../../../model/db_song");
 
@@ -31,6 +30,12 @@ class UserRepository extends BaseRepository {
           ? [{ _id: identifier }]
           : []),
       ],
+    });
+  }
+
+  findByRefreshToken(refreshToken) {
+    return this.model.findOne({
+      "refreshTokens.token": refreshToken,
     });
   }
 

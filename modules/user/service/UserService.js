@@ -16,19 +16,34 @@ class UserService {
     });
   }
 
+  // async getByIdentifier(identifier) {
+  //   const { error } = UserValidator.identifier.validate(identifier);
+  //   if (error) this.validationError(error);
+  //   const user = await UserRepository.findByIdentifier(identifier);
+  //   if (!user) {
+  //     throw new ApiError(ErrorCode.USER.NOT_FOUND);
+  //   }
+  //   return user;
+  // }
+
   async getByIdentifier(identifier) {
-    const { error } = UserValidator.identifier.validate(identifier);
+  console.log("[getByIdentifier] identifier:", identifier);
+  console.log("[getByIdentifier] type:", typeof identifier);
 
-    if (error) this.validationError(error);
+  const { error, value } = UserValidator.identifier.validate(identifier);
 
-    const user = await UserRepository.findByIdentifier(identifier);
-
-    if (!user) {
-      throw new ApiError(ErrorCode.USER.NOT_FOUND);
-    }
-
-    return user;
+  if (error) {
+    this.validationError(error);
   }
+
+  const user = await UserRepository.findByIdentifier(value);
+
+  if (!user) {
+    throw new ApiError(ErrorCode.USER.NOT_FOUND);
+  }
+
+  return user;
+}
 
   async getProfile(identifier) {
     return this.getByIdentifier(identifier);

@@ -13,29 +13,80 @@ const UserMapper = require("../mapper/UserMapper");
 const ApiError = require("../../../utils/ApiError");
 const { ErrorCode } = require("../../../constants");
 class AuthService {
+  getDevice(req) {
+    return req?.headers?.["user-agent"] || "Unknown Device";
+  }
+
+  // async login(req) {
+  //   const { nameAccount, namePassword } = req.body;
+
+  //   const user = await UserRepository.findByAccount(nameAccount);
+
+  //   if (!user) throw new ApiError(ErrorCode.AUTH.ACCOUNT_NOT_FOUND);
+
+  //   const matched = await PasswordService.compare(
+  //     namePassword,
+  //     user.namePassword,
+  //   );
+
+  //   if (!matched) throw new ApiError(ErrorCode.AUTH.INVALID_PASSWORD);
+
+  //   const tokens = await SessionService.createSession(
+  //     user,
+  //     req.headers["user-agent"],
+  //   );
+
+  //   return UserMapper.toLoginResponse(user, tokens);
+  // }
+
   async login(req) {
     const { nameAccount, namePassword } = req.body;
 
     const user = await UserRepository.findByAccount(nameAccount);
 
-    if (!user) throw new ApiError(ErrorCode.AUTH.ACCOUNT_NOT_FOUND);
+    if (!user) {
+      throw new ApiError(ErrorCode.AUTH.ACCOUNT_NOT_FOUND);
+    }
 
     const matched = await PasswordService.compare(
       namePassword,
       user.namePassword,
     );
 
-    if (!matched) throw new ApiError(ErrorCode.AUTH.INVALID_PASSWORD);
+    if (!matched) {
+      throw new ApiError(ErrorCode.AUTH.INVALID_PASSWORD);
+    }
 
     const tokens = await SessionService.createSession(
       user,
-      req.headers["user-agent"],
+      this.getDevice(req),
     );
 
     return UserMapper.toLoginResponse(user, tokens);
   }
 
-  async register(data) {
+  // async register(data) {
+  //   const { nameAccount, namePassword, gmail, fullName } = data;
+
+  //   await UserService.checkAccountExists(nameAccount);
+
+  //   const password = await PasswordService.hash(namePassword);
+
+  //   const user = await UserService.create({
+  //     userID: crypto.randomUUID(),
+  //     nameAccount,
+  //     namePassword: password,
+  //     gmail,
+  //     fullName,
+  //     role: 1,
+  //   });
+
+  //   const tokens = await SessionService.createSession(user);
+
+  //   return UserMapper.toLoginResponse(user, tokens);
+  // }
+
+  async register(data, req) {
     const { nameAccount, namePassword, gmail, fullName } = data;
 
     await UserService.checkAccountExists(nameAccount);
@@ -51,7 +102,10 @@ class AuthService {
       role: 1,
     });
 
-    const tokens = await SessionService.createSession(user);
+    const tokens = await SessionService.createSession(
+      user,
+      this.getDevice(req),
+    );
 
     return UserMapper.toLoginResponse(user, tokens);
   }
@@ -61,16 +115,18 @@ class AuthService {
   }
 
   async logout(refreshToken) {
-    await SessionService.removeSession(refreshToken);
-    const payload = JwtService.verify(accessToken);
-    TokenBlacklistService.add(
-      accessToken,
-      payload.exp * 1000,
-    );
+    if (!refreshToken) {
+      throw new ApiError(ErrorCode.AUTH.INVALID_TOKEN);
+    }
+    const removed = await SessionService.removeSession(refreshToken);
     return {
       success: true,
+      message: removed
+        ? "Logged out successfully."
+        : "Session already removed or invalid.",
     };
   }
+
   async logoutAll(userId) {
     const user = await UserService.getById(userId);
 
@@ -79,19 +135,30 @@ class AuthService {
     await UserService.save(user);
   }
 
-  async googleCallback(profile) {
+  // async googleCallback(profile) {
+  //   const user = await GoogleAuthService.authenticate(profile);
+  //   const tokens = await SessionService.createSession(user);
+  //   return UserMapper.toLoginResponse(user, tokens);
+  // }
+
+  async googleCallback(profile, req) {
     const user = await GoogleAuthService.authenticate(profile);
-    const tokens = await SessionService.createSession(user);
+
+    const tokens = await SessionService.createSession(
+      user,
+      this.getDevice(req),
+    );
+
     return UserMapper.toLoginResponse(user, tokens);
   }
 
   async profile(userId) {
-    const user = await UserService.getById(userId);
+    const user = await UserService.getByIdentifier(userId);
     return UserMapper.toProfile(user);
   }
 
   async changePassword(userId, oldPassword, newPassword) {
-    const user = await UserService.getById(userId);
+    const user = await UserService.getByIdentifier(userId);
 
     const matched = await PasswordService.compare(
       oldPassword,

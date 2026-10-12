@@ -9,16 +9,12 @@ var userSchema = new db.mongoose.Schema(
     fullName: { type: String, required: false },
     gmail: { type: String, required: false, index: true, unique: false },
     Authorization: { type: String, required: false },
-    // refreshToken: {
-    //   type: String,
-    //   default: "",
-    // },
     refreshTokens: [
       {
-        token: String,
-        device: String,
-        createdAt: Date,
-        expiresAt: Date,
+        token: { type: String, required: true },
+        device: { type: String, default: "Unknown Device" },
+        createdAt: { type: Date, default: Date.now },
+        expiresAt: { type: Date, required: true },
       },
     ],
     grender: { type: String, required: false },
@@ -27,7 +23,7 @@ var userSchema = new db.mongoose.Schema(
     // OTP đổi mật khẩu
     otp: {
       code: { type: String, required: false },
-      expiredAt: Date,
+      expiredAt: { type: Date, required: false },
       attempts: {
         type: Number,
         default: 0,
@@ -91,24 +87,9 @@ let UserModel = db.mongoose.model("UserModel", userSchema);
 
 var MP3Schema = new db.mongoose.Schema(
   {
-    songID: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    artist: {
-      type: String,
-      required: false,
-      default: "Unknown",
-    },
-
+    songID: { type: String, required: true, unique: true, },
+    name: { type: String,required: true,trim: true, },
+    artist: { type: String,required: false, default: "Unknown", },
     album: {
       type: String,
       required: false,

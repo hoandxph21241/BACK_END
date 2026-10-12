@@ -1,3 +1,5 @@
+const ApiError = require("../../../utils/ApiError");
+const { ErrorCode } = require("../../../constants");
 const BaseController = require("../../../common/controller/BaseController");
 const AuthService = require("../service/AuthService");
 const UserMapper = require("../mapper/UserMapper");
@@ -16,25 +18,38 @@ class AuthController extends BaseController {
 
   // POST /api/auth/register
   register = async (req, res) => {
-    const data = await this.service.register(req.body);
+    const data = await this.service.register(req.body, this.getDevice(req));
 
     return this.success(res, data);
   };
 
   // POST /api/auth/refresh-token
+  // refreshToken = async (req, res) => {
+  //   const data = await this.service.refreshToken(
+  //     req.body.refreshToken
+  //   );
+
+  //   return this.success(res, data);
+  // };
+
   refreshToken = async (req, res) => {
-    const data = await this.service.refreshToken(
-      req.body.refreshToken
-    );
+    const refreshToken =
+      req.body?.refreshToken ||
+      req.headers["x-refresh-token"] ||
+      req.headers.authorization?.replace(/^Bearer\s+/i, "");
+
+    if (!refreshToken) {
+      throw new ApiError(ErrorCode.AUTH.INVALID_TOKEN);
+    }
+
+    const data = await this.service.refreshToken(refreshToken);
 
     return this.success(res, data);
   };
 
   // POST /api/auth/logout
   logout = async (req, res) => {
-    const data = await this.service.logout(
-      req.body.refreshToken
-    );
+    const data = await this.service.logout(req.body.refreshToken);
 
     return this.success(res, data);
   };
@@ -54,9 +69,22 @@ class AuthController extends BaseController {
   };
 
   // GET /api/auth/profile
+  // profile = async (req, res) => {
+  //   const data = await this.service.profile(req.user.userId);
+  //   return this.success(res, data);
+  // };
   profile = async (req, res) => {
-    const data = await this.service.profile(req.user.userId);
+    const userId =
+      req.user?.userID ??
+      req.user?.userId ??
+      req.user?.id ??
+      req.user?._id ??
+      req.user?.sub;
 
+    if (!userId) {
+      throw new ApiError(ErrorCode.AUTH.INVALID_TOKEN);
+    }
+    const data = await this.service.profile(userId);
     return this.success(res, data);
   };
 
@@ -67,7 +95,7 @@ class AuthController extends BaseController {
     await this.service.changePassword(
       req.user.userId,
       oldPassword,
-      newPassword
+      newPassword,
     );
 
     return this.success(res, null);
@@ -75,27 +103,21 @@ class AuthController extends BaseController {
 
   // POST /api/auth/revoke-token
   revokeToken = async (req, res) => {
-    const data = await this.service.revokeToken(
-      req.body.refreshToken
-    );
+    const data = await this.service.revokeToken(req.body.refreshToken);
 
     return this.success(res, data);
   };
 
   // POST /api/auth/verify-access-token
   verifyAccessToken = async (req, res) => {
-    const data = await this.service.verifyAccessToken(
-      req.body.token
-    );
+    const data = await this.service.verifyAccessToken(req.body.token);
 
     return this.success(res, data);
   };
 
   // POST /api/auth/verify-refresh-token
   verifyRefreshToken = async (req, res) => {
-    const data = await this.service.verifyRefreshToken(
-      req.body.token
-    );
+    const data = await this.service.verifyRefreshToken(req.body.token);
 
     return this.success(res, data);
   };

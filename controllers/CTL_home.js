@@ -102,7 +102,7 @@ exports.Home_pratical = async (req, res, next) => {
 
 exports.CT_Home = async (req, res, next) => {
   try {
-    // Láº¥y táº¥t cáº£ MP3 vá»›i populate category vÃ  sáº¯p xáº¿p
+    // Lấy tất cả MP3 với populate category và sắp xếp
     const mp3List = await db.MP3.find()
       .populate({
         path: "categoryId",
@@ -111,15 +111,15 @@ exports.CT_Home = async (req, res, next) => {
       .sort({ uploadDate: -1 })
       .lean();
 
-    // Láº¥y danh sÃ¡ch categories
+    // Lấy danh sách categories
     const categories = await db.CategoryModel.find()
       .sort({ nameCategory: 1 })
       .lean();
 
-    // Táº¡o object Ä‘á»ƒ group songs theo category
+    // Tạo object để group songs theo category
     const songsByCategory = {};
     
-    // Khá»Ÿi táº¡o categories vá»›i thuá»™c tÃ­nh cáº§n thiáº¿t
+    // Khởi tạo categories với thuộc tính cần thiết
     categories.forEach(category => {
       songsByCategory[category._id.toString()] = {
         name: category.nameCategory,
@@ -128,7 +128,7 @@ exports.CT_Home = async (req, res, next) => {
       };
     });
 
-    // PhÃ¢n loáº¡i bÃ i hÃ¡t theo category (giá»›i háº¡n 5 bÃ i/category)
+    // Phân loại bài hát theo category (giới hạn 5 bài/category)
     mp3List.forEach(song => {
       if (song.categoryId && song.categoryId._id) {
         const categoryId = song.categoryId._id.toString();
@@ -138,23 +138,23 @@ exports.CT_Home = async (req, res, next) => {
       }
     });
 
-    // Loáº¡i bá» categories khÃ´ng cÃ³ bÃ i hÃ¡t
+    // Loại bỏ categories không có bài hát
     Object.keys(songsByCategory).forEach(categoryId => {
       if (songsByCategory[categoryId].songs.length === 0) {
         delete songsByCategory[categoryId];
       }
     });
 
-    // Táº¡o top rated songs (cÃ³ thá»ƒ thay Ä‘á»•i logic nÃ y)
+    // Tạo top rated songs (có thể thay đổi logic này)
     const topRatedSongs = mp3List.slice(0, 5);
 
-    // Láº¥y thÃ´ng tin user
+    // Lấy thông tin user
     const user = req.session.userLogin || { fullName: 'Guest' };
     
-    // Láº¥y lá»‹ch sá»­ phÃ¡t nháº¡c
+    // Lấy lịch sử phát nhạc
     const historySongs = getPlayHistory(req, 4);
 
-    // Render vá»›i táº¥t cáº£ dá»¯ liá»‡u cáº§n thiáº¿t
+    // Render với tất cả dữ liệu cần thiết
     res.render("home/CT_Home.ejs", {
       mp3List,
       songsByCategory,
@@ -162,7 +162,7 @@ exports.CT_Home = async (req, res, next) => {
       categories,
       user,
       historySongs,
-      // ThÃªm helper functions náº¿u cáº§n
+      // Thêm helper functions nếu cần
       helpers: {
         formatDate: (date) => new Date(date).toLocaleDateString(),
         truncateString: (str, length = 50) => str.length > length ? str.substring(0, length) + '...' : str
@@ -172,7 +172,7 @@ exports.CT_Home = async (req, res, next) => {
   } catch (err) {
     console.error("Error in CT_Home:", err);
     
-    // Render vá»›i dá»¯ liá»‡u máº·c Ä‘á»‹nh khi cÃ³ lá»—i
+    // Render với dữ liệu mặc định khi có lỗi
     res.status(500).render("home/CT_Home.ejs", {
       mp3List: [],
       songsByCategory: {},

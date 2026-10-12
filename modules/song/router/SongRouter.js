@@ -26,7 +26,7 @@ router.post(
   verifyAccessToken,
   uploadSong,
   validate(SongValidator.upload),
-  SongController.upload
+  SongController.upload,
 );
 
 //------------------------------------
@@ -36,7 +36,7 @@ router.put(
   "/:id",
   verifyAccessToken,
   validate(SongValidator.update),
-  SongController.update
+  SongController.update,
 );
 
 //------------------------------------

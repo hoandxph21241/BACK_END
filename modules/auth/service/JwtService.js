@@ -1,44 +1,58 @@
 const jwt = require("jsonwebtoken");
 
 class JwtService {
+  generateAccessToken(user) {
+    return jwt.sign(
+      {
+        id: user._id,
+        userID: user.userID,
+        role: user.role,
+        tokenType: "access",
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: process.env.JWT_ACCESS_EXPIRES,
+      }
+    );
+  }
 
-    generateAccessToken(user) {
+  generateRefreshToken(user) {
+    return jwt.sign(
+      {
+        id: user._id,
+        userID: user.userID,
+        tokenType: "refresh",
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: process.env.JWT_REFRESH_EXPIRES,
+      }
+    );
+  }
 
-        return jwt.sign(
-            {
-                id: user._id,
-                userID: user.userID,
-                role: user.role,
-            },
-            process.env.JWT_SECRET,
-            {
-                expiresIn: process.env.JWT_ACCESS_EXPIRES,
-            }
-        );
+  verify(token) {
+    return jwt.verify(token, process.env.JWT_SECRET);
+  }
+
+  verifyAccessToken(token) {
+    const payload = this.verify(token);
+
+    if (payload.tokenType !== "access") {
+      throw new Error("Invalid access token");
     }
 
-    generateRefreshToken(user) {
+    return payload;
+  }
 
-        return jwt.sign(
-            {
-                id: user._id,
-                userID: user.userID,
-            },
-            process.env.JWT_SECRET,
-            {
-                expiresIn: process.env.JWT_REFRESH_EXPIRES,
-            }
-        );
+  verifyRefreshToken(token) {
+    const payload = this.verify(token);
+
+    if (payload.tokenType !== "refresh") {
+      throw new Error("Invalid refresh token");
     }
 
-    verify(token) {
-
-        return jwt.verify(
-            token,
-            process.env.JWT_SECRET,
-        );
-    }
-
+    return payload;
+  }
 }
 
 module.exports = new JwtService();

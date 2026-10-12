@@ -4,4 +4,5 @@ module.exports={
     asyncHandler:require("./asyncHandler"),
     JwtUtil:require("./JwtUtil"),
     PasswordUtil:require("./PasswordUtil"),
+    durationToMs:require("./duration"),
 };
