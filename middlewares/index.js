@@ -16,6 +16,8 @@ module.exports = {
   uploadImage: require('./upload/uploadImage'),
   uploadSong: require('./upload/uploadSong'),
 
+  uploadSongToGridFS: require('./upload/uploadSongToGridFS'),
+
   BaseValidator: require('./validate/BaseValidator'),
   validate: require('./validate/validate'),
 

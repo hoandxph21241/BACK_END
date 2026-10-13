@@ -4,7 +4,7 @@ const router = express.Router();
 const SongController = require("../controller/SongController");
 const SongValidator = require("../validator/SongValidator");
 const validate = require("../../../middlewares/validate/validate");
-const { verifyAccessToken, uploadSong } = require("../../../middlewares");
+const { verifyAccessToken, uploadSong,uploadSongToGridFS } = require("../../../middlewares");
 
 //------------------------------------
 // Public
@@ -24,7 +24,7 @@ router.get("/:id", SongController.getById);
 router.post(
   "/",
   verifyAccessToken,
-  uploadSong,
+  uploadSongToGridFS,
   validate(SongValidator.upload),
   SongController.upload,
 );

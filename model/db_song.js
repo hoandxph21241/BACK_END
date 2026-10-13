@@ -98,7 +98,10 @@ var MP3Schema = new db.mongoose.Schema(
 
     data: {
       type: Buffer,
+      select: false, // Không trả về dữ liệu nhị phân khi truy vấn
     },
+
+    fileId: { type: db.mongoose.Schema.Types.ObjectId, required: false, default: undefined, },
 
     categoryId: {
       type: db.mongoose.Schema.Types.ObjectId,
