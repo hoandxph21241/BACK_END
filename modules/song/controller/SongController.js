@@ -129,16 +129,58 @@ class SongController extends BaseController {
         });
       }
 
+      // Previous full-file response (kept for reference):
+      // res.setHeader("Content-Type", file.contentType || "audio/mpeg");
+      // res.setHeader("Content-Length", file.length);
+      // const downloadStream = GridFS.openDownloadStream(file._id);
+      const fileSize = file.length;
+      let start = 0;
+      let end = fileSize - 1;
+      const range = req.headers.range;
+
+      res.setHeader("Accept-Ranges", "bytes");
+      if (range) {
+        const match = /^bytes=(\d*)-(\d*)$/.exec(range);
+        const invalidRange = () => {
+          res.setHeader("Content-Range", `bytes */${fileSize}`);
+          return res.sendStatus(416);
+        };
+        if (!match || (!match[1] && !match[2])) return invalidRange();
+
+        if (!match[1]) {
+          const suffixLength = Number(match[2]);
+          if (!Number.isSafeInteger(suffixLength) || suffixLength <= 0) {
+            return invalidRange();
+          }
+          start = Math.max(0, fileSize - suffixLength);
+        } else {
+          start = Number(match[1]);
+          const requestedEnd = match[2] ? Number(match[2]) : end;
+          if (!Number.isSafeInteger(requestedEnd)) return invalidRange();
+          end = Math.min(requestedEnd, end);
+        }
+        if (!Number.isSafeInteger(start) || start >= fileSize || end < start) {
+          return invalidRange();
+        }
+        res.status(206);
+        res.setHeader("Content-Range", `bytes ${start}-${end}/${fileSize}`);
+      }
+
       res.setHeader("Content-Type", file.contentType || "audio/mpeg");
-      res.setHeader("Content-Length", file.length);
+      res.setHeader("Content-Length", range ? end - start + 1 : fileSize);
       res.setHeader(
         "Content-Disposition",
         `inline; filename="${encodeURIComponent(file.filename)}"`,
       );
 
-      const downloadStream = GridFS.openDownloadStream(file._id);
+      // GridFS uses an exclusive end offset.
+      const downloadStream = GridFS.openDownloadStream(
+        file._id,
+        range ? { start, end: end + 1 } : {},
+      );
 
       downloadStream.on("error", next);
+      res.once("close", () => downloadStream.destroy());
       downloadStream.pipe(res);
     } catch (error) {
       next(error);

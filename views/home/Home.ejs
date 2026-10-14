@@ -11,9 +11,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="icon" href="/images/bg.png" type="image/x-icon" />
   <link rel='stylesheet' href='/stylesheets/iframe_mediabar.css' />
+  <script src='/javascripts/media_v2/parent_queue_v2_1.js' defer></script>
 </head>
 
-<body>
+<!-- Previous page wrapper: <body> -->
+<!-- Previous narrowed body: <body class="home-compact-layout"> -->
+<body class="home-centered-layout">
   <% let mp3data %>
     <%- include('../inc/top.ejs', { mp3List: mp3List }) %>
 
@@ -32,6 +35,14 @@
         <iframe src="/mediabar_v2" id="mediaPlayerFrame"></iframe>
       </div>
 
+      <section id="parentPlaylistPopup" aria-label="Next Up" aria-hidden="true" inert>
+        <div class="playlist-header">
+          <div><strong>Next Up</strong><!-- <span id="parentQueueCount" class="queue-count">0</span> --></div>
+          <button id="parentCloseQueueBtn" type="button" class="queue-close" aria-label="Close Next Up" title="Close Next Up">&times;</button>
+        </div>
+        <div class="playlist-body"><ul id="parentQueueList" class="playlist-list"></ul></div>
+      </section>
+
       <!-- Parent Volume Popup -->
       <div id="parentVolumePopup" class="volume-popup" style="display: none;">
         <div class="volume-popup-content">
@@ -43,7 +54,7 @@
             </svg>
           </div>
           <div class="volume-slider-wrapper">
-            <input type="range" id="parentVolumeSlider" class="parent-volume-slider" min="0" max="100" value="100">
+            <input type="range" id="parentVolumeSlider" aria-label="Volume" aria-orientation="vertical" class="parent-volume-slider" min="0" max="100" value="100">
           </div>
           <div class="volume-value">100%</div>
         </div>
@@ -188,7 +199,9 @@
           const iframe = document.getElementById('mediaPlayerFrame');
           if (iframe && iframe.contentWindow) {
             iframe.contentWindow.postMessage(
-              { mp3Id, mp3Name, categoryId },
+              // Format cũ:
+              // { mp3Id, mp3Name, categoryId },
+              { type: 'songSelected', mp3Id, mp3Name, categoryId },
               '*'
             );
           }
@@ -197,117 +210,194 @@
           window.playHistoryAPI.playSong(mp3Id);
         }
 
-        // ===== VOLUME POPUP HANDLING =====
+        //         // ===== VOLUME POPUP HANDLING =====
+        //         let volumePopupTimeout;
+        //         const volumePopup = document.getElementById('parentVolumePopup');
+        //         if (!volumePopup) {
+        //           console.error('❌ [FATAL] #parentVolumePopup DOM not found!');
+        //         } else {
+        //           console.log('✅ [INIT] #parentVolumePopup DOM found:', volumePopup);
+        //         }
+        //         const volumeSlider = document.getElementById('parentVolumeSlider');
+        //         if (!volumeSlider) {
+        //           console.error('❌ [FATAL] #parentVolumeSlider DOM not found!');
+        //         }
+        //         const volumeValue = volumePopup ? volumePopup.querySelector('.volume-value') : null;
+        //         if (!volumeValue) {
+        //           console.error('❌ [FATAL] .volume-value DOM not found!');
+        //         }
+        //
+        //         function showVolumePopup(volume, buttonRect) {
+        //           try {
+        //             clearTimeout(volumePopupTimeout);
+        //             console.log('[showVolumePopup] Called with volume:', volume, 'buttonRect:', buttonRect);
+        //
+        //             if (!volumePopup) {
+        //               console.error('[showVolumePopup] ❌ volumePopup is null or undefined!');
+        //               return;
+        //             }
+        //
+        //             // Update slider value
+        //             volumeSlider.value = volume;
+        //             volumeValue.textContent = Math.round(volume) + '%';
+        //
+        //             // Position popup relative to the parent page using iframe position
+        //             const iframe = document.getElementById('mediaPlayerFrame');
+        //             let pageLeft = buttonRect.left;
+        //             let pageTop = buttonRect.top;
+        //
+        //             if (iframe) {
+        //               const iframeRect = iframe.getBoundingClientRect();
+        //               pageLeft = iframeRect.left + buttonRect.left;
+        //               pageTop = iframeRect.top + buttonRect.top;
+        //             }
+        //
+        //             // Position popup ABOVE the button (not below, which goes off-screen)
+        //             // Popup height is ~180px, button is ~34px tall, add 10px gap
+        //             const popupHeight = 180;
+        //             const positionTop = pageTop - popupHeight - 10;
+        //
+        //             console.log('[showVolumePopup] Position: left=' + pageLeft + 'px, top=' + positionTop + 'px');
+        //             volumePopup.style.left = `${pageLeft}px`;
+        //             volumePopup.style.top = `${positionTop}px`;
+        //             volumePopup.style.display = 'flex';
+        //             volumePopup.style.visibility = 'visible';
+        //             volumePopup.style.opacity = '1';
+        //             volumePopup.classList.add('show');
+        //             console.log('[showVolumePopup] ✅ Style applied, display=' + volumePopup.style.display);
+        //           } catch (err) {
+        //             console.error('[showVolumePopup] ❌ Error:', err);
+        //           }
+        //         }
+        //
+        //         function hideVolumePopup() {
+        //           clearTimeout(volumePopupTimeout);
+        //           // Kiểm tra xem chuột có còn ở icon không bằng cách gửi message tới iframe
+        //           const iframe = document.getElementById('mediaPlayerFrame');
+        //           if (iframe && iframe.contentWindow) {
+        //             iframe.contentWindow.postMessage({
+        //               type: 'checkVolumeHover'
+        //             }, '*');
+        //           } else {
+        //             // Nếu không có iframe, ẩn popup ngay
+        //             volumePopup.classList.remove('show');
+        //             setTimeout(() => {
+        //               // volumePopup.style.display = 'none';
+        //             }, 300);
+        //           }
+        //         }
+        //
+        //         // Lắng nghe phản hồi từ iframe về trạng thái hover
+        //         window.volumeHoverCheckListener = (shouldHidePopup) => {
+        //           if (shouldHidePopup) {
+        //             volumePopup.classList.remove('show');
+        //             setTimeout(() => {
+        //               // volumePopup.style.display = 'none';
+        //             }, 300);
+        //           }
+        //         };
+        //
+        //         // Prevent popup from hiding when hovering over it
+        //         volumePopup.addEventListener('mouseenter', () => {
+        //           clearTimeout(volumePopupTimeout);
+        //           console.log('popup mouseenter - will stay visible');
+        //         });
+        //
+        //         volumePopup.addEventListener('mouseleave', () => {
+        //           console.log('popup mouseleave - checking if cursor on icon');
+        //           hideVolumePopup();
+        //         });
+        //
+        //         // Send volume change to iframe
+        //         volumeSlider.addEventListener('input', (e) => {
+        //           const newVolume = parseInt(e.target.value);
+        //           volumeValue.textContent = newVolume + '%';
+        //
+        //           const iframe = document.getElementById('mediaPlayerFrame');
+        //           if (iframe && iframe.contentWindow) {
+        //             iframe.contentWindow.postMessage({
+        //               type: 'setVolume',
+        //               value: newVolume
+        //             }, '*');
+        //           }
+        //         });
+        // Volume popup lives outside the short player iframe.
         let volumePopupTimeout;
+        let volumePopupHovered = false;
+        let volumePopupFocused = false;
         const volumePopup = document.getElementById('parentVolumePopup');
-        if (!volumePopup) {
-          console.error('❌ [FATAL] #parentVolumePopup DOM not found!');
-        } else {
-          console.log('✅ [INIT] #parentVolumePopup DOM found:', volumePopup);
-        }
         const volumeSlider = document.getElementById('parentVolumeSlider');
-        if (!volumeSlider) {
-          console.error('❌ [FATAL] #parentVolumeSlider DOM not found!');
+        const volumeValue = volumePopup.querySelector('.volume-value');
+
+        function updateVolumePopup(value) {
+          const volume = Math.max(0, Math.min(100, Number(value) || 0));
+          volumeSlider.value = volume;
+          volumeSlider.style.setProperty('--volume-progress', `${volume}%`);
+          volumeSlider.setAttribute('aria-valuetext', `${Math.round(volume)}%`);
+          volumeValue.textContent = Math.round(volume) + '%';
         }
-        const volumeValue = volumePopup ? volumePopup.querySelector('.volume-value') : null;
-        if (!volumeValue) {
-          console.error('❌ [FATAL] .volume-value DOM not found!');
+
+        function closeVolumePopup() {
+          clearTimeout(volumePopupTimeout);
+          volumePopup.classList.remove('show');
+          // volumePopup.style.display = 'none';
         }
 
         function showVolumePopup(volume, buttonRect) {
-          try {
-            clearTimeout(volumePopupTimeout);
-            console.log('[showVolumePopup] Called with volume:', volume, 'buttonRect:', buttonRect);
-
-            if (!volumePopup) {
-              console.error('[showVolumePopup] ❌ volumePopup is null or undefined!');
-              return;
-            }
-
-            // Update slider value
-            volumeSlider.value = volume;
-            volumeValue.textContent = Math.round(volume) + '%';
-
-            // Position popup relative to the parent page using iframe position
-            const iframe = document.getElementById('mediaPlayerFrame');
-            let pageLeft = buttonRect.left;
-            let pageTop = buttonRect.top;
-
-            if (iframe) {
-              const iframeRect = iframe.getBoundingClientRect();
-              pageLeft = iframeRect.left + buttonRect.left;
-              pageTop = iframeRect.top + buttonRect.top;
-            }
-
-            // Position popup ABOVE the button (not below, which goes off-screen)
-            // Popup height is ~180px, button is ~34px tall, add 10px gap
-            const popupHeight = 180;
-            const positionTop = pageTop - popupHeight - 10;
-
-            console.log('[showVolumePopup] Position: left=' + pageLeft + 'px, top=' + positionTop + 'px');
-            volumePopup.style.left = `${pageLeft}px`;
-            volumePopup.style.top = `${positionTop}px`;
-            volumePopup.style.display = 'flex';
-            volumePopup.style.visibility = 'visible';
-            volumePopup.style.opacity = '1';
-            volumePopup.classList.add('show');
-            console.log('[showVolumePopup] ✅ Style applied, display=' + volumePopup.style.display);
-          } catch (err) {
-            console.error('[showVolumePopup] ❌ Error:', err);
-          }
+          clearTimeout(volumePopupTimeout);
+          updateVolumePopup(volume);
+          const iframe = document.getElementById('mediaPlayerFrame');
+          if (!iframe || !buttonRect) return;
+          const rect = iframe.getBoundingClientRect();
+          volumePopup.style.display = 'flex';
+          volumePopup.classList.add('show');
+          const width = volumePopup.offsetWidth;
+          const height = volumePopup.offsetHeight;
+          const center = rect.left + (buttonRect.left + buttonRect.right) / 2;
+          volumePopup.style.left = `${Math.max(4, Math.min(window.innerWidth - width - 4, center - width / 2))}px`;
+          volumePopup.style.top = `${Math.max(4, rect.top + buttonRect.top - height - 8)}px`;
         }
 
         function hideVolumePopup() {
           clearTimeout(volumePopupTimeout);
-          // Kiểm tra xem chuột có còn ở icon không bằng cách gửi message tới iframe
-          const iframe = document.getElementById('mediaPlayerFrame');
-          if (iframe && iframe.contentWindow) {
-            iframe.contentWindow.postMessage({
+          volumePopupTimeout = setTimeout(() => {
+            if (volumePopupHovered || volumePopupFocused) return;
+            document.getElementById('mediaPlayerFrame')?.contentWindow.postMessage({
               type: 'checkVolumeHover'
-            }, '*');
-          } else {
-            // Nếu không có iframe, ẩn popup ngay
-            volumePopup.classList.remove('show');
-            setTimeout(() => {
-              volumePopup.style.display = 'none';
-            }, 300);
-          }
+            }, window.location.origin);
+          }, 220);
         }
 
-        // Lắng nghe phản hồi từ iframe về trạng thái hover
-        window.volumeHoverCheckListener = (shouldHidePopup) => {
-          if (shouldHidePopup) {
-            volumePopup.classList.remove('show');
-            setTimeout(() => {
-              volumePopup.style.display = 'none';
-            }, 300);
-          }
-        };
-
-        // Prevent popup from hiding when hovering over it
         volumePopup.addEventListener('mouseenter', () => {
+          volumePopupHovered = true;
           clearTimeout(volumePopupTimeout);
-          console.log('popup mouseenter - will stay visible');
         });
-
         volumePopup.addEventListener('mouseleave', () => {
-          console.log('popup mouseleave - checking if cursor on icon');
+          volumePopupHovered = false;
           hideVolumePopup();
         });
-
-        // Send volume change to iframe
-        volumeSlider.addEventListener('input', (e) => {
-          const newVolume = parseInt(e.target.value);
-          volumeValue.textContent = newVolume + '%';
-
-          const iframe = document.getElementById('mediaPlayerFrame');
-          if (iframe && iframe.contentWindow) {
-            iframe.contentWindow.postMessage({
-              type: 'setVolume',
-              value: newVolume
-            }, '*');
+        volumePopup.addEventListener('focusin', () => {
+          volumePopupFocused = true;
+          clearTimeout(volumePopupTimeout);
+        });
+        volumePopup.addEventListener('focusout', () => {
+          volumePopupFocused = false;
+          hideVolumePopup();
+        });
+        volumePopup.addEventListener('keydown', event => {
+          if (event.key === 'Escape') {
+            volumeSlider.blur();
+            closeVolumePopup();
           }
         });
+        volumeSlider.addEventListener('input', () => {
+          const value = Number(volumeSlider.value);
+          updateVolumePopup(value);
+          document.getElementById('mediaPlayerFrame')?.contentWindow.postMessage({
+            type: 'setVolume', value
+          }, window.location.origin);
+        });
+        window.addEventListener('resize', closeVolumePopup);
 
         // Initialize dynamic content
         function initializeDynamicContent() {
@@ -547,29 +637,48 @@
         // 🔍 KIỂM TRA VÀ SỬA IFRAME CONTAINER LOGIC
 
 window.addEventListener('message', function (event) {
-  // Handle volume popup messages
-  if (event.data && event.data.type === 'volumePopup') {
-    console.log('parent received volumePopup', event.data);
-    if (event.data.action === 'show') {
-      showVolumePopup(event.data.volume, event.data.buttonRect);
-    } else if (event.data.action === 'hide') {
-      hideVolumePopup();
-    }
+//   // Handle volume popup messages
+//   if (event.data && event.data.type === 'volumePopup') {
+//     console.log('parent received volumePopup', event.data);
+//     if (event.data.action === 'show') {
+//       showVolumePopup(event.data.volume, event.data.buttonRect);
+//     } else if (event.data.action === 'hide') {
+//       hideVolumePopup();
+//     }
+//   }
+//
+//   // Handle volume hover check response from iframe
+//   if (event.data && event.data.type === 'volumeHoverResponse') {
+//     console.log('parent received volumeHoverResponse, isHovered=' + event.data.isHovered);
+//     // Only hide popup if cursor is NOT on volume button
+//     if (!event.data.isHovered) {
+//       volumePopup.classList.remove('show');
+//       setTimeout(() => {
+//         volumePopup.style.display = 'none';
+//       }, 300);
+//     }
+//     // If isHovered is true, keep popup visible (no action needed)
+//   }
+  const playerFrame = document.getElementById('mediaPlayerFrame');
+  if (event.source !== playerFrame?.contentWindow || event.origin !== window.location.origin) return;
+  const data = event.data;
+  if (data?.type === 'volumePopup') {
+    if (data.action === 'show') showVolumePopup(data.volume, data.buttonRect);
+    else if (data.action === 'hide') hideVolumePopup();
   }
-
-  // Handle volume hover check response from iframe
-  if (event.data && event.data.type === 'volumeHoverResponse') {
-    console.log('parent received volumeHoverResponse, isHovered=' + event.data.isHovered);
-    // Only hide popup if cursor is NOT on volume button
-    if (!event.data.isHovered) {
-      volumePopup.classList.remove('show');
-      setTimeout(() => {
-        volumePopup.style.display = 'none';
-      }, 300);
-    }
-    // If isHovered is true, keep popup visible (no action needed)
+  if (data?.type === 'volumeState') updateVolumePopup(data.value);
+  if (data?.type === 'volumeHoverResponse' && !data.isHovered && !volumePopupHovered && !volumePopupFocused) {
+    closeVolumePopup();
   }
-
+//   // Resize the actual iframe so the queue is not clipped by its 48px viewport.
+//   if (data?.type === 'playlistState' && document.getElementById('iframeContainer_v2')) {
+//     const height = data.isExpanded ? `${Math.min(window.innerHeight - 12, 440)}px` : '48px';
+//     document.getElementById('iframeContainer_v2').style.height = height;
+//     playerFrame.style.height = height;
+//     window.isExpanded = data.isExpanded;
+//     return;
+//   }
+  if (data?.type === 'playlistState' && document.getElementById('iframeContainer_v2')) return;
   // Handle playlist state
   if (event.data && event.data.type === 'playlistState') {
     window.isExpanded = event.data.isExpanded;

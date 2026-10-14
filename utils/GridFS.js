@@ -57,12 +57,13 @@ function uploadBuffer(buffer, filename, options = {}) {
 /**
  * Tạo luồng đọc file từ GridFS.
  */
-function openDownloadStream(fileId) {
+function openDownloadStream(fileId, options = {}) {
   if (!ObjectId.isValid(fileId)) {
     throw new TypeError("Invalid GridFS file ID.");
   }
 
-  return getBucket().openDownloadStream(new ObjectId(fileId));
+  // return getBucket().openDownloadStream(new ObjectId(fileId));
+  return getBucket().openDownloadStream(new ObjectId(fileId), options);
 }
 
 /**

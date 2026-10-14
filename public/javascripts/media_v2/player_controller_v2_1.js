@@ -13,6 +13,7 @@
   "use strict";
 
   let audio = null;
+  let lastAudibleVolume = 1;
   let initialized = false;
   let currentSong = null;
   let requestId = 0;
@@ -269,11 +270,22 @@
     }
 
     audio.volume = Math.max(0, Math.min(1, value));
+    if (audio.volume > 0) {
+      lastAudibleVolume = audio.volume;
+      audio.muted = false;
+    }
   }
 
   function toggleMute() {
     requireInitialized();
-    audio.muted = !audio.muted;
+    // audio.muted = !audio.muted;
+    if (audio.muted || audio.volume === 0) {
+      if (audio.volume === 0) audio.volume = lastAudibleVolume;
+      audio.muted = false;
+    } else {
+      lastAudibleVolume = audio.volume;
+      audio.muted = true;
+    }
     return audio.muted;
   }
 

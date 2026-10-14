@@ -2,8 +2,10 @@
   "use strict";
 
   const config = {
-    apiBaseUrl: "/api",
-    streamPathTemplate: "/mp3/{id}/stream",
+    apiBaseUrl: "/api/songs",
+    // Endpoint cũ khi còn mount api_Rounters:
+    // streamPathTemplate: "/mp3/{id}/stream",
+    streamPathTemplate: "/{id}/stream",
   };
   async function requestJson(url, options = {}) {
     const response = await fetch(url, {
@@ -38,13 +40,16 @@
 
     return {
       id: String(id),
-      name: song.name ?? "Unknown Song",
+      // name: song.name ?? "Unknown Song",
+      name: song.name ?? song.title ?? "Unknown Song",
       artist: song.artist ?? "Unknown Artist",
-      image: normalizeImage(song.image),
+      // image: normalizeImage(song.image),
+      image: normalizeImage(song.image ?? song.albumCover ?? song.thumbnail ?? song.cover),
       categoryId:
         song.categoryId?._id ??
         song.categoryId ??
         song.category?._id ??
+        (typeof song.category === "string" ? song.category : null) ??
         null,
       duration: song.duration ?? null,
       fileSize: song.fileSize ?? null,
@@ -76,7 +81,9 @@
     }
 
     const id = encodeURIComponent(songId);
-    const url = `${config.apiBaseUrl}/mp3/${id}`;
+    // Endpoint cũ khi còn mount api_Rounters:
+    // const url = `${config.apiBaseUrl}/mp3/${id}`;
+    const url = `${config.apiBaseUrl}/${id}`;
 
     const response = await requestJson(url);
 
@@ -87,6 +94,14 @@
     }
 
     return normalizeSong(response);
+  }
+
+  async function getSongsByCategory(categoryId) {
+    if (!categoryId) return [];
+    const response = await requestJson(`${config.apiBaseUrl}/category/${encodeURIComponent(categoryId)}`);
+    const items = response?.data ?? response;
+    if (!Array.isArray(items)) throw new Error("Invalid category playlist response.");
+    return items.map(item => ({ ...normalizeSong(item), categoryId: String(categoryId) }));
   }
 
   function getStreamUrl(songId) {
@@ -111,6 +126,7 @@
 
   window.SongServiceV2_1 = Object.freeze({
     getSongById,
+    getSongsByCategory,
     getStreamUrl,
     configure,
   });

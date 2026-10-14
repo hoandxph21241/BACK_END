@@ -37,6 +37,17 @@
     return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
   }
 
+  function updateProgress(value) {
+    if (!elements.progress) return;
+    const percentage = Number.isFinite(value)
+      ? Math.max(0, Math.min(100, value))
+      : 0;
+    elements.progress.value = percentage;
+    const progressValue = `${percentage}%`;
+    elements.progress.style.setProperty("--progress", progressValue);
+    elements.progress.parentElement?.style.setProperty("--progress", progressValue);
+  }
+
   function render(state) {
     if (elements.songName) {
       elements.songName.textContent =
@@ -71,14 +82,16 @@
       elements.duration.textContent = formatTime(state.duration);
     }
 
-    if (elements.progress && state.duration > 0) {
-      elements.progress.value = Math.min(
-        100,
-        (state.currentTime / state.duration) * 100
-      );
-    } else if (elements.progress) {
-      elements.progress.value = 0;
-    }
+    // Previous update only moved the thumb, without updating the CSS fill:
+    // if (elements.progress && state.duration > 0) {
+    //   elements.progress.value = Math.min(
+    //     100,
+    //     (state.currentTime / state.duration) * 100
+    //   );
+    // } else if (elements.progress) {
+    //   elements.progress.value = 0;
+    // }
+    updateProgress(state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0);
 
     if (elements.volume) {
       elements.volume.value = String(state.volume);
@@ -110,6 +123,7 @@
 
     if (elements.progress) {
       elements.progress.addEventListener("input", () => {
+        updateProgress(Number(elements.progress.value));
         const state = controller.getState();
 
         if (state.duration > 0) {

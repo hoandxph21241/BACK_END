@@ -37,116 +37,519 @@
     transition: all 0.3s ease;
 }
 
-/* ===== PARENT VOLUME POPUP ===== */
+/*  ===== PARENT VOLUME POPUP =====  */
+/* #parentVolumePopup { */
+/*     position: fixed; */
+/*     display: none; */
+/*     align-items: center; */
+/*     justify-content: center; */
+/*     z-index: 99999 !important; */
+/*     visibility: hidden; */
+/*     opacity: 0; */
+/*     transition: opacity 0.2s ease, visibility 0.2s ease; */
+/*     width: 70px; */
+/*     min-height: 180px; */
+/*     pointer-events: all; */
+/*     background: transparent; */
+/* } */
+/*  */
+/* #parentVolumePopup.show { */
+/*     visibility: visible; */
+/*     opacity: 1; */
+/* } */
+/*  */
+/* .volume-popup-content { */
+/*     background: linear-gradient(135deg, #333 0%, #404040 100%); */
+/*     border-radius: 8px; */
+/*     padding: 12px 16px; */
+/*     display: flex; */
+/*     flex-direction: column; */
+/*     align-items: center; */
+/*     gap: 12px; */
+/*     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1); */
+/*     backdrop-filter: blur(10px); */
+/*     min-width: 60px; */
+/*     border: 1px solid rgba(255, 255, 255, 0.15); */
+/* } */
+/*  */
+/* .volume-header { */
+/*     color: #fff; */
+/*     display: flex; */
+/*     align-items: center; */
+/*     justify-content: center; */
+/*     height: 20px; */
+/* } */
+/*  */
+/* .volume-header svg { */
+/*     width: 18px; */
+/*     height: 18px; */
+/*     color: #ff7700; */
+/* } */
+/*  */
+/* .volume-slider-wrapper { */
+/*     display: flex; */
+/*     align-items: center; */
+/*     justify-content: center; */
+/*     width: 100%; */
+/*     height: 120px; */
+/*     padding: 0; */
+/* } */
+/*  */
+/* .parent-volume-slider { */
+/*     width: 4px; */
+/*     height: 120px; */
+/*     -webkit-appearance: none; */
+/*     appearance: none; */
+/*     background: linear-gradient(180deg, #ff7700 0%, #ff5500 100%); */
+/*     outline: none; */
+/*     border: none; */
+/*     border-radius: 2px; */
+/*     cursor: pointer; */
+/*     writing-mode: vertical-lr; */
+/*     direction: rtl; */
+/* } */
+/*  */
+/* .parent-volume-slider::-webkit-slider-thumb { */
+/*     -webkit-appearance: none; */
+/*     appearance: none; */
+/*     width: 16px; */
+/*     height: 16px; */
+/*     background: #fff; */
+/*     border-radius: 50%; */
+/*     cursor: pointer; */
+/*     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); */
+/*     transition: all 0.2s ease; */
+/* } */
+/*  */
+/* .parent-volume-slider::-webkit-slider-thumb:hover { */
+/*     transform: scale(1.2); */
+/*     box-shadow: 0 2px 12px rgba(255, 119, 0, 0.5); */
+/* } */
+/*  */
+/* .parent-volume-slider::-moz-range-thumb { */
+/*     width: 16px; */
+/*     height: 16px; */
+/*     background: #fff; */
+/*     border-radius: 50%; */
+/*     cursor: pointer; */
+/*     border: none; */
+/*     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); */
+/*     transition: all 0.2s ease; */
+/* } */
+/*  */
+/* .parent-volume-slider::-moz-range-thumb:hover { */
+/*     transform: scale(1.2); */
+/*     box-shadow: 0 2px 12px rgba(255, 119, 0, 0.5); */
+/* } */
+/*  */
+/* .volume-value { */
+/*     color: #fff; */
+/*     font-size: 11px; */
+/*     font-weight: 600; */
+/*     letter-spacing: 0.5px; */
+/*     text-align: center; */
+/*     min-height: 16px; */
+/* } */
+/*  */
+/* Compact vertical volume control above the speaker button. */
 #parentVolumePopup {
     position: fixed;
     display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 99999 !important;
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 0.2s ease, visibility 0.2s ease;
-    width: 70px;
-    min-height: 180px;
-    pointer-events: all;
-    background: transparent;
+    width: 40px;
+    height: 140px;
+    z-index: 99999;
+    background: #303030;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
 }
-
-#parentVolumePopup.show {
-    visibility: visible;
-    opacity: 1;
+#parentVolumePopup::after {
+    content: '';
+    position: absolute;
+    left: -1px;
+    right: -1px;
+    bottom: -12px;
+    height: 12px;
 }
-
-.volume-popup-content {
-    background: linear-gradient(135deg, #333 0%, #404040 100%);
-    border-radius: 8px;
-    padding: 12px 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    min-width: 60px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.volume-header {
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 20px;
-}
-
-.volume-header svg {
-    width: 18px;
-    height: 18px;
-    color: #ff7700;
-}
-
-.volume-slider-wrapper {
+#parentVolumePopup .volume-popup-content {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 120px;
-    padding: 0;
+    height: 100%;
+    padding: 14px 0;
 }
-
-.parent-volume-slider {
-    width: 4px;
-    height: 120px;
-    -webkit-appearance: none;
+#parentVolumePopup .volume-header,
+#parentVolumePopup .volume-value {
+    display: none;
+}
+#parentVolumePopup .volume-slider-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 110px;
+}
+#parentVolumePopup .parent-volume-slider {
     appearance: none;
-    background: linear-gradient(180deg, #ff7700 0%, #ff5500 100%);
-    outline: none;
-    border: none;
-    border-radius: 2px;
-    cursor: pointer;
+    -webkit-appearance: none;
     writing-mode: vertical-lr;
     direction: rtl;
+    width: 4px;
+    height: 110px;
+    margin: 0;
+    border: 0;
+    border-radius: 2px;
+    cursor: pointer;
+    background: linear-gradient(to top, #f50 0%, #f50 var(--volume-progress, 100%), #ccc var(--volume-progress, 100%), #ccc 100%);
 }
-
-.parent-volume-slider::-webkit-slider-thumb {
+#parentVolumePopup .parent-volume-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    background: #fff;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    transition: all 0.2s ease;
+    background: #f50;
+    border: 0;
 }
-
-.parent-volume-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
-    box-shadow: 0 2px 12px rgba(255, 119, 0, 0.5);
-}
-
-.parent-volume-slider::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    background: #fff;
+#parentVolumePopup .parent-volume-slider::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    transition: all 0.2s ease;
+    background: #f50;
+    border: 0;
+}
+#parentVolumePopup .parent-volume-slider:focus-visible {
+    outline: 2px solid #333;
+    outline-offset: 5px;
 }
 
-.parent-volume-slider::-moz-range-thumb:hover {
-    transform: scale(1.2);
-    box-shadow: 0 2px 12px rgba(255, 119, 0, 0.5);
+/* Animate visibility without removing the popup from layout. */
+#parentVolumePopup {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(6px);
+    transition: opacity 160ms ease, transform 180ms ease, visibility 180ms;
+}
+#parentVolumePopup.show {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+    #parentVolumePopup { transition: none; }
+}
+/* Queue V2.1; previous popup styles above are retained for reference. */
+#parentPlaylistPopup {
+    display: block !important;
+    width: min(360px, calc(100vw - 20px));
+    height: min(370px, calc(100vh - 70px));
+    background: #fff;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 4px !important;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+    animation: none;
+    transition: opacity 200ms ease, transform 220ms ease, visibility 220ms;
+    box-shadow: 0 4px 18px rgba(0,0,0,.16);
+}
+#parentPlaylistPopup.is-open {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+#parentPlaylistPopup .playlist-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 48px;
+    padding: 0 14px;
+    background: #fff;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    border-radius: 4px 4px 0 0;
+}
+.queue-count { margin-left: 8px; color: #999; font-size: 12px; }
+.queue-close { width: 28px; height: 28px; border: 0; background: transparent; font-size: 24px; color: #777; }
+#parentPlaylistPopup .playlist-body { height: calc(100% - 48px); background: #303030; border-radius: 0; }
+#parentPlaylistPopup .playlist-list { padding: 0; }
+.queue-track {
+    display: grid;
+    grid-template-columns: 20px 40px minmax(0, 1fr) 36px;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 64px;
+    padding: 8px 12px;
+    border: 0;
+    border-bottom: 1px solid #f1f1f1;
+    background: #303030;
+    text-align: left;
+    color: #333;
+    transition: background-color 150ms ease;
+}
+.queue-track:hover { background: #000000; }
+.queue-track:focus-visible, .queue-close:focus-visible { outline: 2px solid #f50; outline-offset: -2px; }
+.queue-track img { width: 40px; height: 40px; object-fit: cover; border-radius: 0; }
+.queue-info { display: flex; flex-direction: column; min-width: 0; gap: 3px; }
+.queue-title, .queue-artist { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.queue-title { font-size: 13px; color: #fff; }
+.queue-artist, .queue-duration, .queue-number { font-size: 11px; color: #ffffff; }
+.queue-duration { text-align: right; }
+.queue-row.is-current .queue-title, .queue-row.is-current .queue-number { color: #f50; }
+.queue-row.is-current .queue-track { background: #000000; }
+.queue-row.is-playing .queue-number { animation: queuePulse 1200ms ease-in-out infinite alternate; }
+.queue-empty { padding: 24px 14px; text-align: center; color: #888; font-size: 13px; }
+@keyframes queuePulse { from { opacity: .45; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+    #parentPlaylistPopup, .queue-track { transition: none; }
+    .queue-row.is-playing .queue-number { animation: none; }
+}
+#parentPlaylistPopup {
+    position: fixed;
+    z-index: 10000;
+    height: min(370px, calc(100dvh - 80px));
+}
+#parentPlaylistPopup .playlist-list { list-style: none; margin: 0; }
+#parentPlaylistPopup .playlist-body { overflow-y: auto; overscroll-behavior: contain; }
+#parentPlaylistPopup .queue-track { cursor: pointer; }
+#parentPlaylistPopup .queue-close { cursor: pointer; }
+/*  Match the 82% content width of .nav-main; earlier iframe sizing remains above.  */
+/* #iframeContainer_v2 iframe { */
+/*     width: 82%; */
+/*     max-width: none; */
+/* } */
+/*  */
+/*  Reduce the desktop page width by 10%, keeping fixed playback aligned with navigation.  */
+/* @media (min-width: 1000px) { */
+/*     html:has(body.home-compact-layout) { background: #2e2d2d; } */
+/*     body.home-compact-layout { */
+/*         width: 90%; */
+/*         margin: 0 auto; */
+/*     } */
+/*     body.home-compact-layout #iframeContainer_v2 { */
+/*         width: 90%; */
+/*         left: 5%; */
+/*     } */
+/*     body.home-compact-layout #iframeContainer_v2 iframe { */
+/*          82% navigation content width within a page that is now 90% wide.  */
+/*         width: 73.8%; */
+/*     } */
+/* } */
+/*  */
+
+/* Full-width backgrounds with a narrower, centered content area. */
+body.home-centered-layout {
+    width: 100%;
+    margin: 0;
+    --site-content-width: calc(100% - 24px);
+}
+body.home-centered-layout .background_nav { width: 100%; }
+body.home-centered-layout .nav-main {
+    width: var(--site-content-width);
+    margin: 0 auto;
+    padding-inline: 8px;
+    box-sizing: border-box;
+}
+body.home-centered-layout #main {
+    width: var(--site-content-width);
+    margin-inline: auto;
+}
+body.home-centered-layout #iframeContainer_v2 {
+    width: 100%;
+    left: 0;
+    right: 0;
+}
+body.home-centered-layout #iframeContainer_v2 iframe {
+    width: 100%;
+    max-width: none;
+    left: 0;
+    right: 0;
+    transform: none;
+}
+@media (min-width: 1000px) {
+    body.home-centered-layout { --site-content-width: min(73.8%, 1240px); }
 }
 
-.volume-value {
+/* Feed reloads Bootstrap; keep the page background outside the centered content dark. */
+html:has(body.home-centered-layout) {
+    background-color: #2e2d2d;
+}
+body.home-centered-layout {
+    background-color: #2e2d2d;
+    min-height: 100vh;
+}
+body.home-centered-layout #main {
+    background-color: #2e2d2d;
+}
+
+/* Dark playlist header; previous header colors are retained above. */
+#parentPlaylistPopup .playlist-header {
+    background: #303030;
     color: #fff;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    text-align: center;
-    min-height: 16px;
+    border-bottom-color: #444;
 }
+#parentPlaylistPopup .queue-close { color: #fff; }
+#parentPlaylistPopup .queue-close:hover { color: #f50; }
+
+/* Center the close glyph independently of inherited button padding and line height. */
+#parentPlaylistPopup .queue-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    box-sizing: border-box;
+    align-self: center;
+}
+
+/* Equalizer replaces the queue number; animation follows the existing playback state. */
+#parentPlaylistPopup .queue-wave {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    width: 20px;
+    height: 18px;
+    color: #aaa;
+}
+#parentPlaylistPopup .queue-wave > span {
+    display: block;
+    width: 3px;
+    height: 14px;
+    border-radius: 1px;
+    background: currentColor;
+    transform: scaleY(.35);
+    transform-origin: center;
+}
+#parentPlaylistPopup .queue-wave > span:nth-child(2) { transform: scaleY(.65); }
+#parentPlaylistPopup .queue-wave > span:nth-child(3) { transform: scaleY(.85); }
+#parentPlaylistPopup .queue-wave > span:nth-child(4) { transform: scaleY(.5); }
+#parentPlaylistPopup .queue-row.is-current .queue-wave { color: #f50; }
+#parentPlaylistPopup .is-open .queue-wave > span { animation: none; }
+#parentPlaylistPopup.is-open .queue-row.is-playing .queue-wave > span {
+    animation: queueWave 650ms ease-in-out infinite alternate;
+}
+#parentPlaylistPopup.is-open .queue-row.is-playing .queue-wave > span:nth-child(2) {
+    animation-duration: 480ms;
+    animation-delay: -180ms;
+}
+#parentPlaylistPopup.is-open .queue-row.is-playing .queue-wave > span:nth-child(3) {
+    animation-duration: 720ms;
+    animation-delay: -340ms;
+}
+#parentPlaylistPopup.is-open .queue-row.is-playing .queue-wave > span:nth-child(4) {
+    animation-duration: 560ms;
+    animation-delay: -250ms;
+}
+@keyframes queueWave {
+    from { transform: scaleY(.2); }
+    to { transform: scaleY(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+    #parentPlaylistPopup.is-open .queue-row.is-playing .queue-wave > span { animation: none; }
+}
+
+/* Keep a stable queue column, showing waves only for the current track. */
+#parentPlaylistPopup .queue-wave {
+    visibility: hidden;
+    align-items: flex-end;
+}
+#parentPlaylistPopup .queue-row.is-current .queue-wave {
+    visibility: visible;
+}
+#parentPlaylistPopup .queue-wave > span {
+    /* Previous transform-origin: center; */
+    transform-origin: bottom;
+}
+
+/* Separate item actions from the play button to avoid nested interactive controls. */
+#parentPlaylistPopup .queue-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 64px;
+    align-items: center;
+    min-height: 64px;
+    background: #303030;
+    border-bottom: 1px solid #3d3d3d;
+}
+#parentPlaylistPopup .queue-row:hover { background: #383838; }
+#parentPlaylistPopup .queue-row.is-current { background: #383838; }
+#parentPlaylistPopup .queue-track {
+    grid-template-columns: 20px 40px minmax(0, 1fr);
+    min-width: 0;
+    padding: 8px 4px 8px 10px;
+    background: transparent;
+    border-bottom: 0;
+}
+#parentPlaylistPopup .queue-row.is-current .queue-track,
+#parentPlaylistPopup .queue-track:hover { background: transparent; }
+#parentPlaylistPopup .queue-actions { display: flex; gap: 2px; padding-right: 6px; }
+#parentPlaylistPopup .queue-action {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+}
+#parentPlaylistPopup .queue-action:hover,
+#parentPlaylistPopup .queue-action[aria-pressed="true"],
+#parentPlaylistPopup .queue-action[aria-expanded="true"] { color: #f50; }
+.queue-heart-icon, .queue-dots-icon {
+    display: block;
+    width: 15px;
+    height: 15px;
+    background: currentColor;
+    mask: url('/images/player/heart.svg') center / contain no-repeat;
+    -webkit-mask: url('/images/player/heart.svg') center / contain no-repeat;
+}
+.queue-favorite[aria-pressed="true"] .queue-heart-icon {
+    mask-image: url('/images/player/heart-fill.svg');
+    -webkit-mask-image: url('/images/player/heart-fill.svg');
+}
+.queue-dots-icon {
+    width: 18px;
+    mask-image: url('/images/player/three-dots.svg');
+    -webkit-mask-image: url('/images/player/three-dots.svg');
+}
+#parentQueueItemMenu {
+    position: fixed;
+    z-index: 10001;
+    width: 180px;
+    padding: 4px;
+    border: 1px solid #444;
+    border-radius: 3px;
+    background: #191919;
+    box-shadow: 0 4px 16px rgba(0,0,0,.3);
+}
+#parentQueueItemMenu[hidden] { display: none; }
+#parentQueueItemMenu button {
+    display: block;
+    width: 100%;
+    padding: 9px 10px;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+}
+#parentQueueItemMenu button:hover { background: #303030; }
+#parentPlaylistPopup .queue-action:focus-visible,
+#parentQueueItemMenu button:focus-visible { outline: 2px solid #f50; outline-offset: -2px; }

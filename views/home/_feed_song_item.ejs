@@ -1,0 +1,24 @@
+<%
+  const songId = String(song._id || song.id || '');
+  const categoryId = song.categoryId?._id || song.categoryId || '';
+  const cover = typeof song.image === 'string' ? song.image
+    : song.image?.url || song.image?.secure_url || song.albumCover || song.thumbnail || '';
+  const title = song.name || song.title || 'Unknown Song';
+  const artist = song.artist || 'Unknown Artist';
+%>
+<button type="button" class="music-card song-item feed-track"
+        data-id="<%= songId %>" data-name="<%= title %>" data-category="<%= categoryId %>"
+        aria-label="Phát <%= title %> - <%= artist %>">
+  <span class="music-thumbnail">
+    <% if (cover) { %>
+      <img src="<%= cover %>" alt="" loading="lazy" draggable="false">
+    <% } else { %>
+      <i class="fas fa-music feed-cover-fallback" aria-hidden="true"></i>
+    <% } %>
+    <span class="feed-play" aria-hidden="true"><i class="fas fa-play"></i></span>
+  </span>
+  <span class="music-info">
+    <span class="music-title" title="<%= title %>"><%= title %></span>
+    <span class="music-artist" title="<%= artist %>"><%= artist %></span>
+  </span>
+</button>
