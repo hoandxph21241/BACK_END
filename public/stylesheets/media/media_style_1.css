@@ -1226,3 +1226,10 @@ body {
 @media (min-width: 1000px) {
     .media-control-bar { --site-content-width: min(73.8%, 1240px); }
 }
+
+/* Reduce only the two trailing icons by 10%, retaining their button hit areas. */
+.media-control-bar .player-track-section .bi-heart,
+.media-control-bar #togglePlaylistBtn svg {
+    transform: scale(0.7);
+    transform-origin: center;
+}

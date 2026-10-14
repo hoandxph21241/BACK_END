@@ -1,11 +1,65 @@
 <!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>Đăng nhập | MediaHz</title>
+  <link rel="icon" href="/images/bg.png" type="image/png">
+  <link rel="stylesheet" href="/stylesheets/auth/sign_in.css">
+  <script src="/javascripts/auth/sign_in.js" defer></script>
+</head>
+<body class="signin-page">
+  <header class="signin-header">
+    <a href="/home" class="signin-brand" aria-label="MediaHz - Trang chủ">
+      <span class="signin-logo"><img src="/images/bg.png" alt=""></span>
+      <span>MediaHz</span>
+    </a>
+    <a href="/auth/register" class="signin-register-link">Tạo tài khoản</a>
+  </header>
+  <main class="signin-main">
+    <section class="signin-content" aria-labelledby="signinTitle">
+      <a class="signin-back" href="/home"><span class="signin-icon icon-back" aria-hidden="true"></span>Trang chủ</a>
+      <h1 id="signinTitle">Đăng nhập</h1>
+      <p class="signin-subtitle">Chào mừng trở lại MediaHz.</p>
+      <% if (typeof msg === 'string' && msg) { %>
+        <div class="signin-error" id="signinError" role="alert"><%= msg %></div>
+      <% } %>
+      <form id="signinForm" action="/auth/signin" method="POST">
+        <div class="signin-field">
+          <label for="email">Email</label>
+          <input id="email" name="nameAccount" type="email" autocomplete="username"
+                 placeholder="you@example.com" required <% if (typeof msg === 'string' && msg) { %>aria-describedby="signinError"<% } %>>
+        </div>
+        <div class="signin-field">
+          <label for="password">Mật khẩu</label>
+          <div class="signin-password">
+            <input id="password" name="namePassword" type="password" autocomplete="current-password"
+                   placeholder="Nhập mật khẩu" required <% if (typeof msg === 'string' && msg) { %>aria-describedby="signinError"<% } %>>
+            <button id="togglePassword" type="button" class="signin-reveal" aria-label="Hiện mật khẩu"
+                    aria-controls="password" aria-pressed="false" title="Hiện mật khẩu">
+              <span class="signin-icon icon-eye" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+        <button id="signinSubmit" type="submit" class="signin-submit">Đăng nhập</button>
+      </form>
+      <div class="signin-divider"><span>hoặc</span></div>
+      <a href="/auth/google" class="signin-google"><span class="signin-icon icon-google" aria-hidden="true"></span>Tiếp tục với Google</a>
+      <p class="signin-create">Chưa có tài khoản? <a href="/auth/register">Đăng ký</a></p>
+    </section>
+  </main>
+</body>
+</html>
+<!-- Previous sign-in template retained for reference:
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign In</title>
-  
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
@@ -36,7 +90,7 @@
         <div class="card mt-4">
           <h3 class="text-secondary fs-2 fw-bold">Sign In</h3>
 
-          <% if (msg) { %>
+          &lt;% if (msg) { %>
             <div class="alert alert-danger d-flex align-items-center justify-content-between" role="alert">
               <svg xmlns="http://www.w3.org/2000/svg" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"
                   width="24" height="24" viewBox="0 0 16 16" role="img" aria-label="Warning:">
@@ -44,13 +98,13 @@
                       d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
               </svg>
               <div>
-                  <%= msg %>
+                  &lt;%= msg %>
               </div>
               <div>
                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
               </div>
           </div>
-        <% } %>
+        &lt;% } %>
 
           <div class="card-body">
             <form method="POST">
@@ -93,3 +147,4 @@
 </body>
 
 </html>
+-->

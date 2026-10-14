@@ -1,0 +1,83 @@
+/* Library uses the same cover items as Feed with a separate two-column layout. */
+.library-view {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 32px;
+    padding: 32px 8px 80px;
+    color: #f5f5f5;
+}
+.library-content { min-width: 0; }
+.library-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+.library-heading h1 { margin: 0; font-size: 26px; font-weight: 600; line-height: 32px; }
+#libraryResultCount { color: #aaa; font-size: 12px; white-space: nowrap; }
+.library-toolbar {
+    display: grid;
+    grid-template-columns: minmax(160px, 1fr) 150px 125px;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+.library-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background: #242424;
+    color: #aaa;
+}
+.library-search input {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #fff;
+    font-size: 12px;
+}
+.library-search input::placeholder { color: #aaa; }
+.library-toolbar select {
+    min-width: 0;
+    width: 100%;
+    height: 36px;
+    padding: 0 8px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background: #242424;
+    color: #eee;
+    font-size: 12px;
+    color-scheme: dark;
+}
+.library-search:focus-within, .library-toolbar select:focus-visible { outline: 2px solid #f50; outline-offset: 2px; }
+.library-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 26px 18px; }
+.library-entry { min-width: 0; }
+.library-entry[hidden] { display: none; }
+.library-view .feed-track { width: 100%; min-width: 0; }
+.library-empty { padding: 48px 12px; color: #aaa; text-align: center; font-size: 13px; }
+.library-empty[hidden] { display: none; }
+.library-empty > i { margin-bottom: 14px; font-size: 28px; }
+.library-tools { border-left: 1px solid #454545; padding-left: 24px; align-self: start; }
+.library-tools h2 { margin: 4px 0 20px; color: #ccc; font-size: 14px; font-weight: 600; }
+.library-tool-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.library-tool-slot { height: 96px; border: 1px solid #454545; border-radius: 4px; }
+.library-tool-slot-wide { grid-column: 1 / -1; height: 156px; }
+@media (max-width: 1200px) {
+    .library-view { grid-template-columns: minmax(0, 1fr) 220px; gap: 24px; }
+    .library-toolbar { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .library-search { grid-column: 1 / -1; }
+}
+@media (max-width: 900px) {
+    .library-view { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-top: 24px; }
+    .library-tools { padding: 20px 0 0; border-left: 0; border-top: 1px solid #454545; }
+    .library-tool-slots { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .library-tool-slot-wide { grid-column: auto; height: 96px; }
+}
+@media (max-width: 480px) {
+    .library-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; }
+    .library-heading h1 { font-size: 24px; }
+    .library-tool-slots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .library-tool-slot-wide { grid-column: 1 / -1; }
+}

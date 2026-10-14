@@ -1,4 +1,81 @@
 <!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>Tạo tài khoản | MediaHz</title>
+  <link rel="icon" href="/images/bg.png" type="image/png">
+  <link rel="stylesheet" href="/stylesheets/auth/sign_in.css">
+  <link rel="stylesheet" href="/stylesheets/auth/register.css">
+  <script src="/javascripts/auth/register.js" defer></script>
+</head>
+<body class="signin-page register-page">
+  <header class="signin-header">
+    <a href="/home" class="signin-brand" aria-label="MediaHz - Trang chủ">
+      <span class="signin-logo"><img src="/images/bg.png" alt=""></span>
+      <span>MediaHz</span>
+    </a>
+    <a href="/auth/signin" class="signin-register-link">Đăng nhập</a>
+  </header>
+  <main class="signin-main">
+    <section class="signin-content" aria-labelledby="registerTitle">
+      <a class="signin-back" href="/auth/signin"><span class="signin-icon icon-back" aria-hidden="true"></span>Đăng nhập</a>
+      <%
+        const message = typeof msg === 'string' ? msg : '';
+        const registrationSucceeded = message === 'Đăng ký thành công!';
+      %>
+      <% if (registrationSucceeded) { %>
+        <h1 id="registerTitle">Tài khoản đã sẵn sàng</h1>
+        <p class="signin-subtitle">Chào mừng bạn đến với MediaHz.</p>
+        <div class="register-success" role="status"><%= message %></div>
+        <a href="/auth/signin" class="signin-submit">Đăng nhập</a>
+      <% } else { %>
+        <h1 id="registerTitle">Tạo tài khoản</h1>
+        <p class="signin-subtitle">Bắt đầu cùng MediaHz.</p>
+        <% if (message) { %>
+          <div class="signin-error" id="registerError" role="alert"><%= message %></div>
+        <% } %>
+        <form id="registerForm" action="/auth/register" method="POST">
+          <div class="signin-field">
+            <label for="registerEmail">Email</label>
+            <input id="registerEmail" name="nameAccount" type="email" autocomplete="username"
+                   placeholder="you@example.com" required <% if (message) { %>aria-describedby="registerError"<% } %>>
+          </div>
+          <div class="signin-field">
+            <label for="registerPassword">Mật khẩu</label>
+            <div class="signin-password">
+              <input id="registerPassword" name="namePassword" type="password" autocomplete="new-password" placeholder="Tạo mật khẩu" required>
+              <button type="button" class="signin-reveal" data-password-target="registerPassword"
+                      aria-controls="registerPassword" aria-label="Hiện mật khẩu" aria-pressed="false" title="Hiện mật khẩu">
+                <span class="signin-icon icon-eye" aria-hidden="true"></span>
+              </button>
+            </div>
+          </div>
+          <div class="signin-field">
+            <label for="confirmPassword">Xác nhận mật khẩu</label>
+            <div class="signin-password">
+              <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password"
+                     placeholder="Nhập lại mật khẩu" aria-describedby="passwordMatchError" required>
+              <button type="button" class="signin-reveal" data-password-target="confirmPassword"
+                      aria-controls="confirmPassword" aria-label="Hiện mật khẩu xác nhận" aria-pressed="false" title="Hiện mật khẩu xác nhận">
+                <span class="signin-icon icon-eye" aria-hidden="true"></span>
+              </button>
+            </div>
+            <p id="passwordMatchError" class="register-field-error" role="status" hidden>Mật khẩu xác nhận chưa khớp.</p>
+          </div>
+          <button id="registerSubmit" type="submit" class="signin-submit">Tạo tài khoản</button>
+        </form>
+        <div class="signin-divider"><span>hoặc</span></div>
+        <a href="/auth/google" class="signin-google"><span class="signin-icon icon-google" aria-hidden="true"></span>Tiếp tục với Google</a>
+        <p class="signin-create">Đã có tài khoản? <a href="/auth/signin">Đăng nhập</a></p>
+      <% } %>
+    </section>
+  </main>
+</body>
+</html>
+<!-- Previous registration template retained for reference:
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -25,7 +102,7 @@
         <div class="card mt-4">
           <h3 class=" text-secondary fs-2 fw-bold">Register</h3>
 
-          <% if (msg) { %>
+          &lt;% if (msg) { %>
             <div class="alert alert-danger d-flex align-items-center justify-content-between" role="alert">
               <svg xmlns="http://www.w3.org/2000/svg" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"
                   width="24" height="24" viewBox="0 0 16 16" role="img" aria-label="Warning:">
@@ -33,13 +110,13 @@
                       d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
               </svg>
               <div>
-                  <%= msg %>
+                  &lt;%= msg %>
               </div>
               <div>
                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
               </div>
           </div>
-        <% } %>
+        &lt;% } %>
 
           <div class="card-body">
             <form method="POST">
@@ -74,3 +151,5 @@
 </body>
 
 </html>
+
+-->

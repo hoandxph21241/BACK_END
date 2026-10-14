@@ -1,0 +1,18 @@
+/* Register shares the login design and only adds registration-specific states. */
+.register-page .signin-main { padding-top: 36px; padding-bottom: 48px; }
+.register-page .signin-back { margin-bottom: 24px; }
+.register-page .signin-subtitle { margin-bottom: 26px; }
+.register-page .signin-field { margin-bottom: 18px; }
+.register-field-error { margin: 8px 0 0; color: #ffc7c7; font-size: 12px; line-height: 18px; }
+.register-field-error[hidden] { display: none; }
+.register-page input[aria-invalid="true"] { border-color: #c86161; }
+.register-success {
+    margin-bottom: 24px;
+    padding: 14px;
+    border: 1px solid #426f58;
+    border-radius: 4px;
+    background: #203028;
+    color: #c0ecd1;
+    font-size: 14px;
+    line-height: 21px;
+}

@@ -12,6 +12,7 @@
   <link rel="icon" href="/images/bg.png" type="image/x-icon" />
   <link rel='stylesheet' href='/stylesheets/iframe_mediabar.css' />
   <script src='/javascripts/media_v2/parent_queue_v2_1.js' defer></script>
+  <script src='/javascripts/home/library_v2_1.js' defer></script>
 </head>
 
 <!-- Previous page wrapper: <body> -->
@@ -401,6 +402,7 @@
 
         // Initialize dynamic content
         function initializeDynamicContent() {
+          if (typeof window.initLibraryView === "function") window.initLibraryView();
           if (document.getElementById('uploadForm')) {
             if (!window._uploadFormInitialized) {
               if (typeof window.initUploadForm !== 'function') {
@@ -534,91 +536,141 @@
           }, 10);
         }
 
-        document.querySelectorAll('.nav-link').forEach(link => {
-          link.addEventListener('click', function (e) {
-            e.preventDefault();
-
-            document.querySelectorAll('.nav-link').forEach(l => {
-              l.classList.remove('active');
+//         document.querySelectorAll('.nav-link').forEach(link => {
+//           link.addEventListener('click', function (e) {
+//             e.preventDefault();
+//
+//             document.querySelectorAll('.nav-link').forEach(l => {
+//               l.classList.remove('active');
+//             });
+//             this.classList.add('active');
+//             updateIndicatorPosition(this);
+//             const url = this.dataset.url;
+//             document.getElementById('main').innerHTML = '<div class="text-center p-4"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+//             axios.get(url)
+//               .then(response => {
+//                 document.getElementById('main').innerHTML = response.data;
+//                 setTimeout(() => {
+//                   updateIndicatorPosition(this);
+//                   initializeDynamicContent();
+//                 }, 100);
+//
+//                 history.pushState(null, '', url);
+//               })
+//               .catch(error => {
+//                 console.error('Lỗi tải trang:', error.response?.data || error.message);
+//                 document.getElementById('main').innerHTML = `
+//           <div class="error-message">
+//             <i class="fas fa-exclamation-triangle"></i>
+//             <p>Không thể tải trang. Vui lòng thử lại.</p>
+//             <button onclick="location.reload()">Tải lại</button>
+//           </div>
+//         `;
+//               });
+//           });
+//         });
+//
+//         // Update indicator reload page
+//         window.addEventListener('popstate', () => {
+//           axios.get(location.pathname)
+//             .then(response => {
+//               document.getElementById('main').innerHTML = response.data;
+//
+//               // Update active link and indicator
+//               const currentPath = location.pathname;
+//               const matchingLink = document.querySelector(`.nav-link[data-url="${currentPath}"]`);
+//
+//               if (matchingLink) {
+//                 document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+//                 matchingLink.classList.add('active');
+//                 updateIndicatorPosition(matchingLink);
+//               }
+//
+//               setTimeout(() => {
+//                 initializeDynamicContent();
+//               }, 100);
+//             })
+//             .catch(error => {
+//               console.error('Lỗi tải trang:', error.response?.data || error.message);
+//             });
+//         });
+//
+//         // Resize indicator on window resize
+//         let resizeTimeout;
+//         window.addEventListener('resize', () => {
+//           clearTimeout(resizeTimeout);
+//           resizeTimeout = setTimeout(() => {
+//             const activeLink = document.querySelector('.nav-link.active');
+//             if (activeLink) {
+//               updateIndicatorPosition(activeLink);
+//             }
+//           }, 100);
+//         });
+//
+//         // Handle browser back/forward
+//         window.addEventListener('popstate', () => {
+//           axios.get(location.pathname)
+//             .then(response => {
+//               document.getElementById('main').innerHTML = response.data;
+//               setTimeout(() => {
+//                 initializeDynamicContent();
+//               }, 100);
+//             })
+//             .catch(error => {
+//               console.error('Lỗi tải trang:', error.response?.data || error.message);
+//             });
+//         });
+        // Keep the application shell mounted; only replace the tab content.
+        let navigationRequest = 0;
+        const main = document.getElementById('main');
+        function tabPath(path) {
+          return path === '/home' || path === '/home/' ? '/home/pratical' : path;
+        }
+        function updateActiveTab(path) {
+          document.querySelectorAll('.nav-link[data-url]').forEach(link => {
+            const active = link.dataset.url === tabPath(path);
+            link.classList.toggle('active', active);
+            if (active) {
+              link.setAttribute('aria-current', 'page');
+              updateIndicatorPosition(link);
+            } else link.removeAttribute('aria-current');
+          });
+        }
+        async function loadPage(url, pushHistory = false) {
+          const request = ++navigationRequest;
+          main.innerHTML = '<div class="text-center text-light p-4" role="status">Loading...</div>';
+          try {
+            const response = await axios.get(tabPath(url), {
+              headers: { 'X-Requested-With': 'XMLHttpRequest' },
             });
-            this.classList.add('active');
-            updateIndicatorPosition(this);
-            const url = this.dataset.url;
-            document.getElementById('main').innerHTML = '<div class="text-center p-4"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
-            axios.get(url)
-              .then(response => {
-                document.getElementById('main').innerHTML = response.data;
-                setTimeout(() => {
-                  updateIndicatorPosition(this);
-                  initializeDynamicContent();
-                }, 100);
-
-                history.pushState(null, '', url);
-              })
-              .catch(error => {
-                console.error('Lỗi tải trang:', error.response?.data || error.message);
-                document.getElementById('main').innerHTML = `
-          <div class="error-message">
-            <i class="fas fa-exclamation-triangle"></i>
-            <p>Không thể tải trang. Vui lòng thử lại.</p>
-            <button onclick="location.reload()">Tải lại</button>
-          </div>
-        `;
-              });
+            if (request !== navigationRequest) return;
+            main.innerHTML = response.data;
+            if (pushHistory && location.pathname + location.search !== url) {
+              history.pushState({ url }, '', url);
+            }
+            updateActiveTab(new URL(url, location.href).pathname);
+            initializeDynamicContent();
+          } catch (error) {
+            if (request !== navigationRequest) return;
+            console.error('Cannot load tab:', error.message);
+            main.innerHTML = '<div class="text-center text-light p-4"><p>Không thể tải trang.</p><button type="button" id="retryTabBtn" class="btn btn-outline-light">Thử lại</button></div>';
+            document.getElementById('retryTabBtn').addEventListener('click', () => loadPage(url, pushHistory));
+          }
+        }
+        document.querySelectorAll('.nav-link[data-url]').forEach(link => {
+          link.addEventListener('click', event => {
+            if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+            event.preventDefault();
+            loadPage(link.dataset.url, true);
           });
         });
-
-        // Update indicator reload page
-        window.addEventListener('popstate', () => {
-          axios.get(location.pathname)
-            .then(response => {
-              document.getElementById('main').innerHTML = response.data;
-
-              // Update active link and indicator
-              const currentPath = location.pathname;
-              const matchingLink = document.querySelector(`.nav-link[data-url="${currentPath}"]`);
-
-              if (matchingLink) {
-                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-                matchingLink.classList.add('active');
-                updateIndicatorPosition(matchingLink);
-              }
-
-              setTimeout(() => {
-                initializeDynamicContent();
-              }, 100);
-            })
-            .catch(error => {
-              console.error('Lỗi tải trang:', error.response?.data || error.message);
-            });
-        });
-
-        // Resize indicator on window resize
+        window.addEventListener('popstate', () => loadPage(location.pathname + location.search));
         let resizeTimeout;
         window.addEventListener('resize', () => {
           clearTimeout(resizeTimeout);
-          resizeTimeout = setTimeout(() => {
-            const activeLink = document.querySelector('.nav-link.active');
-            if (activeLink) {
-              updateIndicatorPosition(activeLink);
-            }
-          }, 100);
+          resizeTimeout = setTimeout(() => updateActiveTab(location.pathname), 100);
         });
-
-        // Handle browser back/forward
-        window.addEventListener('popstate', () => {
-          axios.get(location.pathname)
-            .then(response => {
-              document.getElementById('main').innerHTML = response.data;
-              setTimeout(() => {
-                initializeDynamicContent();
-              }, 100);
-            })
-            .catch(error => {
-              console.error('Lỗi tải trang:', error.response?.data || error.message);
-            });
-        });
-
+        loadPage(<%- JSON.stringify(typeof initialView === 'string' ? initialView : '/home/pratical') %>);
         // Handle iframe messages
         // window.addEventListener('message', function (event) {
         //   if (event.data && event.data.type === 'playlistState') {
