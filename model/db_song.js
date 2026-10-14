@@ -171,24 +171,10 @@ var MP3Schema = new db.mongoose.Schema(
     timestamps: true,
   },
 );
-
-MP3Schema.index({
-  name: "text",
-  artist: "text",
-});
-
-MP3Schema.index({
-  categoryId: 1,
-});
-
-MP3Schema.index({
-  playCount: -1,
-});
-
-MP3Schema.index({
-  createdAt: -1,
-});
-
+MP3Schema.index({name: "text",artist: "text",});
+MP3Schema.index({categoryId: 1,});
+MP3Schema.index({playCount: -1,});
+MP3Schema.index({createdAt: -1,});
 let MP3 = db.mongoose.model("MP3", MP3Schema);
 
 // Bổ sung Table
