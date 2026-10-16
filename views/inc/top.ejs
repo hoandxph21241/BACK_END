@@ -1,3 +1,7 @@
+<link rel="stylesheet" href="/stylesheets/upload_notifications.css">
+<script src="/javascripts/upload_notifications.js" defer data-notification-owner="<%= user ? (user.userID || user._id || user.id || 'user') : 'guest' %>"></script>
+<link rel="stylesheet" href="/stylesheets/nav_user.css">
+<script src="/javascripts/nav_user.js" defer></script>
 <!-- Header -->
 <style>
     body {
@@ -208,9 +212,9 @@
                     <div class="nav-user">
                         <% if (user) { %>
                             <!-- User Icon with Dropdown (Đã đăng nhập) -->
-                            <li class="nav-item p-2 dropdown">
+                            <li class="nav-item nav-account-item dropdown">
                                 <div class="text-center">
-                                    <button type="button" class="btn btn-outline-warning dropdown-toggle"
+<!-- Previous account button:                                     <button type="button" class="btn btn-outline-warning dropdown-toggle"
                                         data-bs-toggle="dropdown" aria-expanded="false">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                             fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
@@ -218,6 +222,16 @@
                                             <path fill-rule="evenodd"
                                                 d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
                                         </svg>
+                                    </button> -->
+                                    <button id="navAccountDropdown" type="button" class="btn nav-account-trigger dropdown-toggle"
+                                            data-bs-toggle="dropdown" aria-expanded="false" aria-label="Tài khoản" title="Tài khoản">
+                                        <!-- Previous decorative account icon:
+                                        <span class="nav-account-avatar" aria-hidden="true"><span class="nav-account-icon"></span></span>
+                                        -->
+                                        <img class="nav-account-photo"
+                                             src="<%= typeof user.imageAccount === 'string' && user.imageAccount.trim() ? user.imageAccount : '/images/auth/person-circle.svg' %>"
+                                             alt="" width="28" height="28" referrerpolicy="no-referrer"
+                                             data-avatar-fallback="/images/auth/person-circle.svg">
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-dark px-3">
                                         <li><a class="dropdown-item nav-link nav-load d-inline p-0"

@@ -6,6 +6,7 @@ const GridFS = require("../../../utils/GridFS");
 
 const SongMapper = require("../mapper/SongMapper");
 const fs = require("fs/promises");
+const uploadImageToImgBB = require("../../../utils/songCover");
 
 class SongController extends BaseController {
   constructor() {
@@ -18,8 +19,21 @@ class SongController extends BaseController {
         throw new ApiError(ErrorCode.SONG.FILE_REQUIRED);
       }
 
+      let image = req.body.image;
+      if (req.songImage) {
+        const result = await uploadImageToImgBB(req.songImage.path);
+        // if (!result.success) throw new ApiError(ErrorCode.SONG.UPLOAD_FAILED);
+        if (!result.success) throw new ApiError({
+          ...ErrorCode.SONG.UPLOAD_FAILED,
+          status: result.status || 502,
+          message: result.error || ErrorCode.SONG.UPLOAD_FAILED.message,
+        });
+        image = { ...result.data, originalName: req.songImage.originalname };
+      }
       const data = await this.service.upload({
         ...req.body,
+        image,
+        userID: req.user?.userID || req.user?.id,
         file: req.file,
         originalName: req.file.originalname,
         fileSize: req.file.size,
@@ -28,11 +42,16 @@ class SongController extends BaseController {
       return this.success(res, this.mapper.detail(data));
     } finally {
       // Xóa file tạm sau khi upload thành công hoặc thất bại.
-      if (req.file?.path) {
-        await fs.unlink(req.file.path).catch((error) => {
-          if (error.code !== "ENOENT") {
-            console.error("Cannot remove temporary song file:", error.message);
-          }
+//       if (req.file?.path) {
+//         await fs.unlink(req.file.path).catch((error) => {
+//           if (error.code !== "ENOENT") {
+//             console.error("Cannot remove temporary song file:", error.message);
+//           }
+//         });
+//       }
+      for (const file of [req.file, req.songImage]) {
+        if (file?.path) await fs.unlink(file.path).catch(error => {
+          if (error.code !== "ENOENT") console.error("Cannot remove temporary song file:", error.message);
         });
       }
     }

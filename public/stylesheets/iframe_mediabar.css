@@ -553,3 +553,47 @@ body.home-centered-layout #main {
 #parentQueueItemMenu button:hover { background: #303030; }
 #parentPlaylistPopup .queue-action:focus-visible,
 #parentQueueItemMenu button:focus-visible { outline: 2px solid #f50; outline-offset: -2px; }
+
+/* Previous handle-specific styles retained for reference (disabled). */
+/*  Queue gestures: only the handle owns vertical drag; the track keeps vertical scrolling. */
+/* #parentPlaylistPopup .queue-row { display: block; position: relative; overflow: hidden; } */
+/* #parentPlaylistPopup .queue-surface { position: relative; z-index: 1; display: grid; grid-template-columns: 24px minmax(0,1fr) 64px; align-items: center; min-height: 64px; background: #303030; touch-action: pan-y; transition: transform 180ms ease; } */
+/* #parentPlaylistPopup .queue-row:hover .queue-surface, */
+/* #parentPlaylistPopup .queue-row.is-current .queue-surface { background: #383838; } */
+/* #parentPlaylistPopup .queue-row.is-revealed .queue-surface { transform: translateX(-52px); } */
+/* #parentPlaylistPopup .queue-row.is-swiping .queue-surface { transition: none; } */
+/* #parentPlaylistPopup .queue-drag-handle { display: grid; place-items: center; width: 24px; height: 48px; padding: 0; border: 0; color: #aaa; background: transparent; cursor: grab; touch-action: none; } */
+/* #parentPlaylistPopup .queue-row.is-dragging { opacity: .65; outline: 1px solid #f50; outline-offset: -1px; } */
+/* #parentPlaylistPopup .queue-row.is-dragging .queue-drag-handle { cursor: grabbing; } */
+/* .queue-grip-icon, .queue-remove-icon { display: block; width: 16px; height: 16px; background: currentColor; mask: url('/images/player/grip-vertical.svg') center / contain no-repeat; -webkit-mask: url('/images/player/grip-vertical.svg') center / contain no-repeat; } */
+/* .queue-remove-icon { mask-image: url('/images/auth/x-lg.svg'); -webkit-mask-image: url('/images/auth/x-lg.svg'); } */
+/* #parentPlaylistPopup .queue-remove { position: absolute; top: 0; right: 0; display: grid; place-items: center; width: 52px; height: 100%; padding: 0; border: 0; background: #9c3030; color: #fff; cursor: pointer; visibility: hidden; } */
+/* #parentPlaylistPopup .queue-row.is-revealed .queue-remove, */
+/* #parentPlaylistPopup .queue-row.is-swiping .queue-remove { visibility: visible; } */
+/* #parentPlaylistPopup .queue-remove:hover { background: #b83737; } */
+/* #parentPlaylistPopup .queue-drag-handle:focus-visible, */
+/* #parentPlaylistPopup .queue-remove:focus-visible { outline: 2px solid #f50; outline-offset: -2px; } */
+/* #parentQueueItemMenu button:disabled { opacity: .4; cursor: default; } */
+/* @media (prefers-reduced-motion: reduce) { #parentPlaylistPopup .queue-surface { transition: none; } } */
+/* Whole-row mouse drag with independent favorite/menu/remove controls. */
+#parentPlaylistPopup .queue-row { display: block; position: relative; overflow: hidden; }
+#parentPlaylistPopup .queue-surface { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0,1fr) 64px; align-items: center; min-height: 64px; background: #303030; touch-action: pan-y; transition: transform 180ms ease; user-select: none; -webkit-user-select: none; cursor: grab; }
+#parentPlaylistPopup .queue-track { cursor: grab; }
+#parentPlaylistPopup .queue-row:hover .queue-surface,
+#parentPlaylistPopup .queue-row.is-current .queue-surface { background: #383838; }
+#parentPlaylistPopup .queue-row.is-revealed .queue-surface { transform: translateX(-52px); }
+#parentPlaylistPopup .queue-row.is-swiping .queue-surface { transition: none; }
+#parentPlaylistPopup .queue-row.is-dragging { outline: 1px solid #f50; outline-offset: -1px; }
+#parentPlaylistPopup .queue-row.is-dragging .queue-surface { background: #454545; }
+#parentPlaylistPopup .queue-row.is-dragging .queue-surface,
+#parentPlaylistPopup .queue-row.is-dragging .queue-track { cursor: grabbing; }
+.queue-remove-icon { display: block; width: 16px; height: 16px; background: currentColor; mask: url('/images/auth/x-lg.svg') center / contain no-repeat; -webkit-mask: url('/images/auth/x-lg.svg') center / contain no-repeat; }
+#parentPlaylistPopup .queue-remove { position: absolute; top: 0; right: 0; display: grid; place-items: center; width: 52px; height: 100%; padding: 0; border: 0; background: #9c3030; color: #fff; cursor: pointer; visibility: hidden; }
+#parentPlaylistPopup .queue-row.is-revealed .queue-remove,
+#parentPlaylistPopup .queue-row.is-swiping .queue-remove { visibility: visible; }
+#parentPlaylistPopup .queue-remove:hover { background: #b83737; }
+#parentPlaylistPopup .queue-remove:focus-visible { outline: 2px solid #f50; outline-offset: -2px; }
+#parentQueueItemMenu button:disabled { opacity: .4; cursor: default; }
+@media (prefers-reduced-motion: reduce) { #parentPlaylistPopup .queue-surface { transition: none; } }
+/* Keep the exiting row noninteractive while its height collapses. */
+#parentPlaylistPopup .queue-row.is-removing { pointer-events: none; overflow: hidden; }

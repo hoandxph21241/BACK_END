@@ -1,0 +1,11 @@
+.song-like-icon { display:block; width:16px; height:16px; background:currentColor; mask:url('/images/player/heart.svg') center/contain no-repeat; -webkit-mask:url('/images/player/heart.svg') center/contain no-repeat; }
+[aria-pressed="true"] > .song-like-icon { mask-image:url('/images/player/heart-fill.svg'); -webkit-mask-image:url('/images/player/heart-fill.svg'); }
+button[data-song-like][aria-pressed="true"] { color:#f50 !important; }
+button[data-song-like]:disabled { opacity:.5; cursor:wait; }
+.track-like { display:flex; align-items:center; gap:7px; padding:7px 12px; border:1px solid #666; border-radius:3px; background:transparent; color:#eee; font:inherit; font-size:12px; cursor:pointer; }
+.track-toolbar-actions { display:flex; gap:8px; }
+#songEngagementStatus { position:fixed; z-index:12000; bottom:72px; left:50%; transform:translateX(-50%); max-width:calc(100vw - 32px); padding:12px 16px; background:#222; color:#fff; border:1px solid #666; border-radius:4px; font:13px Arial,sans-serif; }
+#songEngagementStatus[hidden] { display:none; }
+.media-control-bar #mediaLikeBtn .song-like-icon { transform:scale(.7); transform-origin:center; }
+.track-toolbar { flex-wrap:wrap; }
+.track-toolbar-actions { margin-left:auto; }

@@ -1,4 +1,4 @@
-﻿var db = require("../model/db_song");
+var db = require("../model/db_song");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
@@ -82,42 +82,43 @@ const upload = multer({
   }
 });
 
-async function uploadImageToImgBB(imagePath) {
-  try {
-    const imageBuffer = fs.readFileSync(imagePath);
-    const base64Image = imageBuffer.toString('base64');
-    const formData = new FormData();
-    formData.append('key', IMGBB_API_KEY);
-    formData.append('image', base64Image);
-    const response = await axios.post(IMGBB_API_URL, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
-      timeout: 30000
-    });
-    
-    if (response.data && response.data.success) {
-      return {
-        success: true,
-        data: {
-          url: response.data.data.url,
-          display_url: response.data.data.display_url,
-          delete_url: response.data.data.delete_url,
-          thumb: response.data.data.thumb
-        }
-      };
-    } else {
-      throw new Error('ImgBB API response không hợp lệ');
-    }
-  } catch (error) {
-    console.error('Error uploading to ImgBB:', error);
-    return {
-      success: false,
-      error: error.message || 'Lỗi upload ảnh lên ImgBB'
-    };
-  }
-}
-
+// Previous ImgBB helper moved to utils/songCover.js for shared web/API use.
+// async function uploadImageToImgBB(imagePath) {
+//   try {
+//     const imageBuffer = fs.readFileSync(imagePath);
+//     const base64Image = imageBuffer.toString('base64');
+//     const formData = new FormData();
+//     formData.append('key', IMGBB_API_KEY);
+//     formData.append('image', base64Image);
+//     const response = await axios.post(IMGBB_API_URL, formData, {
+//       headers: {
+//         'Content-Type': 'multipart/form-data'
+//       },
+//       timeout: 30000
+//     });
+//
+//     if (response.data && response.data.success) {
+//       return {
+//         success: true,
+//         data: {
+//           url: response.data.data.url,
+//           display_url: response.data.data.display_url,
+//           delete_url: response.data.data.delete_url,
+//           thumb: response.data.data.thumb
+//         }
+//       };
+//     } else {
+//       throw new Error('ImgBB API response không hợp lệ');
+//     }
+//   } catch (error) {
+//     console.error('Error uploading to ImgBB:', error);
+//     return {
+//       success: false,
+//       error: error.message || 'Lỗi upload ảnh lên ImgBB'
+//     };
+//   }
+// }
+const uploadImageToImgBB = require("../utils/songCover");
 exports.Product = async (req, res, next) => {
   try {
     let listidCategory = await db.CategoryModel.find();

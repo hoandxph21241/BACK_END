@@ -1233,3 +1233,19 @@ body {
     transform: scale(0.7);
     transform-origin: center;
 }
+
+/* Previous anchor metadata styles (disabled). */
+/* .player-song-cover-link { display:flex; flex:0 0 auto; } */
+/* .player-track-section [data-track-page] { text-decoration:none; cursor:pointer; } */
+/* .player-track-section .player-track-meta [data-track-page]:hover { text-decoration:underline; } */
+/* .player-track-section [data-track-page][aria-disabled="true"] { cursor:default; pointer-events:none; } */
+/* .player-track-section [data-track-page]:focus-visible { outline:2px solid #f50; outline-offset:2px; } */
+/*  */
+/* Metadata is navigation by button, without link decoration or default button chrome. */
+.media-control-bar .player-track-section button[data-track-page] { appearance:none; border:0; padding:0; margin:0; border-radius:0; background:transparent; text-align:left; text-decoration:none !important; cursor:pointer; font-family:inherit; transition:color 150ms ease; }
+.media-control-bar .player-song-cover-button { display:flex; flex:0 0 auto; }
+.media-control-bar .player-track-meta button[data-track-page]:hover,
+.media-control-bar .player-track-meta button[data-track-page]:focus-visible { color:#ff7a38 !important; text-decoration:none !important; }
+.media-control-bar .player-track-section button[data-track-page]:disabled { cursor:default; pointer-events:none; }
+.media-control-bar .player-track-section button[data-track-page]:focus-visible { outline:2px solid #f50; outline-offset:2px; }
+@media(prefers-reduced-motion:reduce) { .media-control-bar .player-track-section button[data-track-page] { transition:none; } }

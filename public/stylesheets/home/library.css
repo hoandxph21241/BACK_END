@@ -81,3 +81,26 @@
     .library-tool-slots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .library-tool-slot-wide { grid-column: 1 / -1; }
 }
+/* Same grid dimensions as the data view; placeholders are never interactive. */
+.library-skeleton { position: relative; }
+.library-skeleton .placeholder { color: #777; cursor: default; border-radius: 3px; }
+.library-skeleton-control { display: block; width: 100%; height: 36px; border: 0; }
+.library-skeleton .library-skeleton-control { background-color: currentColor; }
+.library-skeleton-cover { display: block; width: 100%; aspect-ratio: 1; }
+/* Previous: .library-skeleton-info { padding-top: 10px; } */
+.library-skeleton-info { display: grid; grid-template-rows: 20px 18px; row-gap: 2px; padding-top: 10px; }
+/* Previous: .library-skeleton-title { display: block; height: 16px; min-height: 0; margin: 2px 0 6px; } */
+.library-skeleton-title { display: block; height: 16px; min-height: 0; margin: 0; align-self: center; }
+/* Previous: .library-skeleton-artist { display: block; height: 12px; min-height: 0; margin: 0 0 3px; } */
+.library-skeleton-artist { display: block; height: 12px; min-height: 0; margin: 0; align-self: center; }
+@media (prefers-reduced-motion: reduce) {
+    .library-skeleton .placeholder-glow .placeholder { animation: none; opacity: .35; }
+}
+
+html:has(body.home-centered-layout) { scrollbar-gutter: stable; }
+#main.library-page-active { overflow-anchor: none; }
+.library-content-ready { animation: library-content-reveal 220ms ease-out both; }
+@keyframes library-content-reveal { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+    .library-content-ready { animation: none; }
+}

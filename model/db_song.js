@@ -5,6 +5,9 @@ var userSchema = new db.mongoose.Schema(
     nameAccount: { type: String, required: true, unique: true, trim: true },
     namePassword: { type: String, required: true },
     imageAccount: { type: String, required: false },
+    bannerImage: { type: String, default: '' },
+    profileTag: { type: String, trim: true, lowercase: true, unique: true, sparse: true, match: /^hz\d{3,12}$/ },
+    bio: { type: String, trim: true, maxlength: 500, default: '' },
     userName: { type: String, required: false },
     fullName: { type: String, required: false },
     gmail: { type: String, required: false, index: true, unique: false },
@@ -13,6 +16,7 @@ var userSchema = new db.mongoose.Schema(
       {
         token: { type: String, required: true },
         device: { type: String, default: "Unknown Device" },
+        browserId: { type: String },
         createdAt: { type: Date, default: Date.now },
         expiresAt: { type: Date, required: true },
       },
@@ -156,6 +160,13 @@ var MP3Schema = new db.mongoose.Schema(
       default: 0,
     },
 
+    likedBy: { type: [String], default: [], select: false },
+    recentPlayIds: { type: [String], default: [], select: false },
+    waveform: {
+      type: new db.mongoose.Schema({ version: Number, duration: Number, peaks: [Number] }, { _id: false }),
+      select: false,
+      default: undefined,
+    },
     isPublic: {
       type: Boolean,
       default: true,

@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { randomUUID } = require("crypto");
 
 class JwtService {
   generateAccessToken(user) {
@@ -26,6 +27,7 @@ class JwtService {
       process.env.JWT_SECRET,
       {
         expiresIn: process.env.JWT_REFRESH_EXPIRES,
+        jwtid: randomUUID(),
       }
     );
   }

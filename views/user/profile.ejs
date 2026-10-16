@@ -1,3 +1,72 @@
+<link rel="stylesheet" href="/stylesheets/CSS_User/profile_user.css">
+<%
+  const avatar = user.imageAccount || '/images/auth/person-circle.svg';
+  const banner = user.bannerImage || '/images/bg_main.png';
+  const tag = user.profileTag || '';
+  const profileMessage = typeof message === 'string' ? message : '';
+%>
+<section class="profile-page" data-profile-view data-edit-open="<%= typeof editOpen !== 'undefined' && editOpen ? 'true' : 'false' %>">
+  <header class="profile-header">
+    <img id="profileBanner" class="profile-cover" src="<%= banner %>" alt="Ảnh bìa hồ sơ" data-image-fallback="/images/bg_main.png">
+    <div class="profile-identity">
+      <img id="profileAvatar" class="profile-avatar" src="<%= avatar %>" alt="Ảnh đại diện" data-image-fallback="/images/auth/person-circle.svg">
+      <div class="profile-info">
+        <h1 id="profileFullName"><%= user.fullName || user.userName || 'Chưa có tên' %></h1>
+        <p><%= user.gmail || user.nameAccount || '' %></p>
+      </div>
+    </div>
+    <button id="editProfileButton" type="button" class="profile-edit-button"><span class="profile-icon profile-pencil" aria-hidden="true"></span>Chỉnh sửa hồ sơ</button>
+    <span id="profileTagLabel" class="profile-tag">#<%= tag %></span>
+  </header>
+  <div class="profile-details">
+    <h2>Giới thiệu</h2>
+    <p id="profileBio"><%= user.bio || 'Chưa có giới thiệu.' %></p>
+    <p id="profileSaveStatus" class="profile-save-status" role="status"></p>
+  </div>
+  <dialog id="profileEditDialog" class="profile-dialog" aria-labelledby="profileEditTitle">
+    <form id="profileEditForm" action="/users/profile/edit" method="POST" enctype="multipart/form-data">
+      <div class="profile-dialog-header">
+        <h2 id="profileEditTitle">Chỉnh sửa hồ sơ</h2>
+        <button type="button" class="profile-close" data-close-profile aria-label="Đóng" title="Đóng"><span class="profile-icon profile-x" aria-hidden="true"></span></button>
+      </div>
+      <div class="profile-form-body">
+        <p id="profileFormError" class="profile-form-error" role="alert" <%= profileMessage ? '' : 'hidden' %>><%= profileMessage %></p>
+        <div class="profile-banner-field">
+          <!-- Previous: <label for="profileBannerFile">Ảnh banner</label> -->
+          <span class="profile-file-heading">Ảnh banner</span>
+          <img id="profileBannerPreview" class="profile-banner-preview" src="<%= banner %>" alt="Xem trước banner">
+          <!-- Previous: <input id="profileBannerFile" name="banner" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="profileImageHint"> -->
+          <div class="profile-file-picker">
+            <button type="button" class="profile-file-button" data-profile-file-target="profileBannerFile" aria-controls="profileBannerFile">Chọn ảnh banner</button>
+            <span id="profileBannerFileName" class="profile-file-name" aria-live="polite">Chưa chọn ảnh</span>
+          </div>
+          <input id="profileBannerFile" name="banner" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Ảnh banner" aria-describedby="profileImageHint" hidden>
+        </div>
+        <div class="profile-avatar-field">
+          <img id="profileAvatarPreview" src="<%= avatar %>" alt="Xem trước ảnh đại diện">
+          <!-- Previous: <div><label for="profileAvatarFile">Ảnh đại diện</label><input id="profileAvatarFile" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="profileImageHint"></div> -->
+          <div>
+            <span class="profile-file-heading">Ảnh đại diện</span>
+            <div class="profile-file-picker">
+              <button type="button" class="profile-file-button" data-profile-file-target="profileAvatarFile" aria-controls="profileAvatarFile">Chọn ảnh đại diện</button>
+              <span id="profileAvatarFileName" class="profile-file-name" aria-live="polite">Chưa chọn ảnh</span>
+            </div>
+            <input id="profileAvatarFile" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Ảnh đại diện" aria-describedby="profileImageHint" hidden>
+          </div>
+        </div>
+        <p id="profileImageHint" class="profile-field-hint">JPG, PNG hoặc WebP · Tối đa 5 MB mỗi ảnh</p>
+        <div class="profile-form-grid">
+          <div><label for="profileFullNameInput">Họ và tên</label><input id="profileFullNameInput" name="fullName" value="<%= user.fullName || user.userName || '' %>" maxlength="80" autocomplete="name" required></div>
+          <div><label for="profileTagInput">Biệt danh</label><input id="profileTagInput" name="profileTag" value="#<%= tag %>" pattern="#?hz[0-9]{3,12}" title="hz và từ 3 đến 12 chữ số, ví dụ #hz231" maxlength="15" spellcheck="false" required></div>
+        </div>
+        <label for="profileBioInput">Giới thiệu</label>
+        <textarea id="profileBioInput" name="bio" rows="3" maxlength="500"><%= user.bio || '' %></textarea>
+      </div>
+      <div class="profile-form-actions"><button type="button" class="profile-cancel" data-close-profile>Hủy</button><button id="profileSaveButton" type="submit" class="profile-save">Lưu thay đổi</button></div>
+    </form>
+  </dialog>
+</section>
+<!-- Previous profile template retained for reference:
 <!DOCTYPE html>
 <html>
 
@@ -15,28 +84,29 @@
 </head>
 
 <body>
-  <% let mp3data%>
+  &lt;% let mp3data%>
       <div class="profile-banner">
-        <img src="<%= user.imageAccount %>" class="profile-avatar" />
+        <img src="&lt;%= user.imageAccount %>" class="profile-avatar" />
         <div class="profile-info">
           <h1>
-            <%= user.fullName || 'Chưa có tên' %>
+            &lt;%= user.fullName || 'Chưa có tên' %>
           </h1>
           <p>
-            <%= user.gmail %>
+            &lt;%= user.gmail %>
           </p>
-          <% if (user.bio) { %>
+          &lt;% if (user.bio) { %>
             <p class="bio">
-              <%= user.bio %>
+              &lt;%= user.bio %>
             </p>
-            <% } %>
-              <% if (user.grender) { %>
-                <p class="gender">Giới tính: <%= user.grender %>
+            &lt;% } %>
+              &lt;% if (user.grender) { %>
+                <p class="gender">Giới tính: &lt;%= user.grender %>
                 </p>
-                <% } %>
+                &lt;% } %>
                   <a href="" class="edit-btn">Chỉnh sửa hồ sơ</a>
         </div>
       </div>
 </body>
 
 </html>
+-->

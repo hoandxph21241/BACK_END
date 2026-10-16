@@ -81,7 +81,8 @@
   }
 
   function handlePause() {
-    if (!audio) return;
+    // Previous: if (!audio) return;
+    if (!audio || !currentSong) return;
 
     // Không ghi đè trạng thái ended thành paused.
     if (!audio.ended) {
@@ -90,6 +91,7 @@
   }
 
   function handleEnded() {
+    if (!currentSong) return;
     updateState({
       status: "ended",
       currentTime: state.duration || state.currentTime,
@@ -97,6 +99,7 @@
   }
 
   function handleError() {
+    if (!currentSong) return;
     updateState({
       status: "error",
       error: "Không thể phát bài hát. Hãy kiểm tra dữ liệu audio hoặc kết nối.",
@@ -154,7 +157,8 @@
     return getState();
   }
 
-  async function playSong(songId) {
+  // Previous: async function playSong(songId)
+  async function playSong(songId, options = {}) {
     requireInitialized();
 
     if (!songId || typeof songId !== "string") {
@@ -190,7 +194,9 @@
         error: null,
       });
 
-      await audio.play();
+      // Previous: await audio.play();
+      if (options.autoplay !== false) await audio.play();
+      else updateState({ status: "paused" });
 
       if (thisRequestId !== requestId) return null;
 
@@ -304,6 +310,16 @@
     };
   }
 
+  function stop() {
+    requireInitialized();
+    requestId++;
+    audio.pause();
+    currentSong = null;
+    audio.removeAttribute("src");
+    audio.load();
+    updateState({ status: "idle", currentTime: 0, duration: 0, error: null });
+  }
+
   function destroy() {
     if (!initialized || !audio) return;
 
@@ -344,5 +360,6 @@
     getState,
     subscribe,
     destroy,
+    stop,
   });
 })(window);

@@ -16,6 +16,10 @@
   let originalOrder = [];
   let shuffle = false;
   let repeat = "none";
+  let initialized = false;
+  let generation = 0;
+  let editVersion = 0;
+  const removedSongIds = new Set();
 
   const listeners = new Set();
 
@@ -23,6 +27,7 @@
     return {
       songs: songs.map((song) => ({ ...song })),
       currentIndex,
+      initialized, generation, editVersion,
       shuffle,
       repeat,
       currentSong:
@@ -48,23 +53,46 @@
     });
   }
 
+  function normalizeSongs(items) {
+    const unique = new Map();
+    for (const song of items) {
+      if (!song || typeof song !== "object" || !(song.id || song._id || song.songID)) continue;
+      const id = String(song.id ?? song._id ?? song.songID);
+      unique.set(id, { ...song, id, name: song.name || "Unknown Song", artist: song.artist || "Unknown Artist" });
+    }
+    return [...unique.values()];
+  }
+
+  function appendSongs(items) {
+    if (!Array.isArray(items)) throw new Error("Danh sach phat phai la mot mang.");
+    const existing = new Set(songs.map(song => song.id));
+    const additions = normalizeSongs(items).filter(song => !existing.has(song.id) && !removedSongIds.has(song.id));
+    if (!additions.length) return getState();
+    songs.push(...additions);
+    originalOrder.push(...additions.map(song => ({ ...song })));
+    emitState();
+    return getState();
+  }
+
   function setPlaylist(items, options = {}) {
     if (!Array.isArray(items)) {
       throw new Error("Danh sách phát phải là một mảng.");
     }
 
-    songs = items.filter(
-      (song) =>
-        song &&
-        typeof song === "object" &&
-        (song.id || song._id || song.songID)
-    ).map((song) => ({
-      ...song,
-      id: String(song.id ?? song._id ?? song.songID),
-      name: song.name || "Unknown Song",
-      artist: song.artist || "Unknown Artist",
-    }));
-
+  //     songs = items.filter(
+  //       (song) =>
+  //         song &&
+  //         typeof song === "object" &&
+  //         (song.id || song._id || song.songID)
+  //     ).map((song) => ({
+  //       ...song,
+  //       id: String(song.id ?? song._id ?? song.songID),
+  //       name: song.name || "Unknown Song",
+  //       artist: song.artist || "Unknown Artist",
+  //     }));
+    if (options.restoreSongId) removedSongIds.delete(String(options.restoreSongId));
+    songs = normalizeSongs(items).filter(song => !removedSongIds.has(song.id));
+    initialized = true;
     const latest = new Map(songs.map(song => [song.id, song]));
     const sameMembers = originalOrder.length === songs.length && originalOrder.every(song => latest.has(song.id));
     originalOrder = sameMembers
@@ -190,6 +218,34 @@
     return getState();
   }
 
+  function moveSong(songId, toIndex) {
+    const from = songs.findIndex(song => song.id === String(songId));
+    if (from < 0 || !Number.isInteger(toIndex) || toIndex < 0 || toIndex >= songs.length || from === toIndex) return getState();
+    const currentId = songs[currentIndex]?.id;
+    songs.splice(toIndex, 0, songs.splice(from, 1)[0]);
+    editVersion++;
+    // A manual order is the new baseline, including when shuffle is enabled.
+    originalOrder = songs.map(song => ({ ...song }));
+    currentIndex = songs.findIndex(song => song.id === currentId);
+    emitState();
+    return getState();
+  }
+
+  function removeSong(songId) {
+    const index = songs.findIndex(song => song.id === String(songId));
+    if (index < 0) return getState();
+    const currentId = songs[currentIndex]?.id;
+    songs.splice(index, 1);
+    removedSongIds.add(String(songId));
+    editVersion++;
+    originalOrder = originalOrder.filter(song => song.id !== String(songId));
+    currentIndex = currentId === String(songId)
+      ? Math.min(index, songs.length - 1)
+      : songs.findIndex(song => song.id === currentId);
+    emitState();
+    return getState();
+  }
+
   function subscribe(listener) {
     if (typeof listener !== "function") {
       throw new Error("listener phải là một function.");
@@ -204,6 +260,10 @@
   }
 
   function clear() {
+    initialized = false;
+    generation++;
+    editVersion = 0;
+    removedSongIds.clear();
     songs = [];
     originalOrder = [];
     currentIndex = -1;
@@ -212,12 +272,15 @@
 
   window.PlaylistControllerV2_1 = Object.freeze({
     setPlaylist,
+    appendSongs,
     setShuffle,
     cycleRepeat,
     setCurrentSong,
     getNextSong,
     getPreviousSong,
     moveTo,
+    moveSong,
+    removeSong,
     getState,
     subscribe,
     clear,

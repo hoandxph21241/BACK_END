@@ -11,6 +11,7 @@ const { ErrorCode } = require("../../../constants");
 
 const path = require("path");
 const GridFS = require("../../../utils/GridFS");
+const generateWaveform = require("../../../utils/audioWaveform");
 
 class SongService extends BaseService {
   constructor() {
@@ -41,6 +42,7 @@ class SongService extends BaseService {
     let fileId;
 
     try {
+      const waveform = await generateWaveform(file.path);
       fileId = await GridFS.uploadFilePath(file.path, originalName, {
         contentType: file.mimetype || "audio/mpeg",
         metadata: {
@@ -56,7 +58,9 @@ class SongService extends BaseService {
         userID: data.userID || undefined,
         originalName,
         fileSize: file.size,
-        duration: Number(data.duration) || 0,
+        // Previous: duration: Number(data.duration) || 0,
+        duration: waveform.duration,
+        waveform,
         image: data.image || undefined,
         fileId,
         songID: crypto.randomUUID(),

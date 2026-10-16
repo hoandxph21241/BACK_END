@@ -1,0 +1,83 @@
+/* Database-backed account photo; the earlier decorative avatar styles remain below. */
+.nav-main .nav-user .nav-account-item { padding: 0 8px; }
+.nav-main .nav-user .nav-item .nav-account-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 48px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #aaa;
+    box-shadow: none;
+}
+.nav-account-photo {
+    display: block;
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
+    object-fit: cover;
+    border-radius: 50%;
+    background: #303030;
+}
+.nav-main .nav-user .nav-account-trigger::after {
+    margin: 0;
+    vertical-align: middle;
+    transition: transform 150ms ease;
+}
+.nav-main .nav-user .nav-account-trigger[aria-expanded="true"]::after { transform: rotate(180deg); }
+.nav-main .nav-user .nav-item .nav-account-trigger:focus-visible { outline: 2px solid #f50; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+    .nav-main .nav-user .nav-account-trigger::after { transition: none; }
+}
+/*  Account control for authenticated users, scoped to the top navigation.  */
+/* .nav-main .nav-user .nav-account-item { padding: 0 8px; } */
+/* .nav-main .nav-user .nav-item .nav-account-trigger { */
+/*     display: inline-flex; */
+/*     align-items: center; */
+/*     justify-content: center; */
+/*     gap: 8px; */
+/*     width: 48px; */
+/*     height: 36px; */
+/*     padding: 0; */
+/*     border: 0; */
+/*     border-radius: 4px; */
+/*     background: transparent; */
+/*     color: #aaa; */
+/*     box-shadow: none; */
+/* } */
+/* .nav-account-avatar { */
+/*     display: flex; */
+/*     align-items: center; */
+/*     justify-content: center; */
+/*     flex: 0 0 28px; */
+/*     width: 28px; */
+/*     height: 28px; */
+/*     border-radius: 50%; */
+/*     background: #c9c9c9; */
+/*     color: #484848; */
+/*     transition: background-color 150ms ease; */
+/* } */
+/* .nav-account-icon { */
+/*     display: block; */
+/*     width: 20px; */
+/*     height: 20px; */
+/*     background: currentColor; */
+/*     mask: url('/images/auth/person-fill.svg') center / contain no-repeat; */
+/*     -webkit-mask: url('/images/auth/person-fill.svg') center / contain no-repeat; */
+/* } */
+/* .nav-main .nav-user .nav-account-trigger::after { */
+/*     margin: 0; */
+/*     vertical-align: middle; */
+/*     transition: transform 150ms ease; */
+/* } */
+/* .nav-account-trigger:hover .nav-account-avatar, */
+/* .nav-account-trigger[aria-expanded="true"] .nav-account-avatar { background: #eee; } */
+/* .nav-main .nav-user .nav-account-trigger[aria-expanded="true"]::after { transform: rotate(180deg); } */
+/* .nav-main .nav-user .nav-item .nav-account-trigger:focus-visible { outline: 2px solid #f50; outline-offset: 3px; } */
+/* @media (prefers-reduced-motion: reduce) { */
+/*     .nav-account-avatar, .nav-main .nav-user .nav-account-trigger::after { transition: none; } */
+/* } */

@@ -4,6 +4,7 @@ const AuthController = require("../controller/AuthController");
 const verifyToken = require("../../../middlewares/verifyToken");
 
 const router = express.Router();
+router.use(require("../../../middlewares/browserIdentity"));
 
 /*
 |--------------------------------------------------------------------------

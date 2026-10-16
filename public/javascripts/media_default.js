@@ -288,6 +288,9 @@ function initializeMediaV2() {
         }
 
         updatePlayPauseIcon(state.status === "playing");
+        updateTrackTargets(state);
+        sendTrackPlayback(state);
+        window.SongEngagementV2_1?.observePlayback(state);
         const queue = window.PlaylistControllerV2_1.getState();
         const song = state.currentSong;
         if (song) {
@@ -323,10 +326,47 @@ function initializeMediaV2() {
         updateModeButtons();
         renderPlaylist(state);
     });
+// Previous anchor navigation handler:
+//     document.querySelectorAll("[data-track-page]").forEach(link => link.addEventListener("click", event => {
+//         const song = window.PlayerControllerV2_1.getState().currentSong;
+//         if (!song) { event.preventDefault(); return; }
+//         if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+//         event.preventDefault();
+//         window.parent.postMessage({ type: "trackNavigate", songId: song.id }, window.location.origin);
+//     }));
+    document.querySelectorAll("[data-track-page]").forEach(button => button.addEventListener("click", event => {
+        event.preventDefault();
+        const song = window.PlayerControllerV2_1.getState().currentSong;
+        if (!song) return;
+        const path = "/home/song/" + encodeURIComponent(song.id);
+        if (window.parent.location.pathname.replace(/\/+$/, "") === path) return;
+        window.parent.postMessage({ type: "trackNavigate", songId: song.id }, window.location.origin);
+    }));
     mediaV2Initialized = true;
     return true;
 }
 
+function sendTrackPlayback(state = window.PlayerControllerV2_1.getState()) {
+    window.parent.postMessage({ type: "trackPlayback", songId: state.currentSong?.id || null,
+        status: state.status, currentTime: state.currentTime, duration: state.duration }, window.location.origin);
+}
+// Previous href updates for anchor controls:
+// function updateTrackLinks(state) {
+//     const id = state.currentSong?.id;
+//     document.querySelectorAll("[data-track-page]").forEach(link => {
+//         link.href = id ? "/home/song/" + encodeURIComponent(id) : "#";
+//         link.setAttribute("aria-disabled", String(!id));
+//         link.tabIndex = id ? 0 : -1;
+//     });
+// }
+function updateTrackTargets(state) {
+    const enabled = Boolean(state.currentSong?.id);
+    document.querySelectorAll("[data-track-page]").forEach(button => {
+        button.disabled = !enabled;
+        button.setAttribute("aria-disabled", String(!enabled));
+        button.tabIndex = enabled ? 0 : -1;
+    });
+}
 function updatePlayPauseIcon(isPlaying) {
     if (!playPauseIcon) return;
 
@@ -348,6 +388,7 @@ function addSongToPlaylist(song) {
 
     window.PlaylistControllerV2_1.setPlaylist(songs, {
         currentSongId: song.id,
+        restoreSongId: song.id,
     });
 }
 
@@ -405,9 +446,9 @@ function addSongToPlaylist(song) {
 //
 //         addSongToPlaylist(song);
 //
-//         const state = await window.PlayerControllerV2_1.playSong(song.id);
+//         const state = await window.PlayerControllerV2_1.playSong(song.id, options);
 //
-//         if (state?.currentSong && window.HistoryServiceV2_1) {
+//         if (options.autoplay !== false && state?.currentSong && window.HistoryServiceV2_1) {
 //             window.HistoryServiceV2_1.recordPlayed(state.currentSong);
 //         }
 //     } catch (error) {
@@ -415,11 +456,12 @@ function addSongToPlaylist(song) {
 //     }
 // };
 let selectionVersion = 0;
-async function playPlaylistSong(song) {
+// Previous: async function playPlaylistSong(song)
+async function playPlaylistSong(song, options = {}) {
     if (!song) return null;
     window.PlaylistControllerV2_1.setCurrentSong(song.id);
-    const state = await window.PlayerControllerV2_1.playSong(song.id);
-    if (state?.currentSong && window.HistoryServiceV2_1) {
+    const state = await window.PlayerControllerV2_1.playSong(song.id, options);
+    if (options.autoplay !== false && state?.currentSong && window.HistoryServiceV2_1) {
         window.HistoryServiceV2_1.recordPlayed(state.currentSong);
     }
     return state;
@@ -439,33 +481,63 @@ async function playPreviousSong() {
     if (previous) await playPlaylistSong(previous);
 }
 
+// Previous selection handler reloaded and replaced the whole category on every click.
+  // window.handleItemClick = async function (mp3Id, mp3Name, categoryId) {
+  //     if (!initializeMediaV2()) return;
+  //     const version = ++selectionVersion;
+  //     const song = { id: String(mp3Id), name: mp3Name || "Unknown Song", categoryId: categoryId || null };
+  //     try {
+  //         addSongToPlaylist(song);
+  //         const state = await playPlaylistSong(song);
+  //         if (version !== selectionVersion || !state?.currentSong) return;
+  //         const selected = { ...song, ...state.currentSong };
+  //         const category = selected.categoryId || categoryId;
+  //         if (!category) return;
+  //         try {
+  //             const songs = await window.SongServiceV2_1.getSongsByCategory(String(category));
+  //             // Ignore a stale category request after another song was selected.
+  //             if (version !== selectionVersion || window.PlayerControllerV2_1.getState().currentSong?.id !== selected.id) return;
+  //             const items = songs.some(item => item.id === selected.id)
+  //                 ? songs.map(item => item.id === selected.id ? selected : item)
+  //                 : [selected, ...songs];
+  //             window.PlaylistControllerV2_1.setPlaylist(items, { currentSongId: selected.id });
+  //         } catch (error) {
+  //             console.error("Cannot load category playlist:", error);
+  //         }
+  //     } catch (error) {
+  //         console.error("Cannot play selected song:", error);
+  //     }
+  // };
 window.handleItemClick = async function (mp3Id, mp3Name, categoryId) {
     if (!initializeMediaV2()) return;
+    const queue = window.PlaylistControllerV2_1;
+    const before = queue.getState();
+    const seedQueue = !before.initialized;
     const version = ++selectionVersion;
     const song = { id: String(mp3Id), name: mp3Name || "Unknown Song", categoryId: categoryId || null };
     try {
+        // An explicit choice restores only this song, never the entire category.
         addSongToPlaylist(song);
         const state = await playPlaylistSong(song);
-        if (version !== selectionVersion || !state?.currentSong) return;
+        if (!seedQueue || version !== selectionVersion || !state?.currentSong) return;
         const selected = { ...song, ...state.currentSong };
         const category = selected.categoryId || categoryId;
         if (!category) return;
         try {
-            const songs = await window.SongServiceV2_1.getSongsByCategory(String(category));
-            // Ignore a stale category request after another song was selected.
-            if (version !== selectionVersion || window.PlayerControllerV2_1.getState().currentSong?.id !== selected.id) return;
-            const items = songs.some(item => item.id === selected.id)
-                ? songs.map(item => item.id === selected.id ? selected : item)
-                : [selected, ...songs];
-            window.PlaylistControllerV2_1.setPlaylist(items, { currentSongId: selected.id });
+            const candidates = await window.SongServiceV2_1.getSongsByCategory(String(category));
+            const currentQueue = queue.getState();
+            // Discard late suggestions after a selection, deletion, reorder or queue reset.
+            if (version !== selectionVersion || currentQueue.generation !== before.generation ||
+                currentQueue.editVersion !== before.editVersion ||
+                window.PlayerControllerV2_1.getState().currentSong?.id !== selected.id) return;
+            queue.appendSongs(candidates);
         } catch (error) {
-            console.error("Cannot load category playlist:", error);
+            console.error("Cannot load initial queue suggestions:", error);
         }
     } catch (error) {
         console.error("Cannot play selected song:", error);
     }
 };
-
 async function handleKeyboardControl(data) {
     if (!initializeMediaV2()) return;
 
@@ -628,8 +700,47 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        if (data.type === "trackStateRequest") {
+            if (initializeMediaV2()) sendTrackPlayback();
+            return;
+        }
+        if (data.type === "trackToggle" && typeof data.songId === "string") {
+            if (!initializeMediaV2()) return;
+            if (window.PlayerControllerV2_1.getState().currentSong?.id === data.songId) {
+                window.PlayerControllerV2_1.togglePlayPause().catch(error => console.error("Cannot toggle track:", error));
+            } else window.handleItemClick(data.songId, data.name, data.categoryId);
+            return;
+        }
+        if (data.type === "trackSeek") {
+            if (initializeMediaV2() && window.PlayerControllerV2_1.getState().currentSong?.id === data.songId && Number.isFinite(data.seconds)) {
+                window.PlayerControllerV2_1.seek(data.seconds);
+            }
+            return;
+        }
         if (data.type === "queueReady") {
             if (initializeMediaV2()) sendQueueState();
+            return;
+        }
+        if (data.type === "queueMove") {
+            if (initializeMediaV2()) window.PlaylistControllerV2_1.moveSong(data.songId, data.toIndex);
+            return;
+        }
+        if (data.type === "queueRemove") {
+            if (!initializeMediaV2()) return;
+            const queue = window.PlaylistControllerV2_1.getState();
+            if (!queue.songs.some(song => song.id === data.songId)) return;
+            const player = window.PlayerControllerV2_1;
+            const state = player.getState();
+            const removingCurrent = queue.currentSong?.id === data.songId || state.currentSong?.id === data.songId;
+            if (removingCurrent) {
+                selectionVersion++;
+                player.stop();
+            }
+            const next = window.PlaylistControllerV2_1.removeSong(data.songId);
+            if (removingCurrent && next.currentSong) {
+                playPlaylistSong(next.currentSong, { autoplay: state.status === "playing" || state.status === "loading" })
+                    .catch(error => console.error("Cannot play next queued song:", error));
+            }
             return;
         }
         if (data.type === "queueSelect") {

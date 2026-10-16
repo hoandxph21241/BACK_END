@@ -1,0 +1,30 @@
+<section class="library-view library-skeleton" aria-label="Library">
+  <span class="visually-hidden" role="status">Đang tải thư viện...</span>
+  <div class="library-content" aria-hidden="true">
+    <header class="library-heading"><h1>Library</h1></header>
+    <div class="library-toolbar placeholder-glow">
+      <span class="library-search placeholder library-skeleton-control"></span>
+      <span class="placeholder library-skeleton-control"></span>
+      <span class="placeholder library-skeleton-control"></span>
+    </div>
+    <div class="library-grid" inert>
+      <% for (let index = 0; index < 8; index++) { %>
+        <div class="library-entry placeholder-glow">
+          <span class="placeholder library-skeleton-cover"></span>
+          <div class="library-skeleton-info">
+            <span class="placeholder library-skeleton-title col-10"></span>
+            <span class="placeholder library-skeleton-artist col-6"></span>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+  <aside class="library-tools" aria-hidden="true">
+    <h2>Công cụ</h2>
+    <div class="library-tool-slots">
+      <div class="library-tool-slot"></div>
+      <div class="library-tool-slot"></div>
+      <div class="library-tool-slot library-tool-slot-wide"></div>
+    </div>
+  </aside>
+</section>

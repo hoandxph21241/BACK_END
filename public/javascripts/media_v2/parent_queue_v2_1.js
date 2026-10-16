@@ -11,12 +11,14 @@
     let playback = {};
     let signature = "";
     const send = data => frame.contentWindow?.postMessage(data, window.location.origin);
+    const gestures = window.createQueueGestures(list, send);
 //     const formatTime = value => {
 //         const seconds = Math.floor(Number(value));
 //         return Number.isFinite(seconds) && seconds > 0
 //             ? `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}` : "";
 //     };
     const favorites = new Set();
+    const removingSongs = new Set();
     let menuTrigger = null;
     const menu = document.createElement("div");
     menu.id = "parentQueueItemMenu";
@@ -34,17 +36,57 @@
         }
         menuTrigger = null;
     }
+    async function removeFromQueue(songId) {
+        if (removingSongs.has(songId)) return;
+        removingSongs.add(songId);
+        closeItemMenu();
+        const row = [...list.querySelectorAll(".queue-row")].find(item => item.dataset.songId === songId);
+        try {
+            if (row && !window.matchMedia("(prefers-reduced-motion: reduce)").matches && row.animate) {
+                const surface = row.querySelector(".queue-surface");
+                const transform = window.getComputedStyle(surface).transform;
+                const height = row.getBoundingClientRect().height;
+                gestures.cancel();
+                row.classList.add("is-removing");
+                row.inert = true;
+                row.setAttribute("aria-busy", "true");
+                surface.animate([
+                    { transform, opacity: 1 },
+                    { transform: "translateX(-100%)", opacity: 0 },
+                ], { duration: 160, easing: "ease-in", fill: "forwards" });
+                const collapse = row.animate([
+                    { height: `${height}px`, minHeight: "0px" },
+                    { height: "0px", minHeight: "0px", borderBottomWidth: "0px" },
+                ], { duration: 180, delay: 100, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" });
+                // A render can detach the row while animation is in progress.
+                await collapse.finished.catch(() => {});
+            }
+            if (songs.some(song => song.id === songId)) send({ type: "queueRemove", songId });
+        } finally {
+            removingSongs.delete(songId);
+        }
+    }
+
     function updateFavorite(button, song) {
         const liked = favorites.has(song.id);
         button.setAttribute("aria-pressed", String(liked));
         button.title = liked ? "Bo yeu thich" : "Yeu thich";
         button.setAttribute("aria-label", `${button.title}: ${song.name}`);
     }
-    function toggleFavorite(button, song) {
-        if (favorites.has(song.id)) favorites.delete(song.id);
-        else favorites.add(song.id);
-        updateFavorite(button, song);
-    }
+//     function toggleFavorite(button, song) {
+//         if (favorites.has(song.id)) favorites.delete(song.id);
+//         else favorites.add(song.id);
+//         updateFavorite(button, song);
+//     }
+    function toggleFavorite(button, song) { window.SongEngagementV2_1?.toggle(song.id); }
+    window.addEventListener("songStats", event => {
+        const stats = event.detail;
+        if (stats.liked) favorites.add(stats.songId); else favorites.delete(stats.songId);
+        list.querySelectorAll(".queue-favorite").forEach(button => {
+            const song = songs.find(song => song.id === button.dataset.songLike);
+            if (song) updateFavorite(button, song);
+        });
+    });
     function showItemMenu(trigger, favoriteButton, song) {
         const wasOpen = menuTrigger === trigger && !menu.hidden;
         closeItemMenu();
@@ -65,7 +107,23 @@
             toggleFavorite(favoriteButton, song);
             closeItemMenu(true);
         });
-        menu.replaceChildren(play, favorite);
+        // Previous: menu.replaceChildren(play, favorite);
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "Xoa khoi danh sach phat";
+        remove.addEventListener("click", () => {
+            // Previous: send({ type: "queueRemove", songId: song.id });
+            removeFromQueue(song.id);
+            closeItemMenu();
+        });
+        const up = document.createElement("button"), down = document.createElement("button");
+        [[up, "Di chuyen len", -1], [down, "Di chuyen xuong", 1]].forEach(([button, label, delta]) => {
+            button.type = "button"; button.textContent = label;
+            const toIndex = songs.findIndex(item => item.id === song.id) + delta;
+            button.disabled = toIndex < 0 || toIndex >= songs.length;
+            button.addEventListener("click", () => { send({ type: "queueMove", songId: song.id, toIndex }); closeItemMenu(); });
+        });
+        menu.replaceChildren(play, favorite, up, down, remove);
         menu.hidden = false;
         const rect = trigger.getBoundingClientRect();
         menu.style.left = `${Math.max(8, Math.min(window.innerWidth - menu.offsetWidth - 8, rect.right - menu.offsetWidth))}px`;
@@ -86,7 +144,7 @@
     }
     function setOpen(value) {
         open = value;
-        if (!value) closeItemMenu();
+        if (!value) { closeItemMenu(); gestures.cancel(); }
         popup.classList.toggle("is-open", value);
         popup.setAttribute("aria-hidden", String(!value));
         popup.inert = !value;
@@ -101,7 +159,7 @@
             const current = row.dataset.songId === playback.currentSongId;
             row.classList.toggle("is-current", current);
             row.classList.toggle("is-playing", current && playback.status === "playing");
-            const button = row.querySelector("button");
+            const button = row.querySelector(".queue-track");
             if (current) button.setAttribute("aria-current", "true");
             else button.removeAttribute("aria-current");
             // const song = songs.find(item => item.id === row.dataset.songId);
@@ -109,12 +167,30 @@
         });
     }
     function render() {
+        const focusedId = document.activeElement?.closest(".queue-row")?.dataset.songId;
+// Previous: const restoreHandle = document.activeElement?.classList.contains("queue-drag-handle");
+        const focusedClass = ["queue-track", "queue-favorite", "queue-more"].find(name => document.activeElement?.classList.contains(name));
+        gestures.cancel();
         closeItemMenu();
         const fragment = document.createDocumentFragment();
         songs.forEach((song, index) => {
             const row = document.createElement("li");
             row.className = "queue-row";
             row.dataset.songId = song.id;
+            const surface = document.createElement("div");
+            surface.className = "queue-surface";
+//             const handle = document.createElement("button");
+//             handle.type = "button"; handle.className = "queue-drag-handle";
+//             handle.title = "Keo de sap xep; mui ten len/xuong de doi vi tri";
+//             handle.setAttribute("aria-label", `Sap xep ${song.name}`);
+//             const grip = document.createElement("span"); grip.className = "queue-grip-icon"; grip.setAttribute("aria-hidden", "true"); handle.append(grip);
+            const remove = document.createElement("button");
+            remove.type = "button"; remove.className = "queue-remove";
+            remove.title = "Xoa khoi danh sach phat"; remove.tabIndex = -1;
+            remove.setAttribute("aria-hidden", "true"); remove.setAttribute("aria-label", `Xoa ${song.name} khoi danh sach phat`);
+            const cross = document.createElement("span"); cross.className = "queue-remove-icon"; cross.setAttribute("aria-hidden", "true"); remove.append(cross);
+            // Previous: remove.addEventListener("click", () => send({ type: "queueRemove", songId: song.id }));
+            remove.addEventListener("click", () => removeFromQueue(song.id));
             const button = document.createElement("button");
             button.type = "button";
             button.className = "queue-track";
@@ -132,6 +208,7 @@
             const cover = document.createElement("img");
             cover.src = song.image || "/images/chibi.gif";
             cover.alt = "";
+            cover.draggable = false;
             cover.addEventListener("error", () => { cover.src = "/images/chibi.gif"; }, { once: true });
             const info = document.createElement("span");
             info.className = "queue-info";
@@ -157,7 +234,8 @@
             heart.setAttribute("aria-hidden", "true");
             favorite.append(heart);
             updateFavorite(favorite, song);
-            favorite.addEventListener("click", () => toggleFavorite(favorite, song));
+            // Previous local-only toggle: favorite.addEventListener("click", () => toggleFavorite(favorite, song));
+            favorite.dataset.songLike = song.id;
             const more = document.createElement("button");
             more.type = "button";
             more.className = "queue-action queue-more";
@@ -173,7 +251,10 @@
             actions.append(favorite, more);
             button.addEventListener("click", () => send({ type: "queueSelect", songId: song.id }));
             // row.append(button);
-            row.append(button, actions);
+            // Previous: row.append(button, actions);
+            // Previous: surface.append(handle, button, actions);
+            surface.append(button, actions);
+            row.append(remove, surface);
             fragment.append(row);
         });
         if (!songs.length) {
@@ -183,6 +264,13 @@
             fragment.append(empty);
         }
         list.replaceChildren(fragment);
+        window.SongEngagementV2_1?.bind(list);
+        // Previous: restore focus to the removed drag handle.
+        if (focusedClass) {
+            const row = [...list.querySelectorAll(".queue-row")].find(item => item.dataset.songId === focusedId);
+            // Previous: row?.querySelector(".queue-drag-handle").focus({ preventScroll: true });
+            row?.querySelector(`.${focusedClass}`)?.focus({ preventScroll: true });
+        }
         // count.textContent = String(songs.length);
         updatePlayback();
     }

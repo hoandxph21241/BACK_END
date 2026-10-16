@@ -63,7 +63,14 @@
 .icon-back { width: 15px; height: 15px; mask: url('/images/auth/arrow-left.svg') center / contain no-repeat; -webkit-mask: url('/images/auth/arrow-left.svg') center / contain no-repeat; }
 .icon-eye { mask: url('/images/auth/eye.svg') center / contain no-repeat; -webkit-mask: url('/images/auth/eye.svg') center / contain no-repeat; }
 .signin-reveal[aria-pressed="true"] .icon-eye { mask-image: url('/images/auth/eye-slash.svg'); -webkit-mask-image: url('/images/auth/eye-slash.svg'); }
-.icon-google { mask: url('/images/auth/google.svg') center / contain no-repeat; -webkit-mask: url('/images/auth/google.svg') center / contain no-repeat; }
+/* .icon-google { mask: url('/images/auth/google.svg') center / contain no-repeat; -webkit-mask: url('/images/auth/google.svg') center / contain no-repeat; } */
+.icon-google {
+    width: 20px;
+    height: 20px;
+    mask: none;
+    -webkit-mask: none;
+    background: url('/images/auth/google-color.svg') center / contain no-repeat;
+}
 .signin-submit, .signin-google {
     display: flex;
     align-items: center;

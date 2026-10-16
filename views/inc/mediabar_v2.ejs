@@ -5,6 +5,8 @@
 <script src="/javascripts/media_v2/playlist_controller_v2_1.js" defer></script>
 <script src="/javascripts/media_v2/player_controller_v2_1.js" defer></script>
 <script src="/javascripts/media_v2/player_ui_v2_1.js" defer></script>
+<link rel="stylesheet" href="/stylesheets/song_engagement.css">
+<script src="/javascripts/media_v2/song_engagement_v2_1.js" defer></script>
 <script src="/javascripts/media_default.js" defer></script>
 <!-- V2.1 dùng các file trong /javascripts/media_v2 thay cho media_controls.js cũ. -->
 <!-- <script src="/javascripts/media_controls.js"></script> -->
@@ -96,15 +98,27 @@
         <small class="text-secondary artist-name">Tên nghệ sĩ</small>
       </div>
     -->
+<!-- Previous non-link mediabar metadata:
     <div class="player-track-section d-flex align-items-center">
       <img id="albumCover" src="/images/chibi.gif" alt="Album cover">
       <div class="player-track-meta">
         <small class="text-secondary artist-name">Tên nghệ sĩ</small>
         <p class="mb-0 song-name" data-text="mp3Name">Tên bài hát</p>
       </div>
+-->
+    <div class="player-track-section d-flex align-items-center">
+      <!-- Previous: <a class="player-song-cover-link" data-track-page href="#" aria-disabled="true" aria-label="Thông tin bài hát"><img id="albumCover" src="/images/chibi.gif" alt="Album cover"></a> -->
+      <button type="button" class="player-song-cover-button" data-track-page aria-disabled="true" aria-label="Thông tin bài hát"><img id="albumCover" src="/images/chibi.gif" alt="Album cover"></button>
+      <div class="player-track-meta">
+        <!-- Previous: <a class="text-secondary artist-name" data-track-page href="#" aria-disabled="true">Tên nghệ sĩ</a> -->
+      <button type="button" class="text-secondary artist-name" data-track-page aria-disabled="true">Tên nghệ sĩ</button>
+        <!-- Previous: <a class="mb-0 song-name" data-text="mp3Name" data-track-page href="#" aria-disabled="true">Tên bài hát</a> -->
+      <button type="button" class="mb-0 song-name" data-text="mp3Name" data-track-page aria-disabled="true">Tên bài hát</button>
+      </div>
       <div class="d-flex align-items-center ms-3 position-relative">
+<!-- Previous decorative heart:
         <button class="btn btn-link btn-sm text-secondary p-0 me-2">
-          <!-- Heart -->
+          &lt;!-- Heart --&gt;
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart"
             viewBox="0 0 16 16">
             <path
@@ -112,6 +126,8 @@
           </svg>
         </button>
 
+-->
+        <button id="mediaLikeBtn" type="button" class="btn btn-link btn-sm text-secondary p-0 me-2" data-song-like="" aria-label="Yêu thích" aria-pressed="false" disabled><span class="song-like-icon" aria-hidden="true"></span></button>
         <button id="togglePlaylistBtn" aria-label="Danh sách phát" aria-controls="playlistPopup" aria-expanded="false" title="Danh sách phát" class="btn btn-link btn-sm text-secondary p-0">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
             class="bi bi-music-note-list" viewBox="0 0 16 16">

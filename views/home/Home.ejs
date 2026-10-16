@@ -11,8 +11,18 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="icon" href="/images/bg.png" type="image/x-icon" />
   <link rel='stylesheet' href='/stylesheets/iframe_mediabar.css' />
+<link rel="stylesheet" href="/stylesheets/song_engagement.css">
+<script src="/javascripts/media_v2/song_engagement_v2_1.js" defer></script>
+  <script src='/javascripts/media_v2/queue_gestures_v2_1.js' defer></script>
   <script src='/javascripts/media_v2/parent_queue_v2_1.js' defer></script>
+  <link rel='stylesheet' href='/stylesheets/home/music-card.css'>
+  <link rel='stylesheet' href='/stylesheets/home/feed.css'>
+  <link rel='stylesheet' href='/stylesheets/home/library.css'>
   <script src='/javascripts/home/library_v2_1.js' defer></script>
+  <script src='/javascripts/user_profile.js' defer></script>
+  <link rel='stylesheet' href='/stylesheets/home/track_detail.css'>
+  <script src='/javascripts/home/track_waveform.js' defer></script>
+  <script src='/javascripts/home/track_detail.js' defer></script>
 </head>
 
 <!-- Previous page wrapper: <body> -->
@@ -25,6 +35,9 @@
         style="position: fixed; top: 20px; right: 20px; width: 360px; height: 305px; border: none; z-index: 9999;">
       </iframe> -->
 
+      <template id="libraryLoadingTemplate">
+        <%- include('_library_skeleton') %>
+      </template>
       <main id="main">
       </main>
 
@@ -403,8 +416,11 @@
         // Initialize dynamic content
         function initializeDynamicContent() {
           if (typeof window.initLibraryView === "function") window.initLibraryView();
+          if (typeof window.initProfileView === "function") window.initProfileView();
+          if (typeof window.initTrackView === "function") window.initTrackView();
           if (document.getElementById('uploadForm')) {
-            if (!window._uploadFormInitialized) {
+            // if (!window._uploadFormInitialized) {
+            if (document.getElementById('uploadForm').dataset.uploadInitialized !== 'true') {
               if (typeof window.initUploadForm !== 'function') {
                 const script = document.createElement('script');
                 script.src = '/javascripts/product/upload_Mediafile.js';
@@ -636,33 +652,133 @@
             } else link.removeAttribute('aria-current');
           });
         }
-        async function loadPage(url, pushHistory = false) {
+        // Previous track-only duplicate guard retained for reference.
+//         let pendingTrackId = null;
+//         async function loadPage(url, pushHistory = false) {
+//           const destination = new URL(url, location.href);
+//           const trackId = /^\/home\/song\/([a-f0-9]{24})\/?$/i.exec(destination.pathname)?.[1].toLowerCase();
+//           const displayedTrack = main.querySelector('[data-track-view]')?.dataset.songId;
+//           if (trackId && (pendingTrackId === trackId ||
+//               (displayedTrack === trackId && location.pathname.replace(/\/+$/, '') === destination.pathname.replace(/\/+$/, '')))) return;
+//           pendingTrackId = trackId || null;
+//           const request = ++navigationRequest;
+//           main.innerHTML = '<div class="text-center text-light p-4" role="status">Loading...</div>';
+//           try {
+//             const response = await axios.get(tabPath(url), {
+//               headers: { 'X-Requested-With': 'XMLHttpRequest' },
+//             });
+//             if (request !== navigationRequest) return;
+//             main.innerHTML = response.data;
+//             if (pushHistory && location.pathname + location.search !== url) {
+//               history.pushState({ url }, '', url);
+//             }
+//             updateActiveTab(new URL(url, location.href).pathname);
+//             initializeDynamicContent();
+//           } catch (error) {
+//             if (request !== navigationRequest) return;
+//             if (error.response?.status === 404 && url.startsWith('/home/song/') &&
+//                 typeof error.response.data === 'string' && error.response.data.includes('track-missing')) {
+//               main.innerHTML = error.response.data;
+//               if (pushHistory) history.pushState({ url }, '', url);
+//               updateActiveTab(new URL(url, location.href).pathname);
+//               return;
+//             }
+//             console.error('Cannot load tab:', error.message);
+//             main.innerHTML = '<div class="text-center text-light p-4"><p>Không thể tải trang.</p><button type="button" id="retryTabBtn" class="btn btn-outline-light">Thử lại</button></div>';
+//             document.getElementById('retryTabBtn').addEventListener('click', () => loadPage(url, pushHistory));
+//           } finally {
+//             if (request === navigationRequest) pendingTrackId = null;
+//           }
+//         }
+        let pendingPageKey = null;
+        let displayedPageKey = null;
+        let navigationController = null;
+        function navigationKey(url) {
+          const target = new URL(url, location.href);
+          return tabPath(target.pathname.replace(/\/+$/, '') || '/') + target.search;
+        }
+        // Previous: async function loadPage(url, pushHistory = false) {
+        async function loadPage(url, pushHistory = false, options = {}) {
+          const destination = new URL(url, location.href);
+          if (destination.origin !== location.origin) return;
+          const pageKey = navigationKey(destination.href);
+          // Previous: if (pendingPageKey === pageKey || (!pendingPageKey && displayedPageKey === pageKey)) return;
+          if (pendingPageKey === pageKey || (!options.refresh && !pendingPageKey && displayedPageKey === pageKey)) return;
+          const targetUrl = destination.pathname + destination.search + destination.hash;
           const request = ++navigationRequest;
-          main.innerHTML = '<div class="text-center text-light p-4" role="status">Loading...</div>';
+          navigationController?.abort();
+          const controller = new AbortController();
+          navigationController = controller;
+          pendingPageKey = pageKey;
+          displayedPageKey = null;
+          main.setAttribute('aria-busy', 'true');
+          // Previous: main.innerHTML = '<div class="text-center text-light p-4" role="status">Loading...</div>';
+          const libraryLoading = destination.pathname.replace(/\/+$/, '') === '/home/ct_home'
+            ? document.getElementById('libraryLoadingTemplate') : null;
+          const previousLibrary = main.querySelector('.library-view:not(.library-skeleton)');
+          main.classList.toggle('library-page-active', Boolean(libraryLoading));
+          // Preserve scroll height on refresh; the next non-Library tab releases it.
+          main.style.minHeight = libraryLoading
+            ? Math.ceil(Math.max(previousLibrary ? main.getBoundingClientRect().height : 0,
+                window.innerHeight - main.getBoundingClientRect().top)) + 'px' : '';
+          main.innerHTML = libraryLoading?.innerHTML || '<div class="text-center text-light p-4" role="status">Loading...</div>';
+          const loadingStartedAt = Date.now();
+          function commitPage(content) {
+            main.innerHTML = content;
+            if (libraryLoading) main.querySelector('.library-view')?.classList.add('library-content-ready');
+            displayedPageKey = pageKey;
+            if (pushHistory && navigationKey(location.href) !== pageKey) {
+              history.pushState({ url: targetUrl }, '', targetUrl);
+            }
+            updateActiveTab(destination.pathname);
+          }
           try {
-            const response = await axios.get(tabPath(url), {
-              headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            const response = await axios.get(pageKey, {
+              // Previous: headers: { 'X-Requested-With': 'XMLHttpRequest' },
+              headers: { 'X-Requested-With': 'XMLHttpRequest', 'Cache-Control': 'no-cache' },
+              signal: controller.signal,
             });
             if (request !== navigationRequest) return;
-            main.innerHTML = response.data;
-            if (pushHistory && location.pathname + location.search !== url) {
-              history.pushState({ url }, '', url);
+            if (libraryLoading) {
+              const remaining = 1500 - (Date.now() - loadingStartedAt);
+              if (remaining > 0) await new Promise(resolve => setTimeout(resolve, remaining));
             }
-            updateActiveTab(new URL(url, location.href).pathname);
+            if (request !== navigationRequest || controller.signal.aborted) return;
+            commitPage(response.data);
             initializeDynamicContent();
           } catch (error) {
-            if (request !== navigationRequest) return;
+            if (request !== navigationRequest || controller.signal.aborted) return;
+            if (error.response?.status === 404 && destination.pathname.startsWith('/home/song/') &&
+                typeof error.response.data === 'string' && error.response.data.includes('track-missing')) {
+              commitPage(error.response.data);
+              return;
+            }
+            displayedPageKey = null;
             console.error('Cannot load tab:', error.message);
             main.innerHTML = '<div class="text-center text-light p-4"><p>Không thể tải trang.</p><button type="button" id="retryTabBtn" class="btn btn-outline-light">Thử lại</button></div>';
-            document.getElementById('retryTabBtn').addEventListener('click', () => loadPage(url, pushHistory));
+            document.getElementById('retryTabBtn').addEventListener('click', () => loadPage(targetUrl, pushHistory));
+          } finally {
+            if (request === navigationRequest) {
+              pendingPageKey = null;
+              navigationController = null;
+              main.removeAttribute('aria-busy');
+            }
           }
         }
         document.querySelectorAll('.nav-link[data-url]').forEach(link => {
           link.addEventListener('click', event => {
             if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
             event.preventDefault();
-            loadPage(link.dataset.url, true);
+            // Previous: loadPage(link.dataset.url, true);
+            loadPage(link.dataset.url, true, { refresh: true });
           });
+        });
+        window.navigateMediaHz = loadPage;
+        window.addEventListener('message', event => {
+          const frame = document.getElementById('mediaPlayerFrame');
+          if (event.origin !== location.origin || event.source !== frame?.contentWindow || event.data?.type !== 'trackNavigate') return;
+          const id = event.data.songId;
+          if (typeof id === 'string' && /^[a-f0-9]{24}$/i.test(id)) loadPage('/home/song/' + encodeURIComponent(id), true);
         });
         window.addEventListener('popstate', () => loadPage(location.pathname + location.search));
         let resizeTimeout;
@@ -924,7 +1040,8 @@ window.smartIframeHandler = function(isExpanded) {
           }
 
           // Ignore if user is typing in input/textarea
-          if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+          // if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+          if (event.target.closest('input, textarea, select, button, [contenteditable]')) {
             return;
           }
 

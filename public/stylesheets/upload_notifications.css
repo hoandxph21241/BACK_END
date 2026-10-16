@@ -1,0 +1,30 @@
+.upload-notification-panel, .upload-notification-toast { box-sizing: border-box; }
+.upload-notification-bell { position: relative; }
+.upload-notification-badge { position: absolute; top: -2px; right: -2px; min-width: 17px; height: 17px; padding: 0 3px; background: #ed5633; color: #fff; border-radius: 9px; font: bold 10px/17px Arial, sans-serif; }
+.upload-notification-panel { position: fixed; z-index: 1100; width: min(370px, calc(100vw - 16px)); background: #252525; color: #fff; border: 1px solid #505050; border-radius: 4px; box-shadow: 0 8px 24px #0006; font: 13px Arial, sans-serif; animation: upload-notification-enter 160ms ease-out; }
+.upload-notification-header { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #303030; border-bottom: 1px solid #484848; }
+.upload-notification-header strong { flex: 1; }
+.upload-notification-panel button { background: transparent; border: 0; color: #ddd; cursor: pointer; font-family: inherit; }
+.upload-notification-panel button:hover { color: #ff824f; }
+.upload-notification-close { width: 28px; height: 28px; padding: 0; font-size: 24px; line-height: 1; }
+.upload-notification-clear { font-size: 12px; }
+.upload-notification-list { max-height: min(440px, calc(100dvh - 150px)); overflow-y: auto; margin: 0; padding: 0; list-style: none; }
+.upload-notification-empty { padding: 28px 16px; color: #aaa; text-align: center; margin: 0; }
+.upload-notification-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px; border-bottom: 1px solid #3b3b3b; }
+.upload-notification-item:last-child { border-bottom: 0; }
+.upload-notification-symbol { flex: 0 0 22px; height: 22px; text-align: center; line-height: 22px; background: #633b32; color: #ffa48d; border-radius: 50%; }
+.is-success .upload-notification-symbol { background: #254e3c; color: #8de1b2; }
+.is-warning .upload-notification-symbol { background: #584a28; color: #ffdc8a; }
+.upload-notification-content { min-width: 0; overflow-wrap: anywhere; }
+.upload-notification-content strong { display: block; font-size: 13px; line-height: 1.4; }
+.upload-notification-content p { color: #ddd; margin: 5px 0; line-height: 1.5; }
+.upload-notification-content time { color: #aaa; font-size: 11px; }
+.upload-notification-toast { position: fixed; z-index: 1200; right: 20px; bottom: 76px; width: min(350px, calc(100vw - 32px)); padding: 14px 16px; border: 1px solid #626262; border-left: 3px solid #ef785d; border-radius: 4px; background: #292929; color: #fff; box-shadow: 0 6px 20px #0005; font: 13px/1.5 Arial, sans-serif; overflow-wrap: anywhere; animation: upload-notification-enter 180ms ease-out; }
+.upload-notification-toast.is-success { border-left-color: #71d99d; }
+.upload-notification-toast.is-warning { border-left-color: #ebc96c; }
+.upload-notification-toast strong, .upload-notification-toast span { display: block; }
+.upload-notification-toast span { margin-top: 4px; color: #ddd; }
+.upload-notification-panel[hidden], .upload-notification-toast[hidden], .upload-notification-badge[hidden] { display: none !important; }
+@keyframes upload-notification-enter { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .upload-notification-panel, .upload-notification-toast { animation: none; } }
+@media (max-width: 480px) { .upload-notification-toast { right: 16px; } }

@@ -18,7 +18,8 @@ class AuthController extends BaseController {
 
   // POST /api/auth/register
   register = async (req, res) => {
-    const data = await this.service.register(req.body, this.getDevice(req));
+    // Previous: const data = await this.service.register(req.body, this.getDevice(req));
+    const data = await this.service.register(req.body, req);
 
     return this.success(res, data);
   };
@@ -63,7 +64,8 @@ class AuthController extends BaseController {
 
   // POST /api/auth/google
   googleCallback = async (req, res) => {
-    const data = await this.service.googleCallback(req.body);
+    // Previous: const data = await this.service.googleCallback(req.body);
+    const data = await this.service.googleCallback(req.body, req);
 
     return this.success(res, data);
   };

@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const AuthValidator = require("../validator/AuthValidator");
 
 const TokenBlacklistService = require("./TokenBlacklistService");
 const JwtService = require("./JwtService");
@@ -13,6 +14,13 @@ const UserMapper = require("../mapper/UserMapper");
 const ApiError = require("../../../utils/ApiError");
 const { ErrorCode } = require("../../../constants");
 class AuthService {
+  getSessionContext(req) {
+    return {
+      browserId: req?.authBrowserId,
+      previousToken: req?.session?.authTokens?.refreshToken,
+    };
+  }
+
   getDevice(req) {
     return req?.headers?.["user-agent"] || "Unknown Device";
   }
@@ -39,74 +47,138 @@ class AuthService {
   //   return UserMapper.toLoginResponse(user, tokens);
   // }
 
+// Previous login/register implementations retained for reference.
+  //   async login(req) {
+  //     const { nameAccount, namePassword } = req.body;
+  //
+  //     const user = await UserRepository.findByAccount(nameAccount);
+  //
+  //     if (!user) {
+  //       throw new ApiError(ErrorCode.AUTH.ACCOUNT_NOT_FOUND);
+  //     }
+  //
+  //     const matched = await PasswordService.compare(
+  //       namePassword,
+  //       user.namePassword,
+  //     );
+  //
+  //     if (!matched) {
+  //       throw new ApiError(ErrorCode.AUTH.INVALID_PASSWORD);
+  //     }
+  //
+  //     const tokens = await SessionService.createSession(
+  //       user,
+  //       this.getDevice(req),
+  //     );
+  //
+  //     return UserMapper.toLoginResponse(user, tokens);
+  //   }
+  //
+  //   // async register(data) {
+  //   //   const { nameAccount, namePassword, gmail, fullName } = data;
+  //
+  //   //   await UserService.checkAccountExists(nameAccount);
+  //
+  //   //   const password = await PasswordService.hash(namePassword);
+  //
+  //   //   const user = await UserService.create({
+  //   //     userID: crypto.randomUUID(),
+  //   //     nameAccount,
+  //   //     namePassword: password,
+  //   //     gmail,
+  //   //     fullName,
+  //   //     role: 1,
+  //   //   });
+  //
+  //   //   const tokens = await SessionService.createSession(user);
+  //
+  //   //   return UserMapper.toLoginResponse(user, tokens);
+  //   // }
+  //
+  //   async register(data, req) {
+  //     const { nameAccount, namePassword, gmail, fullName } = data;
+  //
+  //     await UserService.checkAccountExists(nameAccount);
+  //
+  //     const password = await PasswordService.hash(namePassword);
+  //
+  //     const user = await UserService.create({
+  //       userID: crypto.randomUUID(),
+  //       nameAccount,
+  //       namePassword: password,
+  //       gmail,
+  //       fullName,
+  //       role: 1,
+  //     });
+  //
+  //     const tokens = await SessionService.createSession(
+  //       user,
+  //       this.getDevice(req),
+  //     );
+  //
+  //     return UserMapper.toLoginResponse(user, tokens);
+  //   }
+
+  // Previous: async login(req, options = {})
   async login(req) {
-    const { nameAccount, namePassword } = req.body;
-
+    const { nameAccount, namePassword } = AuthValidator.login(req.body);
     const user = await UserRepository.findByAccount(nameAccount);
+    if (!user) throw new ApiError(ErrorCode.AUTH.ACCOUNT_NOT_FOUND);
 
-    if (!user) {
-      throw new ApiError(ErrorCode.AUTH.ACCOUNT_NOT_FOUND);
+    const storedPassword = user.namePassword;
+    const isHash = typeof storedPassword === "string" &&
+      /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/.test(storedPassword);
+    let matched = false;
+    if (isHash) {
+      matched = await PasswordService.compare(namePassword, storedPassword);
+    } else if (typeof storedPassword === "string" && storedPassword &&
+               !storedPassword.startsWith("$2")) {
+      // Upgrade old web passwords only after a successful exact comparison.
+      const supplied = Buffer.from(namePassword, "utf8");
+      const stored = Buffer.from(storedPassword, "utf8");
+      matched = supplied.length === stored.length &&
+        crypto.timingSafeEqual(supplied, stored);
     }
+    if (!matched) throw new ApiError(ErrorCode.AUTH.INVALID_PASSWORD);
 
-    const matched = await PasswordService.compare(
-      namePassword,
-      user.namePassword,
-    );
-
-    if (!matched) {
-      throw new ApiError(ErrorCode.AUTH.INVALID_PASSWORD);
+    if (!isHash && Buffer.byteLength(namePassword, "utf8") > 72) {
+      throw new ApiError({
+        ...ErrorCode.VALIDATION.FAILED,
+        message: "Mật khẩu cũ vượt quá 72 byte. Vui lòng liên hệ hỗ trợ để đặt lại mật khẩu.",
+      });
     }
-
-    const tokens = await SessionService.createSession(
-      user,
-      this.getDevice(req),
-    );
-
+    if (!isHash || !user.userID) {
+      if (!isHash) user.namePassword = await PasswordService.hash(namePassword);
+      if (!user.userID) user.userID = crypto.randomUUID();
+      await user.save();
+    }
+    // Previous: if (options.issueTokens === false) return UserMapper.toProfile(user);
+    // Previous: const tokens = await SessionService.createSession(user, this.getDevice(req));
+    const tokens = await SessionService.createSession(user, this.getDevice(req), this.getSessionContext(req));
     return UserMapper.toLoginResponse(user, tokens);
   }
 
-  // async register(data) {
-  //   const { nameAccount, namePassword, gmail, fullName } = data;
-
-  //   await UserService.checkAccountExists(nameAccount);
-
-  //   const password = await PasswordService.hash(namePassword);
-
-  //   const user = await UserService.create({
-  //     userID: crypto.randomUUID(),
-  //     nameAccount,
-  //     namePassword: password,
-  //     gmail,
-  //     fullName,
-  //     role: 1,
-  //   });
-
-  //   const tokens = await SessionService.createSession(user);
-
-  //   return UserMapper.toLoginResponse(user, tokens);
-  // }
-
-  async register(data, req) {
-    const { nameAccount, namePassword, gmail, fullName } = data;
-
+  async register(data, req, options = {}) {
+    const { nameAccount, namePassword, gmail, fullName } = AuthValidator.register(data);
     await UserService.checkAccountExists(nameAccount);
-
     const password = await PasswordService.hash(namePassword);
-
-    const user = await UserService.create({
-      userID: crypto.randomUUID(),
-      nameAccount,
-      namePassword: password,
-      gmail,
-      fullName,
-      role: 1,
-    });
-
-    const tokens = await SessionService.createSession(
-      user,
-      this.getDevice(req),
-    );
-
+    let user;
+    try {
+      user = await UserService.create({
+        userID: crypto.randomUUID(),
+        nameAccount,
+        namePassword: password,
+        gmail,
+        fullName,
+        role: 1,
+      });
+    } catch (error) {
+      if (error.code === 11000) throw new ApiError(ErrorCode.AUTH.ACCOUNT_EXISTS);
+      throw error;
+    }
+    if (options.issueTokens === false) return UserMapper.toProfile(user);
+    // Previous: const tokens = await SessionService.createSession(user, this.getDevice(req));
+    const tokens = await SessionService.createSession(user, this.getDevice(req), this.getSessionContext(req));
     return UserMapper.toLoginResponse(user, tokens);
   }
 
@@ -147,6 +219,7 @@ class AuthService {
     const tokens = await SessionService.createSession(
       user,
       this.getDevice(req),
+      this.getSessionContext(req),
     );
 
     return UserMapper.toLoginResponse(user, tokens);

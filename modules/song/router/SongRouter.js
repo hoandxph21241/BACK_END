@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+router.use(require("./SongEngagementRouter"));
+router.use(require("./SongWaveformRouter"));
 
 const SongController = require("../controller/SongController");
 const SongValidator = require("../validator/SongValidator");

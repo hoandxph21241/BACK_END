@@ -1,0 +1,20 @@
+const express = require("express");
+const rateLimit = require("express-rate-limit");
+const service = require("../service/SongEngagementService");
+const verify = require("../../../middlewares/auth/verifyAccessToken");
+const webAuth = require("../../../middlewares/auth/webAccessToken");
+const ApiError = require("../../../utils/ApiError");
+const { ErrorCode } = require("../../../constants");
+const router = express.Router();
+const userId = req => req.user?.userID || req.user?.id || req.session?.userLogin?.userID || req.session?.userLogin?._id;
+const optionalAuth = (req, res, next) => req.headers.authorization ? verify(req, res, next) : next();
+const requireAuth = (req, res, next) => req.headers.authorization ? verify(req, res, next) : webAuth(req, res, next);
+const limit = rateLimit({ windowMs: 60000, max: 30, message: { success: false, message: "Bạn thao tác quá nhanh. Vui lòng thử lại sau." } });
+router.get("/:id/stats", optionalAuth, async (req, res) => res.json({ success: true, data: await service.getStats(req.params.id, userId(req)) }));
+router.post("/:id/listen", limit, optionalAuth, async (req, res) => res.json({ success: true, data: await service.recordListen(req.params.id, req.body?.playbackId, userId(req)) }));
+router.put("/:id/like", limit, requireAuth, async (req, res) => res.json({ success: true, data: await service.setLike(req.params.id, userId(req), req.body?.liked) }));
+router.use((error, req, res, next) => {
+  if (res.headersSent) return next(error);
+  return res.status(error.status || 500).json({ success: false, message: error.status ? error.message : "Không thể cập nhật lượt nghe/yêu thích." });
+});
+module.exports = router;

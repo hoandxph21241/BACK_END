@@ -1,11 +1,13 @@
 function initUploadForm() {
-  if (window._uploadFormInitialized) {
-    console.log('initUploadForm: already initialized');
-    return;
-  }
-  window._uploadFormInitialized = true;
-  console.log('initUploadForm: initialized');
-
+//   if (window._uploadFormInitialized) {
+//     console.log('initUploadForm: already initialized');
+//     return;
+//   }
+//   window._uploadFormInitialized = true;
+//   console.log('initUploadForm: initialized');
+  const currentForm = document.getElementById('uploadForm');
+  if (!currentForm || currentForm.dataset.uploadInitialized === 'true') return;
+  currentForm.dataset.uploadInitialized = 'true';
   let isUploading = false;
 
   const uploadForm = document.getElementById('uploadForm');
@@ -56,35 +58,53 @@ function initUploadForm() {
       });
   }
 
+  // Previous alert interpolated server messages as HTML:
+  //   function showAlert(message, type = 'danger') {
+  //     alertContainer.innerHTML = `
+  //       <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+  //         ${message}
+  //         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  //       </div>
+  //     `;
+  //   }
   function showAlert(message, type = 'danger') {
-    alertContainer.innerHTML = `
-      <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    `;
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.setAttribute('role', 'alert');
+    alert.textContent = String(message);
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'btn-close';
+    close.setAttribute('data-bs-dismiss', 'alert');
+    close.setAttribute('aria-label', 'Close');
+    alert.appendChild(close);
+    alertContainer.replaceChildren(alert);
   }
-
   document.getElementById('mp3File').addEventListener('change', function (e) {
     const file = e.target.files[0];
     if (file) {
       // Kiểm tra loại file
-      const allowedTypes = ['audio/mpeg', 'audio/mp4', 'audio/m4a'];
-      const allowedExtensions = ['.mp3', '.m4a'];
+      // Previous: const allowedTypes = ['audio/mpeg', 'audio/mp4', 'audio/m4a'];
+      // Previous: const allowedTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/x-wav', 'audio/flac'];
+      const allowedTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/x-wav', 'audio/flac', 'audio/mp4', 'audio/m4a', 'audio/x-m4a'];
+      // Previous: const allowedExtensions = ['.mp3', '.m4a'];
+      // Previous: const allowedExtensions = ['.mp3', '.wav', '.flac'];
+      const allowedExtensions = ['.mp3', '.m4a', '.wav', '.flac'];
       
       const isValidType = allowedTypes.includes(file.type);
       const isValidExtension = allowedExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
       
       if (!isValidType && !isValidExtension) {
-        showAlert('Chỉ chấp nhận file MP3 hoặc M4A! File của bạn không hợp lệ.');
+        showAlert('Chỉ chấp nhận file MP3, M4A, WAV hoặc FLAC! File của bạn không hợp lệ.');
         e.target.value = '';
         return;
       }
       
       // Kiểm tra kích thước
-      const maxSize = 50 * 1024 * 1024;
+      // Previous: const maxSize = 50 * 1024 * 1024;
+      const maxSize = 25 * 1024 * 1024;
       if (file.size > maxSize) {
-        showAlert('File MP3 quá lớn! Vui lòng chọn file nhỏ hơn 50MB.');
+        showAlert('File audio quá lớn! Vui lòng chọn file không quá 25 MB.');
         e.target.value = '';
         return;
       }
@@ -95,7 +115,7 @@ function initUploadForm() {
   document.getElementById('imageFile').addEventListener('change', function (e) {
     const file = e.target.files[0];
     if (file) {
-      if (!file.type.startsWith('image/')) {
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
         showAlert('Vui lòng chọn file ảnh hợp lệ!');
         e.target.value = '';
         previewImg.style.display = 'none';
@@ -141,7 +161,7 @@ function initUploadForm() {
     }
 
     if (!mp3File) {
-      showAlert('Vui lòng chọn file MP3!');
+      showAlert('Vui lòng chọn file audio!');
       isUploading = false;
       return;
     }
@@ -149,7 +169,8 @@ function initUploadForm() {
     const formData = new FormData();
     formData.append('name', document.getElementById('mp3Name').value);
     formData.append('categoryId', categoryId);
-    formData.append('mp3File', mp3File);
+    // Previous: formData.append('mp3File', mp3File);
+    formData.append('song', mp3File);
     if (imageFile) formData.append('imageFile', imageFile);
 
     alertContainer.innerHTML = '';
@@ -163,6 +184,24 @@ function initUploadForm() {
     spinner.classList.remove('d-none');
 
     const xhr = new XMLHttpRequest();
+    const notificationId = crypto.randomUUID();
+    const uploadTitle = document.getElementById('mp3Name').value.trim() || mp3File.name.replace(/\.[^.]+$/, '');
+    let resultReported = false;
+    function reportUpload(status, message) {
+      if (resultReported) return;
+      resultReported = true;
+      let notifications = window.MediaHzNotifications;
+      try {
+        if (window.parent !== window && window.parent.location.origin === location.origin) {
+          notifications = window.parent.MediaHzNotifications || notifications;
+        }
+      } catch { /* Cross-origin parents do not receive upload details. */ }
+      notifications?.publish({
+        id: notificationId, status,
+        title: status === 'success' ? 'Tải lên thành công' : status === 'warning' ? 'Chưa xác nhận kết quả tải lên' : 'Tải lên thất bại',
+        message: uploadTitle + ' — ' + message,
+      });
+    }
 
     xhr.upload.addEventListener('progress', function (e) {
       if (e.lengthComputable) {
@@ -186,7 +225,9 @@ function initUploadForm() {
     });
 
     xhr.onreadystatechange = function () {
-      if (xhr.readyState === XMLHttpRequest.DONE) {
+      // Previous: if (xhr.readyState === XMLHttpRequest.DONE) {
+      // Status 0 is handled by onerror/ontimeout, not as an invalid JSON response.
+      if (xhr.readyState === XMLHttpRequest.DONE && xhr.status !== 0) {
         isUploading = false;
         uploadBtn.disabled = false;
         backBtn.disabled = false;
@@ -199,8 +240,14 @@ function initUploadForm() {
             progressBar.classList.add('bg-success');
             progressBar.innerText = '100% - Hoàn thành!';
             showAlert('Upload thành công!', 'success');
+            reportUpload('success', 'Bài hát đã được lưu.');
 
             setTimeout(() => {
+              if (!uploadForm.isConnected) return;
+              if (typeof window.navigateMediaHz === 'function') {
+                window.navigateMediaHz('/home/pratical', true);
+                return;
+              }
               if (window.parent !== window && window.parent.document.getElementById('main')) {
                 loadHomePage();
               } else {
@@ -208,7 +255,7 @@ function initUploadForm() {
               }
             }, 2000);
           } else {
-            throw new Error(response.error || 'Upload thất bại!');
+            throw new Error(response.message || response.error || response.msg || 'Upload thất bại!');
           }
         } catch (err) {
           console.error('JSON parsing error:', err);
@@ -217,6 +264,7 @@ function initUploadForm() {
           progressBar.classList.add('bg-danger');
           progressBar.innerText = 'Lỗi!';
           showAlert(err.message || 'Có lỗi xảy ra trong quá trình xử lý phản hồi!');
+          reportUpload(xhr.status >= 200 && xhr.status < 300 ? 'warning' : 'error', err.message || 'Phản hồi không hợp lệ.');
         }
       }
     };
@@ -230,6 +278,7 @@ function initUploadForm() {
       progressBar.classList.add('bg-danger');
       progressBar.innerText = 'Lỗi kết nối!';
       showAlert('Lỗi kết nối! Vui lòng thử lại.');
+      reportUpload('warning', 'Mất kết nối. Vui lòng kiểm tra Library trước khi tải lại để tránh trùng bài.');
     };
 
     xhr.ontimeout = function () {
@@ -241,6 +290,7 @@ function initUploadForm() {
       progressBar.classList.add('bg-danger');
       progressBar.innerText = 'Timeout!';
       showAlert('Upload timeout! Vui lòng thử lại.');
+      reportUpload('warning', 'Hết thời gian chờ. Vui lòng kiểm tra Library trước khi tải lại để tránh trùng bài.');
     };
 
     xhr.open('POST', '/product/upload');

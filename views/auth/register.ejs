@@ -45,7 +45,8 @@
           <div class="signin-field">
             <label for="registerPassword">Mật khẩu</label>
             <div class="signin-password">
-              <input id="registerPassword" name="namePassword" type="password" autocomplete="new-password" placeholder="Tạo mật khẩu" required>
+              <!-- <input id="registerPassword" name="namePassword" type="password" autocomplete="new-password" placeholder="Tạo mật khẩu" required> -->
+              <input id="registerPassword" name="namePassword" type="password" autocomplete="new-password" placeholder="Tạo mật khẩu" minlength="8" maxlength="72" required>
               <button type="button" class="signin-reveal" data-password-target="registerPassword"
                       aria-controls="registerPassword" aria-label="Hiện mật khẩu" aria-pressed="false" title="Hiện mật khẩu">
                 <span class="signin-icon icon-eye" aria-hidden="true"></span>

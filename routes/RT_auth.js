@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+router.use(require("../middlewares/browserIdentity"));
 var Contronlers = require("../controllers/CTL_auth");
 var check_login = require("../middlewares/check_login");
 

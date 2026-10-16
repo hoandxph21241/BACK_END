@@ -48,6 +48,7 @@ const SONG_SUMMARY_SELECT =
 
 module.exports = {
   SONG_SUMMARY_SELECT,
+  getImageUrl,
   formatSongSummary,
   formatSongSummaries,
 };
