@@ -81,3 +81,5 @@
 /* @media (prefers-reduced-motion: reduce) { */
 /*     .nav-account-avatar, .nav-main .nav-user .nav-account-trigger::after { transition: none; } */
 /* } */
+
+.nav-auth-controls { display: flex; align-items: center; height: 100%; }

@@ -15,10 +15,11 @@
         button.title = playing ? "Tạm dừng" : "Phát bài hát";
         button.setAttribute("aria-label", button.title);
         const duration = active && playback.duration > 0 ? playback.duration : Number(root.dataset.duration);
-        const seek = root.querySelector("[data-track-seek]");
-        seek.max = duration || 1;
-        seek.disabled = !active || !duration;
-        if (document.activeElement !== seek) seek.value = active ? playback.currentTime || 0 : 0;
+        // Previous timeline updates retained for reference:
+        // const seek = root.querySelector("[data-track-seek]");
+        // seek.max = duration || 1;
+        // seek.disabled = !active || !duration;
+        // if (document.activeElement !== seek) seek.value = active ? playback.currentTime || 0 : 0;
         root.querySelector("[data-track-time]").textContent = time(active ? playback.currentTime : 0);
         root.querySelector("[data-track-duration]").textContent = time(duration);
         window.TrackWaveform?.update(playback);
@@ -43,9 +44,10 @@
         window.SongEngagementV2_1?.bind(root);
         root.querySelectorAll("[data-track-image]").forEach(image => image.addEventListener("error", () => { image.src = "/images/chibi.gif"; }, { once: true }));
         root.querySelector("[data-track-play]").addEventListener("click", () => send({ type: "trackToggle", songId: root.dataset.songId, name: root.dataset.songName, categoryId: root.dataset.categoryId || null }));
-        const seek = root.querySelector("[data-track-seek]");
-        seek.addEventListener("input", () => { root.querySelector("[data-track-time]").textContent = time(seek.value); });
-        seek.addEventListener("change", () => send({ type: "trackSeek", songId: root.dataset.songId, seconds: Number(seek.value) }));
+        // Previous timeline listeners retained for reference:
+        // const seek = root.querySelector("[data-track-seek]");
+        // seek.addEventListener("input", () => { root.querySelector("[data-track-time]").textContent = time(seek.value); });
+        // seek.addEventListener("change", () => send({ type: "trackSeek", songId: root.dataset.songId, seconds: Number(seek.value) }));
         root.querySelector("[data-track-share]").addEventListener("click", async () => {
             const status = root.querySelector("[data-track-feedback]");
             try {

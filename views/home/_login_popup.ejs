@@ -1,0 +1,24 @@
+<dialog id="loginPopup" class="login-popup" aria-labelledby="loginPopupTitle" aria-describedby="loginPopupDescription">
+  <button type="button" class="login-popup-close" data-login-close aria-label="Đóng đăng nhập" title="Đóng">
+    <span aria-hidden="true"></span>
+  </button>
+  <header>
+    <img class="login-popup-logo" src="/images/bg.png" alt="MediaHz" width="40" height="40">
+    <h2 id="loginPopupTitle">Đăng nhập</h2>
+    <p id="loginPopupDescription">Đăng nhập để lưu những bài hát bạn yêu thích.</p>
+  </header>
+  <p class="login-popup-error" data-login-error role="alert" hidden></p>
+  <form data-login-form action="/auth/signin" method="post">
+    <label for="popupAccount">Email hoặc tài khoản</label>
+    <input id="popupAccount" name="nameAccount" type="text" autocomplete="username" maxlength="254" required>
+    <label for="popupPassword">Mật khẩu</label>
+    <div class="login-popup-password">
+      <input id="popupPassword" name="namePassword" type="password" autocomplete="current-password" required>
+      <button type="button" data-login-reveal aria-label="Hiện mật khẩu" title="Hiện mật khẩu" aria-pressed="false" aria-controls="popupPassword"><span aria-hidden="true"></span></button>
+    </div>
+    <button type="submit" class="login-popup-submit" data-login-submit>Đăng nhập</button>
+  </form>
+  <div class="login-popup-divider"><span>hoặc</span></div>
+  <button type="button" class="login-popup-google" data-login-google><img src="/images/auth/google-color.svg" alt="" width="20" height="20">Tiếp tục với Google</button>
+  <p class="login-popup-register">Chưa có tài khoản? <a href="/auth/register" target="_blank" rel="noopener">Đăng ký</a></p>
+</dialog>

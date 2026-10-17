@@ -2,6 +2,7 @@
     "use strict";
     const cache = new Map(), requests = new Map(), busy = new Set();
     let run = null, lastSong = null;
+    let authVersion = 0;
     function paint() {
         document.querySelectorAll("[data-song-like]").forEach(button => {
             const id = button.dataset.songLike, stats = cache.get(id)?.stats;
@@ -30,13 +31,26 @@
             ...(body ? { body: JSON.stringify(body) } : {}),
         });
         const data = await response.json();
-        if (!response.ok || !data.success) throw new Error(response.status === 401 ? "Vui lòng đăng nhập để yêu thích bài hát." : data.message || "Không thể cập nhật thống kê.");
+        // Previous error did not preserve the HTTP status for the login popup:
+        // if (!response.ok || !data.success) throw new Error(response.status === 401 ? "Vui lòng đăng nhập để yêu thích bài hát." : data.message || "Không thể cập nhật thống kê.");
+        if (!response.ok || !data.success) {
+            const error = new Error(data.message || "Không thể cập nhật thống kê.");
+            error.status = response.status;
+            throw error;
+        }
         return data.data;
     }
     function get(id) {
         if (cache.has(id) && Date.now() - cache.get(id).time < 30000) return Promise.resolve(cache.get(id).stats);
-        if (!requests.has(id)) requests.set(id, request(id).then(stats => { publish(stats); return stats; }).finally(() => requests.delete(id)));
-        return requests.get(id);
+        // Previous in-flight key was only the song ID and could publish anonymous stats after login.
+        // if (!requests.has(id)) requests.set(id, request(id).then(stats => { publish(stats); return stats; }).finally(() => requests.delete(id)));
+        // return requests.get(id);
+        const version = authVersion, key = version + ':' + id;
+        if (!requests.has(key)) requests.set(key, request(id).then(stats => {
+            if (version === authVersion) publish(stats);
+            return stats;
+        }).finally(() => requests.delete(key)));
+        return requests.get(key);
     }
     function notify(message) {
         let toast = document.getElementById("songEngagementStatus");
@@ -44,14 +58,23 @@
         toast.textContent = message; toast.hidden = false;
         clearTimeout(notify.timer); notify.timer = setTimeout(() => { toast.hidden = true; }, 4000);
     }
-    async function toggle(id) {
+    // Previous: async function toggle(id) {
+    async function toggle(id, liked) {
         if (!id || busy.has(id)) return;
         busy.add(id); paint();
         try {
             const current = await get(id);
-            const stats = await request(id, "PUT", "like", { liked: !current.liked });
+            // Previous: const stats = await request(id, "PUT", "like", { liked: !current.liked });
+            const stats = await request(id, "PUT", "like", { liked: typeof liked === "boolean" ? liked : !current.liked });
             publish(stats);
-        } catch (error) { notify(error.message); }
+        // Previous: } catch (error) { notify(error.message); }
+        } catch (error) {
+            if (error.status === 401) {
+                if (window.parent !== window) window.parent.postMessage({ type: "authRequired", songId: id }, location.origin);
+                else if (window.MediaHzLogin) window.MediaHzLogin.open({ songId: id });
+                else location.assign("/auth/signin");
+            } else notify(error.message);
+        }
         finally { busy.delete(id); paint(); }
     }
     const observed = new Set();
@@ -103,9 +126,14 @@
         if (!button) return;
         event.preventDefault(); toggle(button.dataset.songLike);
     });
+    function authenticationChanged() { authVersion++; cache.clear(); bind(); }
+    window.addEventListener("mediahz:authenticated", authenticationChanged);
     window.addEventListener("message", event => {
         const source = window.parent !== window ? window.parent : document.getElementById("mediaPlayerFrame")?.contentWindow;
-        if (event.origin !== location.origin || event.source !== source || event.data?.type !== "songStats") return;
+        // Previous: if (event.origin !== location.origin || event.source !== source || event.data?.type !== "songStats") return;
+        if (event.origin !== location.origin || event.source !== source) return;
+        if (event.data?.type === "authChanged") { authenticationChanged(); return; }
+        if (event.data?.type !== "songStats") return;
         const stats = event.data.stats;
         if (stats && typeof stats.songId === "string" && Number.isFinite(stats.playCount) && Number.isFinite(stats.likeCount)) publish(stats, false);
     });

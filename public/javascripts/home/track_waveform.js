@@ -78,7 +78,8 @@
       this.element.setAttribute('aria-disabled', String(!this.enabled));
       this.element.tabIndex = this.enabled ? 0 : -1;
       this.element.setAttribute('aria-valuemax', String(this.duration || 0));
-      this.element.title = this.enabled ? 'Tua bài hát' : 'Phát bài hát để tua';
+      // Previous tooltip: this.element.title = this.enabled ? 'Tua bài hát' : 'Phát bài hát để tua';
+      this.element.removeAttribute('title');
       cancelAnimationFrame(this.animation); this.draw();
       if (active && state.status === 'playing') this.tick();
     }
@@ -106,7 +107,7 @@
     seek(seconds) {
       this.previewTime = Math.max(0, Math.min(this.duration, seconds)); this.seekAt = performance.now();
       this.send({ type: 'trackSeek', songId: this.root.dataset.songId, seconds: this.previewTime });
-      const input = this.root.querySelector('[data-track-seek]'); input.value = this.previewTime;
+      // Previous timeline sync: const input = this.root.querySelector('[data-track-seek]'); input.value = this.previewTime;
       this.root.querySelector('[data-track-time]').textContent = format(this.previewTime); this.draw();
     }
     draw() {
@@ -117,18 +118,35 @@
         this.canvas.width = Math.round(width * scale); this.canvas.height = Math.round(height * scale);
       }
       const ctx = this.canvas.getContext('2d');
-      ctx.setTransform(scale, 0, 0, scale, 0, 0); ctx.clearRect(0, 0, width, height);
+      // Previous: ctx.setTransform(scale, 0, 0, scale, 0, 0); ctx.clearRect(0, 0, width, height);
+      ctx.resetTransform(); ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
       if (!this.peaks.length) return;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(0, 0, width, height); ctx.clip();
       const count = Math.min(this.peaks.length, Math.max(1, Math.floor(width / 4)));
       const step = width / count, played = this.duration > 0 ? width * this.time() / this.duration : 0;
       for (let i = 0; i < count; i++) {
         const from = Math.floor(i * this.peaks.length / count), to = Math.max(from + 1, Math.floor((i + 1) * this.peaks.length / count));
         let peak = 0; for (let j = from; j < to; j++) peak = Math.max(peak, this.peaks[j]);
-        const bar = Math.max(2, Math.sqrt(peak / 255) * (height - 24));
-        const x = i * step, y = (height - bar) / 2, barWidth = Math.max(1, step - 1.5);
-        ctx.fillStyle = '#a9b3af'; ctx.fillRect(x, y, barWidth, bar);
-        if (played > x) { ctx.fillStyle = '#ff5500'; ctx.fillRect(x, y, Math.min(barWidth, played - x), bar); }
+        // Previous mirrored waveform: const bar = Math.max(2, Math.sqrt(peak / 255) * (height - 24));
+        // const x = i * step, y = (height - bar) / 2, barWidth = Math.max(1, step - 1.5);
+        // Previous two-layer rendering retained for reference:
+        // const bar = Math.max(1, Math.sqrt(peak / 255) * (height - 12));
+        // const x = i * step, y = height - bar, barWidth = Math.max(1, step - 1.5);
+        // ctx.fillStyle = '#a9b3af'; ctx.fillRect(x, y, barWidth, bar);
+        // if (played > x) { ctx.fillStyle = '#ff5500'; ctx.fillRect(x, y, Math.min(barWidth, played - x), bar); }
+        if (peak <= 0) continue;
+        const bar = Math.max(1, Math.sqrt(peak / 255) * (height - 12));
+        // Align edges to physical pixels and paint each region only once.
+        const x = Math.round(i * step * scale) / scale;
+        const right = Math.round((i * step + Math.max(1, step - 1.5)) * scale) / scale;
+        const y = Math.round((height - bar) * scale) / scale;
+        const split = Math.max(x, Math.min(right, Math.round(played * scale) / scale));
+        if (split > x) { ctx.fillStyle = '#ff5500'; ctx.fillRect(x, y, split - x, height - y); }
+        if (split < right) { ctx.fillStyle = '#a9b3af'; ctx.fillRect(split, y, right - split, height - y); }
       }
+      ctx.restore();
       this.element.setAttribute('aria-valuenow', String(Math.round(this.time())));
       this.element.setAttribute('aria-valuetext', format(this.time()) + ' / ' + format(this.duration));
     }

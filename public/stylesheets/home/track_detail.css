@@ -1,6 +1,7 @@
 .track-page,.track-page * { box-sizing:border-box; }
 .track-page { padding:24px 0 72px; color:#eee; font-family:Arial,sans-serif; }
-.track-header { display:grid; grid-template-columns:minmax(0,1fr) 264px; gap:32px; padding:32px; background:#393c3b; }
+/* Previous track-header background: #393c3b. */
+.track-header { display:grid; grid-template-columns:minmax(0,1fr) 264px; gap:32px; padding:32px; background:#000000; }
 .track-main-info { display:flex; flex-direction:column; min-width:0; }
 .track-heading { display:flex; align-items:flex-start; gap:18px; }
 .track-heading-text { min-width:0; }
@@ -12,10 +13,17 @@
 .track-play.is-playing .track-play-icon { mask-image:url('/images/player/pause-fill.svg'); -webkit-mask-image:url('/images/player/pause-fill.svg'); }
 .track-tags { display:flex; flex-wrap:wrap; align-items:center; gap:16px; margin:24px 0; font-size:12px; color:#c9cecc; }
 .track-tags > span { padding:4px 9px; border-radius:3px; background:#284b43; color:#d1f0e5; }
-.track-artwork { display:block; width:100%; aspect-ratio:1; object-fit:cover; background:#252525; }
+/* Previous: .track-artwork { display:block; width:100%; aspect-ratio:1; object-fit:cover; background:#252525; } */
+.track-artwork { display:block; width:100%; aspect-ratio:1; object-fit:cover; background:#252525; border:1px solid #ffffff; border-radius:5%; }
+.track-artwork { position:relative; z-index:2; }
+.track-artwork-frame { position:relative; width:100%; aspect-ratio:1; align-self:start; }
+.track-artwork-backdrop { display:block; position:absolute; inset:0; width:100%; height:100%; z-index:1; object-fit:fill; background:#000000; pointer-events:none; user-select:none; }
+.track-artwork-frame > .track-artwork { width:100%; height:100%; }
+/* Previous timeline styles retained for reference:
 .track-timeline { margin-top:auto; padding-top:28px; }
 .track-timeline input { display:block; width:100%; height:22px; margin:0; accent-color:#f50; cursor:pointer; }
 .track-timeline input:disabled { cursor:default; opacity:.5; }
+*/
 .track-times { display:flex; justify-content:space-between; padding-top:6px; font-size:12px; color:#d6d6d6; font-variant-numeric:tabular-nums; }
 .track-toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 0; border-bottom:1px solid #444; }
 .track-stats { display:flex; flex-wrap:wrap; gap:20px; font-size:12px; color:#bbb; }
@@ -47,18 +55,28 @@
 .track-missing { padding:48px 20px; color:#eee; }
 @media(max-width:800px) { .track-header { grid-template-columns:minmax(0,1fr) 180px; gap:20px; padding:24px; } .track-heading h1 { font-size:23px; } .track-columns { grid-template-columns:minmax(0,1fr) 240px; gap:24px; } }
 @media(max-width:600px) { .track-page { padding-top:12px; } .track-header { display:flex; flex-direction:column-reverse; padding:20px 16px; gap:24px; } .track-artwork { width:min(220px,100%); align-self:center; } .track-play { flex-basis:48px; width:48px; height:48px; } .track-heading { gap:12px; } .track-heading h1 { font-size:22px; } .track-columns { grid-template-columns:minmax(0,1fr); gap:24px; } .track-related { border-left:0; border-top:1px solid #444; padding:24px 0 0; } .track-about dl > div { grid-template-columns:104px minmax(0,1fr); } }
-.track-waveform-shell { position: relative; min-width: 0; margin: 0 0 6px; }
-.track-waveform { position: relative; width: 100%; height: 128px; outline-offset: 3px; touch-action: pan-y; user-select: none; cursor: crosshair; }
+/* Previous: .track-waveform-shell { position: relative; min-width: 0; margin: 0 0 6px; } */
+.track-waveform-shell { position: relative; min-width: 0; margin: auto 0 6px; }
+/* Previous full waveform height: 128px. */
+/* Previous waveform cursor: crosshair. */
+/* Previous waveform focus offset: outline-offset: 3px. */
+.track-waveform { position: relative; width: 100%; height: 64px; border: 0; outline: none; box-shadow: none; background: transparent; touch-action: pan-y; user-select: none; cursor: pointer; }
+.track-waveform { overflow: hidden; isolation: isolate; }
 .track-waveform[aria-disabled="true"] { cursor: default; }
-.track-waveform:focus-visible { outline: 2px solid #ff7a38; }
+/* Previous: .track-waveform:focus-visible { outline: 2px solid #ff7a38; } */
+.track-waveform:focus-visible { outline: none; }
+.track-main-info:has(.track-waveform:focus-visible) > .track-times { color: #ff9b73; }
 .track-waveform canvas { display: block; position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.track-waveform.is-loading { background: #ffffff08; animation: track-waveform-loading 1.5s ease-in-out infinite; }
+.track-waveform > canvas { max-width: 100%; max-height: 100%; clip-path: inset(0); contain: paint; }
+/* Previous loading backdrop: .track-waveform.is-loading { background: #ffffff08; animation: track-waveform-loading 1.5s ease-in-out infinite; } */
 .track-waveform-label { position: absolute; top: 0; transform: translateX(-50%); padding: 2px 5px; background: #202322; color: #fff; border-radius: 3px; font-size: 11px; pointer-events: none; font-variant-numeric: tabular-nums; }
 .track-waveform-state { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; pointer-events: none; color: #d0d6d3; font-size: 12px; text-align: center; }
 .track-waveform-state button { pointer-events: auto; flex-shrink: 0; padding: 5px 9px; border: 1px solid #87938d; border-radius: 3px; background: transparent; color: #fff; font: inherit; cursor: pointer; }
 .track-waveform-state [hidden], .track-waveform-label[hidden] { display: none !important; }
 /* Previous timeline spacing: .track-timeline { margin-top:auto; padding-top:28px; } */
-.track-main-info .track-timeline { padding-top: 8px; }
-@keyframes track-waveform-loading { 50% { opacity: .4; } }
-@media(max-width:600px) { .track-waveform { height: 104px; } }
-@media(prefers-reduced-motion:reduce) { .track-waveform.is-loading { animation: none; } }
+/* .track-main-info .track-timeline { padding-top: 8px; } */
+/* Previous: @keyframes track-waveform-loading { 50% { opacity: .4; } } */
+/* Previous: @media(max-width:600px) { .track-waveform { height: 104px; } } */
+@media(max-width:600px) { .track-waveform { height: 52px; } }
+@media(max-width:600px) { .track-artwork-frame { width:min(220px,100%); align-self:center; } }
+/* Previous: @media(prefers-reduced-motion:reduce) { .track-waveform.is-loading { animation: none; } } */

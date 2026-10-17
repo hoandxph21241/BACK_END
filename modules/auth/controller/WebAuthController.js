@@ -16,6 +16,24 @@ function messageFor(error) {
 }
 
 class WebAuthController {
+  async sessionResponse(req, res) {
+    res.set("Cache-Control", "no-store");
+    const user = req.session?.userLogin;
+    if (!user) return res.json({ success: true, authenticated: false });
+    const nav = await new Promise((resolve, reject) => {
+      res.render("inc/_nav_account", { user }, (error, html) => error ? reject(error) : resolve(html));
+    });
+    return res.json({ success: true, authenticated: true, nav, user: {
+      id: user._id, userID: user.userID, fullName: user.fullName,
+      imageAccount: user.imageAccount, role: user.role,
+    } });
+  }
+
+  session = async (req, res, next) => {
+    try { return await this.sessionResponse(req, res); }
+    catch (error) { next(error); }
+  };
+
   register = async (req, res) => {
     try {
       if (!req.body?.confirmPassword) {
@@ -87,6 +105,8 @@ class WebAuthController {
       });
       throw error;
     }
+    // Previous: return res.redirect("/home");
+    if (req.xhr && req.get("accept")?.includes("application/json")) return this.sessionResponse(req, res);
     return res.redirect("/home");
   }
 
@@ -95,6 +115,11 @@ class WebAuthController {
       const data = await AuthService.login(req);
       return await this.finishLogin(req, res, data);
     } catch (error) {
+      if (req.xhr && req.get("accept")?.includes("application/json")) {
+        res.set("Cache-Control", "no-store");
+        return res.status(error instanceof ApiError ? error.status : 500)
+          .json({ success: false, message: messageFor(error) });
+      }
       return res.status(error instanceof ApiError ? error.status : 500)
         .render("auth/sign_in.ejs", { msg: messageFor(error), user: null });
     }

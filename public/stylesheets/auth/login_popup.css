@@ -1,0 +1,38 @@
+.login-popup, .login-popup * { box-sizing: border-box; }
+.login-popup { width: min(420px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); margin: auto; padding: 30px; overflow-y: auto; border: 1px solid #494949; border-radius: 6px; background: #171717; color: #fff; font: 14px/1.5 Arial, sans-serif; color-scheme: dark; }
+.login-popup[open] { animation: login-popup-enter 180ms ease-out; }
+.login-popup::backdrop { background: #000a; animation: login-popup-backdrop 180ms ease-out; }
+.login-popup header { padding-right: 20px; }
+.login-popup-logo { display: block; object-fit: contain; margin-bottom: 16px; }
+.login-popup h2 { margin: 0 0 8px; font-size: 25px; line-height: 32px; font-weight: 600; }
+.login-popup header p { margin: 0 0 24px; color: #b5b5b5; font-size: 13px; }
+.login-popup button, .login-popup input { font-family: inherit; }
+.login-popup label { display: block; margin: 16px 0 7px; font-size: 13px; font-weight: 600; }
+.login-popup input { width: 100%; height: 44px; padding: 0 12px; border: 1px solid #555; border-radius: 4px; background: #232323; color: #fff; font-size: 14px; }
+.login-popup input:focus-visible { outline: 2px solid #f50; outline-offset: 1px; }
+.login-popup-password { position: relative; }
+.login-popup-password input { padding-right: 44px; }
+.login-popup [data-login-reveal] { position: absolute; right: 3px; top: 3px; display: grid; place-items: center; width: 38px; height: 38px; border: 0; background: transparent; color: #bbb; cursor: pointer; }
+.login-popup [data-login-reveal] span { width: 18px; height: 18px; background: currentColor; mask: url('/images/auth/eye.svg') center/contain no-repeat; -webkit-mask: url('/images/auth/eye.svg') center/contain no-repeat; }
+.login-popup [data-login-reveal][aria-pressed="true"] span { mask-image: url('/images/auth/eye-slash.svg'); -webkit-mask-image: url('/images/auth/eye-slash.svg'); }
+.login-popup-close { position: absolute; right: 12px; top: 12px; display: grid; place-items: center; width: 32px; height: 32px; border: 0; background: transparent; color: #bbb; cursor: pointer; }
+.login-popup-close span { width: 16px; height: 16px; background: currentColor; mask: url('/images/auth/x-lg.svg') center/contain no-repeat; -webkit-mask: url('/images/auth/x-lg.svg') center/contain no-repeat; }
+.login-popup-close:hover, .login-popup [data-login-reveal]:hover { color: #fff; }
+.login-popup-submit, .login-popup-google { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 44px; padding: 10px 14px; border: 1px solid transparent; border-radius: 4px; font-size: 14px; line-height: 22px; font-weight: 600; cursor: pointer; }
+.login-popup-submit { margin-top: 24px; background: #f50; color: #fff; }
+.login-popup-submit:hover { background: #e64b00; }
+.login-popup-google { border-color: #555; background: transparent; color: #fff; }
+.login-popup-google:hover { background: #292929; }
+.login-popup button:disabled { opacity: .6; cursor: wait; }
+.login-popup-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: #999; font-size: 12px; }
+.login-popup-divider::before, .login-popup-divider::after { content: ''; flex: 1; height: 1px; background: #444; }
+.login-popup-register { margin: 22px 0 0; text-align: center; color: #aaa; font-size: 13px; }
+.login-popup-register a { color: #ff8c54; text-decoration: none; }
+.login-popup-register a:hover { color: #ffb38d; }
+.login-popup-error { padding: 10px 12px; border: 1px solid #783f3f; border-radius: 4px; color: #ffcaca; background: #302020; overflow-wrap: anywhere; font-size: 13px; }
+.login-popup-error[hidden] { display: none; }
+.login-popup button:focus-visible, .login-popup a:focus-visible { outline: 2px solid #ff8c54; outline-offset: 3px; }
+@keyframes login-popup-enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes login-popup-backdrop { from { opacity: 0; } to { opacity: 1; } }
+@media(max-width:480px) { .login-popup { padding: 24px 20px; } }
+@media(prefers-reduced-motion:reduce) { .login-popup[open], .login-popup::backdrop { animation: none; } }

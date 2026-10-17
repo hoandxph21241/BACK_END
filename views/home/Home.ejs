@@ -20,6 +20,8 @@
   <link rel='stylesheet' href='/stylesheets/home/library.css'>
   <script src='/javascripts/home/library_v2_1.js' defer></script>
   <script src='/javascripts/user_profile.js' defer></script>
+  <link rel="stylesheet" href="/stylesheets/auth/login_popup.css">
+  <script src="/javascripts/auth/login_popup.js" defer></script>
   <link rel='stylesheet' href='/stylesheets/home/track_detail.css'>
   <script src='/javascripts/home/track_waveform.js' defer></script>
   <script src='/javascripts/home/track_detail.js' defer></script>
@@ -38,6 +40,7 @@
       <template id="libraryLoadingTemplate">
         <%- include('_library_skeleton') %>
       </template>
+      <%- include('_login_popup') %>
       <main id="main">
       </main>
 
@@ -765,13 +768,19 @@
             }
           }
         }
-        document.querySelectorAll('.nav-link[data-url]').forEach(link => {
-          link.addEventListener('click', event => {
-            if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
-            event.preventDefault();
-            // Previous: loadPage(link.dataset.url, true);
-            loadPage(link.dataset.url, true, { refresh: true });
-          });
+        // Previous per-link bindings did not include account links inserted after popup login:
+        // document.querySelectorAll('.nav-link[data-url]').forEach(link => {
+        //   link.addEventListener('click', event => {
+        //     if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        //     event.preventDefault();
+        //     loadPage(link.dataset.url, true, { refresh: true });
+        //   });
+        // });
+        document.addEventListener('click', event => {
+          const link = event.target.closest('.nav-main .nav-link[data-url]');
+          if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+          event.preventDefault();
+          loadPage(link.dataset.url, true, { refresh: true });
         });
         window.navigateMediaHz = loadPage;
         window.addEventListener('message', event => {

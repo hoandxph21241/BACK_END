@@ -378,14 +378,17 @@ body.home-centered-layout #iframeContainer_v2 iframe {
 
 /* Feed reloads Bootstrap; keep the page background outside the centered content dark. */
 html:has(body.home-centered-layout) {
-    background-color: #2e2d2d;
+    /* Previous: background-color: #2e2d2d; */
+    background-color: #000000;
 }
 body.home-centered-layout {
-    background-color: #2e2d2d;
+    /* Previous: background-color: #2e2d2d; */
+    background-color: #000000;
     min-height: 100vh;
 }
 body.home-centered-layout #main {
-    background-color: #2e2d2d;
+    /* Previous: background-color: #2e2d2d; */
+    background-color: #000000;
 }
 
 /* Dark playlist header; previous header colors are retained above. */

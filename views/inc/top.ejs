@@ -8,17 +8,25 @@
         margin: 0;
         padding: 0;
         font-family: Arial, sans-serif;
-        background-color: #2e2d2d;
+        /* Previous: background-color: #2e2d2d; */
+        background-color: #000000;
     }
+
+    .nav-shell { height: 50px; }
 
     .background_nav {
         width: 100%;
         height: 50px;
-        background-color: rgb(0, 0, 0);
+        /* Previous: background-color: rgb(0, 0, 0); */
+        background-color: #101010;
         display: flex;
         align-items: center;
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-        position: relative;
+        /* Previous: position: relative; */
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
         z-index: 1000;
     }
 
@@ -152,7 +160,8 @@
 </style>
 
 <body>
-    <div class="container-fluid p-0">
+    <!-- Previous nav wrapper: <div class="container-fluid p-0"> -->
+    <div class="container-fluid p-0 nav-shell">
         <div class="row m-0">
             <!-- Sidebar -->
             <nav class="background_nav d-md-block sidebar custom-sidebar">
@@ -210,11 +219,15 @@
 
                     <!-- User Navigation -->
                     <div class="nav-user">
-                        <% if (user) { %>
-                            <!-- User Icon with Dropdown (Đã đăng nhập) -->
+                        <div id="navAuthControls" class="nav-auth-controls">
+                          <%- include('_nav_account') %>
+                        </div>
+                        <!-- Previous inline account controls retained for reference:
+&lt;% if (user) { %>
+                            &lt;!-- User Icon with Dropdown (Đã đăng nhập) --&gt;
                             <li class="nav-item nav-account-item dropdown">
                                 <div class="text-center">
-<!-- Previous account button:                                     <button type="button" class="btn btn-outline-warning dropdown-toggle"
+&lt;!-- Previous account button:                                     <button type="button" class="btn btn-outline-warning dropdown-toggle"
                                         data-bs-toggle="dropdown" aria-expanded="false">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                             fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
@@ -222,14 +235,14 @@
                                             <path fill-rule="evenodd"
                                                 d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
                                         </svg>
-                                    </button> -->
+                                    </button> --&gt;
                                     <button id="navAccountDropdown" type="button" class="btn nav-account-trigger dropdown-toggle"
                                             data-bs-toggle="dropdown" aria-expanded="false" aria-label="Tài khoản" title="Tài khoản">
-                                        <!-- Previous decorative account icon:
+                                        &lt;!-- Previous decorative account icon:
                                         <span class="nav-account-avatar" aria-hidden="true"><span class="nav-account-icon"></span></span>
-                                        -->
+                                        --&gt;
                                         <img class="nav-account-photo"
-                                             src="<%= typeof user.imageAccount === 'string' && user.imageAccount.trim() ? user.imageAccount : '/images/auth/person-circle.svg' %>"
+                                             src="&lt;%= typeof user.imageAccount === 'string' && user.imageAccount.trim() ? user.imageAccount : '/images/auth/person-circle.svg' %>"
                                              alt="" width="28" height="28" referrerpolicy="no-referrer"
                                              data-avatar-fallback="/images/auth/person-circle.svg">
                                     </button>
@@ -297,8 +310,8 @@
                                     </a>
                                 </div>
                             </li>
-                            <% } else { %>
-                                <!-- Login Link (Chưa đăng nhập) -->
+                            &lt;% } else { %>
+                                &lt;!-- Login Link (Chưa đăng nhập) --&gt;
                                 <li class="nav-item p-2">
                                     <div class="text-center">
                                         <a href="/auth/signin" class="btn btn-outline-warning">
@@ -308,8 +321,10 @@
                                         </a>
                                     </div>
                                 </li>
-                                <% } %>
+                                &lt;% } %>
 
+
+                        -->
                                     <!-- Notification Icon -->
                                     <button type="button" id="notification" class="me-3 btn "
                                         style="border: none; background-color: transparent; color: rgb(255, 170, 0);">

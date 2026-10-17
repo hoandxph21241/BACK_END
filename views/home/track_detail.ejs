@@ -24,12 +24,21 @@
           <button type="button" data-waveform-retry hidden>Thử lại</button>
         </div>
       </div>
+      <!-- Previous timeline retained for reference:
       <div class="track-timeline">
-        <input type="range" min="0" max="<%= seconds || 1 %>" step="0.1" value="0" data-track-seek aria-label="Vị trí phát" disabled>
-        <div class="track-times"><span data-track-time>0:00</span><span data-track-duration><%= durationText %></span></div>
+        <input type="range" min="0" max="&lt;%= seconds || 1 %>" step="0.1" value="0" data-track-seek aria-label="Vị trí phát" disabled>
+        <div class="track-times"><span data-track-time>0:00</span><span data-track-duration>&lt;%= durationText %></span></div>
       </div>
+      -->
+      <div class="track-times"><span data-track-time>0:00</span><span data-track-duration><%= durationText %></span></div>
     </div>
-    <img class="track-artwork" src="<%= imageUrl(song.image) %>" alt="Ảnh bìa <%= song.name %>" data-track-image>
+    <!-- Previous standalone artwork:
+    <img class="track-artwork" src="&lt;%= imageUrl(song.image) %>" alt="Ảnh bìa &lt;%= song.name %>" data-track-image>
+    -->
+    <div class="track-artwork-frame">
+      <img class="track-artwork-backdrop" src="/images/player/artwork-black.svg" alt="" aria-hidden="true" draggable="false">
+      <img class="track-artwork" src="<%= imageUrl(song.image) %>" alt="Ảnh bìa <%= song.name %>" data-track-image>
+    </div>
   </header>
   <div class="track-toolbar">
     <div class="track-stats"><span><span class="track-small-play" aria-hidden="true"></span><b data-song-plays="<%= song._id %>"><%= Number(song.playCount) || 0 %></b> lượt nghe</span><span><b data-song-likes="<%= song._id %>"><%= Number(song.likeCount) || 0 %></b> lượt thích</span></div>
