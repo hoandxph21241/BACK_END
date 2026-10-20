@@ -2,6 +2,8 @@
 <script src="/javascripts/upload_notifications.js" defer data-notification-owner="<%= user ? (user.userID || user._id || user.id || 'user') : 'guest' %>"></script>
 <link rel="stylesheet" href="/stylesheets/nav_user.css">
 <script src="/javascripts/nav_user.js" defer></script>
+<link rel="stylesheet" href="/stylesheets/mail.css">
+<script src="/javascripts/mail.js" defer data-mail-user="<%= user ? String(user._id || '') : '' %>"></script>
 <!-- Header -->
 <style>
     body {

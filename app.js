@@ -9,7 +9,8 @@ const cors = require("cors");
 var session = require("express-session");
 
 const passport = require("passport");
-require("dotenv").config({ path: "../env/B_E_S.env" });
+// Previous: require("dotenv").config({ path: "../env/B_E_S.env" });
+require("dotenv").config({ path: path.resolve(__dirname, "../env/B_E_S.env") });
 require("./config/passport");
 
 var indexRouter = require("./routes/index");
@@ -38,14 +39,22 @@ app.listen(() => {
 });
 
 //session check
-app.use(
-  session({
-    secret: "AAAAAAAAABBBBBBBBBCCCCCCCDDDDDDD",
-    resave: false,
-    saveUninitialized: true,
-    //  cookie: { secure: true },
-  }),
-);
+// Previous MemoryStore configuration:
+// app.use(
+//   session({
+//     secret: "AAAAAAAAABBBBBBBBBCCCCCCCDDDDDDD",
+//     resave: false,
+//     saveUninitialized: true,
+//     // cookie: { secure: true },
+//   }),
+// );
+const { mongoose } = require("./model/db");
+const createSessionConfig = require("./config/session");
+const webSession = createSessionConfig({
+  clientPromise: mongoose.connection.asPromise().then(connection => connection.getClient()),
+});
+app.set("trust proxy", webSession.trustProxy);
+app.use(session(webSession.options));
 
 // Passport
 app.use(passport.initialize());
@@ -118,6 +127,7 @@ app.use("/api/users", UserRouter);
 
 const AuthRouter = require("./modules/auth/router/AuthRouter");
 app.use("/api/auth", AuthRouter);
+app.use("/api/mail", require("./modules/mail/router/MailRouter"));
 
 app.get("/profile", (req, res) => {
   if (!req.isAuthenticated()) {

@@ -1,3 +1,4 @@
 env/B_E_S.env
 config/passport.js
 javascripts/btn_pub.txt
+node_modules/
