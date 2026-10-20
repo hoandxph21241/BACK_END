@@ -34,6 +34,10 @@ module.exports = async (req, res, next) => {
       throw new ApiError(ErrorCode.USER.NOT_FOUND);
     }
 
+    if ((payload.authVersion || 0) !== (user.authVersion || 0)) {
+      throw new ApiError(ErrorCode.AUTH.INVALID_TOKEN);
+    }
+
     req.user = user;
     return next();
   } catch (err) {

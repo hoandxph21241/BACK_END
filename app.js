@@ -59,6 +59,7 @@ app.use(session(webSession.options));
 // Passport
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(require("./middlewares/auth/validateWebSession"));
 
 // Middleware truyền user vào views
 app.use((req, res, next) => {
@@ -127,6 +128,7 @@ app.use("/api/users", UserRouter);
 
 const AuthRouter = require("./modules/auth/router/AuthRouter");
 app.use("/api/auth", AuthRouter);
+
 app.use("/api/mail", require("./modules/mail/router/MailRouter"));
 
 app.get("/profile", (req, res) => {

@@ -4,65 +4,104 @@
   const banner = user.bannerImage || '/images/bg_main.png';
   const tag = user.profileTag || '';
   const profileMessage = typeof message === 'string' ? message : '';
+  const profileLinks = Array.isArray(user.links) ? user.links : [];
 %>
+<!-- Previous profile copy: Chỉnh sửa hồ sơ; Giới thiệu; Chưa có tên; Chưa có giới thiệu.;
+     Ảnh bìa; Ảnh đại diện; Chọn ảnh banner; Đổi ảnh đại diện; Tối đa 5 MB mỗi ảnh;
+     Tên hiển thị; Biệt danh; Tên; Họ; Thành phố; Quốc gia; Liên kết của bạn;
+     Thêm liên kết; Hủy; Lưu thay đổi; Đóng. -->
 <section class="profile-page" data-profile-view data-edit-open="<%= typeof editOpen !== 'undefined' && editOpen ? 'true' : 'false' %>">
   <header class="profile-header">
-    <img id="profileBanner" class="profile-cover" src="<%= banner %>" alt="Ảnh bìa hồ sơ" data-image-fallback="/images/bg_main.png">
+    <img id="profileBanner" class="profile-cover" src="<%= banner %>" alt="Profile banner" data-image-fallback="/images/bg_main.png">
     <div class="profile-identity">
-      <img id="profileAvatar" class="profile-avatar" src="<%= avatar %>" alt="Ảnh đại diện" data-image-fallback="/images/auth/person-circle.svg">
+      <img id="profileAvatar" class="profile-avatar" src="<%= avatar %>" alt="Profile picture" data-image-fallback="/images/auth/person-circle.svg">
       <div class="profile-info">
-        <h1 id="profileFullName"><%= user.fullName || user.userName || 'Chưa có tên' %></h1>
+        <h1 id="profileFullName"><%= user.fullName || user.userName || 'Unnamed user' %></h1>
         <p><%= user.gmail || user.nameAccount || '' %></p>
       </div>
     </div>
-    <button id="editProfileButton" type="button" class="profile-edit-button"><span class="profile-icon profile-pencil" aria-hidden="true"></span>Chỉnh sửa hồ sơ</button>
+    <button id="editProfileButton" type="button" class="profile-edit-button"><span class="profile-icon profile-pencil" aria-hidden="true"></span>Edit Profile</button>
     <span id="profileTagLabel" class="profile-tag">#<%= tag %></span>
   </header>
   <div class="profile-details">
-    <h2>Giới thiệu</h2>
-    <p id="profileBio"><%= user.bio || 'Chưa có giới thiệu.' %></p>
+    <h2>About</h2>
+    <p id="profileBio"><%= user.bio || 'No bio yet.' %></p>
+    <p id="profileLocation" <%= user.city || user.country ? '' : 'hidden' %>><%= [user.city, user.country].filter(Boolean).join(', ') %></p>
+    <ul id="profileLinks" class="profile-public-links">
+      <% profileLinks.forEach(link => { if (/^https?:\/\//i.test(link.url)) { %>
+        <li><a href="<%= link.url %>" target="_blank" rel="noopener noreferrer"><span class="profile-icon profile-link-icon" aria-hidden="true"></span><%= link.label || link.url %></a></li>
+      <% } }); %>
+    </ul>
     <p id="profileSaveStatus" class="profile-save-status" role="status"></p>
   </div>
   <dialog id="profileEditDialog" class="profile-dialog" aria-labelledby="profileEditTitle">
     <form id="profileEditForm" action="/users/profile/edit" method="POST" enctype="multipart/form-data">
       <div class="profile-dialog-header">
-        <h2 id="profileEditTitle">Chỉnh sửa hồ sơ</h2>
-        <button type="button" class="profile-close" data-close-profile aria-label="Đóng" title="Đóng"><span class="profile-icon profile-x" aria-hidden="true"></span></button>
+        <h2 id="profileEditTitle">Edit Profile</h2>
+        <button type="button" class="profile-close" data-close-profile aria-label="Close" title="Close"><span class="profile-icon profile-x" aria-hidden="true"></span></button>
       </div>
       <div class="profile-form-body">
         <p id="profileFormError" class="profile-form-error" role="alert" <%= profileMessage ? '' : 'hidden' %>><%= profileMessage %></p>
+        <div class="profile-editor-layout">
+        <aside class="profile-media-column">
         <div class="profile-banner-field">
           <!-- Previous: <label for="profileBannerFile">Ảnh banner</label> -->
-          <span class="profile-file-heading">Ảnh banner</span>
-          <img id="profileBannerPreview" class="profile-banner-preview" src="<%= banner %>" alt="Xem trước banner">
+          <!-- Previous: <span class="profile-file-heading">Ảnh banner</span> -->
+          <span class="profile-file-heading">Banner image</span>
+          <img id="profileBannerPreview" class="profile-banner-preview" src="<%= banner %>" alt="Banner preview">
           <!-- Previous: <input id="profileBannerFile" name="banner" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="profileImageHint"> -->
           <div class="profile-file-picker">
-            <button type="button" class="profile-file-button" data-profile-file-target="profileBannerFile" aria-controls="profileBannerFile">Chọn ảnh banner</button>
-            <span id="profileBannerFileName" class="profile-file-name" aria-live="polite">Chưa chọn ảnh</span>
+            <button type="button" class="profile-file-button" data-profile-file-target="profileBannerFile" aria-controls="profileBannerFile">Update banner</button>
+            <!-- Previous: <span id="profileBannerFileName" class="profile-file-name" aria-live="polite">Chưa chọn ảnh</span> -->
+            <span id="profileBannerFileName" class="profile-file-name" aria-live="polite" hidden></span>
           </div>
-          <input id="profileBannerFile" name="banner" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Ảnh banner" aria-describedby="profileImageHint" hidden>
+          <input id="profileBannerFile" name="banner" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Banner image" aria-describedby="profileImageHint" hidden>
         </div>
         <div class="profile-avatar-field">
-          <img id="profileAvatarPreview" src="<%= avatar %>" alt="Xem trước ảnh đại diện">
+          <img id="profileAvatarPreview" src="<%= avatar %>" alt="Profile picture preview">
           <!-- Previous: <div><label for="profileAvatarFile">Ảnh đại diện</label><input id="profileAvatarFile" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="profileImageHint"></div> -->
-          <div>
-            <span class="profile-file-heading">Ảnh đại diện</span>
+          <div class="profile-avatar-picker">
+            <!-- Previous: <span class="profile-file-heading">Ảnh đại diện</span> -->
             <div class="profile-file-picker">
-              <button type="button" class="profile-file-button" data-profile-file-target="profileAvatarFile" aria-controls="profileAvatarFile">Chọn ảnh đại diện</button>
-              <span id="profileAvatarFileName" class="profile-file-name" aria-live="polite">Chưa chọn ảnh</span>
+              <!-- Previous: <button type="button" class="profile-file-button" data-profile-file-target="profileAvatarFile" aria-controls="profileAvatarFile">Chọn ảnh đại diện</button> -->
+              <button type="button" class="profile-file-button" data-profile-file-target="profileAvatarFile" aria-controls="profileAvatarFile">Update image</button>
+              <!-- Previous: <span id="profileAvatarFileName" class="profile-file-name" aria-live="polite">Chưa chọn ảnh</span> -->
+              <span id="profileAvatarFileName" class="profile-file-name" aria-live="polite" hidden></span>
             </div>
-            <input id="profileAvatarFile" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Ảnh đại diện" aria-describedby="profileImageHint" hidden>
+            <input id="profileAvatarFile" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Profile picture" aria-describedby="profileImageHint" hidden>
           </div>
         </div>
-        <p id="profileImageHint" class="profile-field-hint">JPG, PNG hoặc WebP · Tối đa 5 MB mỗi ảnh</p>
+        <p id="profileImageHint" class="profile-field-hint">JPG, PNG or WebP · Up to 5 MB per image</p>
+        </aside>
+        <div class="profile-fields-column">
+        <!-- Previous fields:
         <div class="profile-form-grid">
-          <div><label for="profileFullNameInput">Họ và tên</label><input id="profileFullNameInput" name="fullName" value="<%= user.fullName || user.userName || '' %>" maxlength="80" autocomplete="name" required></div>
-          <div><label for="profileTagInput">Biệt danh</label><input id="profileTagInput" name="profileTag" value="#<%= tag %>" pattern="#?hz[0-9]{3,12}" title="hz và từ 3 đến 12 chữ số, ví dụ #hz231" maxlength="15" spellcheck="false" required></div>
+          <div><label for="profileFullNameInput">Họ và tên</label><input id="profileFullNameInput" name="fullName" value="&lt;%= user.fullName || user.userName || '' %>" maxlength="80" autocomplete="name" required></div>
+          <div><label for="profileTagInput">Biệt danh</label><input id="profileTagInput" name="profileTag" value="#&lt;%= tag %>" pattern="#?hz[0-9]{3,12}" title="hz và từ 3 đến 12 chữ số, ví dụ #hz231" maxlength="15" spellcheck="false" required></div>
         </div>
-        <label for="profileBioInput">Giới thiệu</label>
+        -->
+        <div class="profile-primary-fields">
+          <div><label for="profileFullNameInput">Display name <span class="profile-required" aria-hidden="true">*</span></label><input id="profileFullNameInput" name="fullName" value="<%= user.fullName || '' %>" maxlength="80" autocomplete="nickname" required></div>
+          <div><label for="profileTagInput">Profile tag <span class="profile-required" aria-hidden="true">*</span></label><input id="profileTagInput" name="profileTag" value="#<%= tag %>" pattern="#?hz[0-9]{3,12}" title="hz followed by 3 to 12 digits, e.g. #hz231" maxlength="15" spellcheck="false" required></div>
+        </div>
+        <div class="profile-form-grid">
+          <div><label for="profileFirstNameInput">First name</label><input id="profileFirstNameInput" name="firstName" value="<%= user.firstName || '' %>" maxlength="60" autocomplete="given-name"></div>
+          <div><label for="profileLastNameInput">Last name</label><input id="profileLastNameInput" name="lastName" value="<%= user.lastName || '' %>" maxlength="60" autocomplete="family-name"></div>
+          <div><label for="profileCityInput">City</label><input id="profileCityInput" name="city" value="<%= user.city || '' %>" maxlength="80" autocomplete="address-level2"></div>
+          <div><label for="profileCountryInput">Country</label><input id="profileCountryInput" name="country" value="<%= user.country || '' %>" maxlength="80" autocomplete="country-name"></div>
+        </div>
+        <label for="profileBioInput">Bio</label>
         <textarea id="profileBioInput" name="bio" rows="3" maxlength="500"><%= user.bio || '' %></textarea>
+        </div>
+        </div>
+        <section class="profile-links-editor" aria-labelledby="profileLinksTitle">
+          <h3 id="profileLinksTitle">Your links</h3>
+          <input id="profileLinksData" type="hidden" name="links" value="<%= JSON.stringify(profileLinks.map(link => ({ label: link.label || '', url: link.url }))) %>">
+          <div id="profileLinkRows"></div>
+          <button id="profileAddLink" type="button" class="profile-file-button"><span class="profile-icon profile-plus-icon" aria-hidden="true"></span>Add link</button>
+        </section>
       </div>
-      <div class="profile-form-actions"><button type="button" class="profile-cancel" data-close-profile>Hủy</button><button id="profileSaveButton" type="submit" class="profile-save">Lưu thay đổi</button></div>
+      <div class="profile-form-actions"><button type="button" class="profile-cancel" data-close-profile>Cancel</button><button id="profileSaveButton" type="submit" class="profile-save">Save changes</button></div>
     </form>
   </dialog>
 </section>

@@ -59,7 +59,13 @@ class UserService {
 
     const user = await this.getByIdentifier(identifier);
 
-    if (value.gmail && value.gmail !== user.gmail) {
+    // Previous: if (value.gmail && value.gmail !== user.gmail) {
+    const emailChanging = value.gmail && value.gmail !== user.gmail;
+    if (emailChanging) {
+      // Recovery email changes must not bypass the password-change proof.
+      if (!value.oldPassword || !await PasswordService.compare(value.oldPassword, user.namePassword)) {
+        throw new ApiError({ ...ErrorCode.AUTH.INVALID_PASSWORD, message: "Cần mật khẩu hiện tại để thay đổi email nhận OTP." });
+      }
       const existing = await UserRepository.findByGmail(value.gmail);
 
       if (existing && String(existing._id) !== String(user._id)) {
@@ -67,7 +73,11 @@ class UserService {
       }
     }
 
-    const updated = await UserRepository.update(user._id, value);
+    delete value.oldPassword;
+    // Previous: const updated = await UserRepository.update(user._id, value);
+    const updated = emailChanging
+      ? await UserRepository.model.findOneAndUpdate({ _id: user._id, namePassword: user.namePassword, gmail: user.gmail }, { $set: value }, { new: true, runValidators: true })
+      : await UserRepository.update(user._id, value);
 
     if (!updated) {
       throw new ApiError(ErrorCode.USER.NOT_FOUND);
@@ -77,35 +87,18 @@ class UserService {
   }
 
   async changePassword(identifier, data) {
-    const { error, value } = ChangePasswordValidator.change.validate(data, {
-      abortEarly: false,
-      stripUnknown: true,
-    });
-
-    if (error) this.validationError(error);
-
-    const user = await this.getByIdentifier(identifier);
-
-    const matched = await PasswordService.compare(
-      value.oldPassword,
-      user.namePassword,
-    );
-
-    if (!matched) {
-      throw new ApiError(ErrorCode.AUTH.INVALID_PASSWORD);
-    }
-
-    const hashedPassword = await PasswordService.hash(value.newPassword);
-
-    const updated = await UserRepository.update(user._id, {
-      namePassword: hashedPassword,
-    });
-
-    if (!updated) {
-      throw new ApiError(ErrorCode.USER.NOT_FOUND);
-    }
-
-    return { success: true };
+    // Previous password-only update did not revoke existing credentials:
+    // const { error, value } = ChangePasswordValidator.change.validate(data, { abortEarly: false, stripUnknown: true });
+    // if (error) this.validationError(error);
+    // const user = await this.getByIdentifier(identifier);
+    // const matched = await PasswordService.compare(value.oldPassword, user.namePassword);
+    // if (!matched) throw new ApiError(ErrorCode.AUTH.INVALID_PASSWORD);
+    // const hashedPassword = await PasswordService.hash(value.newPassword);
+    // const updated = await UserRepository.update(user._id, { namePassword: hashedPassword });
+    // if (!updated) throw new ApiError(ErrorCode.USER.NOT_FOUND);
+    // return { success: true };
+    const service = require("../../auth/service/PasswordChangeService");
+    return service.change(await service.actor(String(identifier)), data);
   }
 
   async list(query = {}) {

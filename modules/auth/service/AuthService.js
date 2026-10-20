@@ -122,7 +122,8 @@ class AuthService {
   // Previous: async login(req, options = {})
   async login(req) {
     const { nameAccount, namePassword } = AuthValidator.login(req.body);
-    const user = await UserRepository.findByAccount(nameAccount);
+    // Previous: const user = await UserRepository.findByAccount(nameAccount);
+    let user = await UserRepository.findByAccount(nameAccount);
     if (!user) throw new ApiError(ErrorCode.AUTH.ACCOUNT_NOT_FOUND);
 
     const storedPassword = user.namePassword;
@@ -148,9 +149,15 @@ class AuthService {
       });
     }
     if (!isHash || !user.userID) {
-      if (!isHash) user.namePassword = await PasswordService.hash(namePassword);
-      if (!user.userID) user.userID = crypto.randomUUID();
-      await user.save();
+      // Previous migration could overwrite a concurrent password reset:
+      // if (!isHash) user.namePassword = await PasswordService.hash(namePassword);
+      // if (!user.userID) user.userID = crypto.randomUUID();
+      // await user.save();
+      const changes = {};
+      if (!isHash) changes.namePassword = await PasswordService.hash(namePassword);
+      if (!user.userID) changes.userID = crypto.randomUUID();
+      user = await UserRepository.model.findOneAndUpdate({ _id: user._id, namePassword: storedPassword }, { $set: changes }, { new: true });
+      if (!user) throw new ApiError(ErrorCode.AUTH.INVALID_PASSWORD);
     }
     // Previous: if (options.issueTokens === false) return UserMapper.toProfile(user);
     // Previous: const tokens = await SessionService.createSession(user, this.getDevice(req));
@@ -231,22 +238,15 @@ class AuthService {
   }
 
   async changePassword(userId, oldPassword, newPassword) {
-    const user = await UserService.getByIdentifier(userId);
-
-    const matched = await PasswordService.compare(
-      oldPassword,
-      user.namePassword,
-    );
-
-    if (!matched) {
-      throw new ApiError(ErrorCode.AUTH_INVALID_PASSWORD);
-    }
-
-    user.namePassword = await PasswordService.hash(newPassword);
-
-    user.refreshTokens = [];
-
-    await UserService.save(user);
+    // Previous implementation:
+    // const user = await UserService.getByIdentifier(userId);
+    // const matched = await PasswordService.compare(oldPassword, user.namePassword);
+    // if (!matched) throw new ApiError(ErrorCode.AUTH_INVALID_PASSWORD);
+    // user.namePassword = await PasswordService.hash(newPassword);
+    // user.refreshTokens = [];
+    // await UserService.save(user);
+    const service = require("./PasswordChangeService");
+    return service.change(await service.actor(String(userId)), { oldPassword, newPassword });
   }
 
   async revokeToken(refreshToken) {

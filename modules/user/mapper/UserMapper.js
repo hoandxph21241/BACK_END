@@ -24,6 +24,14 @@ class UserMapper {
       gmail: user.gmail,
       imageAccount: user.imageAccount,
       grender: user.grender,
+      bannerImage: user.bannerImage || '',
+      profileTag: user.profileTag || '',
+      bio: user.bio || '',
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      city: user.city || '',
+      country: user.country || '',
+      links: (user.links || []).map(link => ({ label: link.label || '', url: link.url })),
       role: user.role,
     };
   }

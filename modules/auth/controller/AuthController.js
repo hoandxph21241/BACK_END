@@ -95,7 +95,8 @@ class AuthController extends BaseController {
     const { oldPassword, newPassword } = req.body;
 
     await this.service.changePassword(
-      req.user.userId,
+      // Previous: req.user.userId,
+      String(req.user.userID || req.user._id || req.user.id || ""),
       oldPassword,
       newPassword,
     );

@@ -1,3 +1,4 @@
+<!-- Previous settings page retained for reference:
 <!DOCTYPE html>
 <html>
 
@@ -51,3 +52,35 @@
 </body>
 
 </html>
+-->
+<section class="password-settings" data-password-settings>
+  <header class="password-settings-heading"><h1>Cài đặt tài khoản</h1><span>Bảo mật</span></header>
+  <section class="password-settings-section" aria-labelledby="passwordSettingsTitle">
+    <h2 id="passwordSettingsTitle">Đổi mật khẩu</h2>
+    <div class="password-methods" role="tablist" aria-label="Cách xác nhận">
+      <button type="button" id="passwordMethodCurrent" role="tab" aria-selected="true" aria-controls="passwordProof" data-password-method="password">Mật khẩu hiện tại</button>
+      <button type="button" id="passwordMethodOtp" role="tab" aria-selected="false" aria-controls="passwordProof" tabindex="-1" data-password-method="otp">OTP qua email</button>
+    </div>
+    <p class="password-settings-status" data-password-status role="status" hidden></p>
+    <form data-password-form>
+      <div id="passwordProof" role="tabpanel" aria-labelledby="passwordMethodCurrent">
+        <div data-password-current>
+          <label for="currentPassword">Mật khẩu hiện tại</label>
+          <div class="password-field"><input id="currentPassword" name="oldPassword" type="password" autocomplete="current-password" maxlength="1024" required><button type="button" class="password-reveal" data-password-reveal="currentPassword" aria-pressed="false" aria-label="Hiện mật khẩu" title="Hiện mật khẩu"><span aria-hidden="true"></span></button></div>
+        </div>
+        <div data-password-email hidden>
+          <div class="password-email-line"><span>Email nhận mã</span><strong data-password-destination>Đang tải...</strong></div>
+          <div class="password-otp-line"><div><label for="passwordOtp">Mã OTP</label><input id="passwordOtp" name="otp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="000000" disabled></div><button type="button" class="password-secondary" data-password-send-otp disabled>Gửi OTP</button></div>
+          <p class="password-otp-status" data-password-otp-status role="status"></p>
+        </div>
+      </div>
+      <label for="newPassword">Mật khẩu mới</label>
+      <div class="password-field"><input id="newPassword" name="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="72" required aria-describedby="passwordRule"><button type="button" class="password-reveal" data-password-reveal="newPassword" aria-pressed="false" aria-label="Hiện mật khẩu" title="Hiện mật khẩu"><span aria-hidden="true"></span></button></div>
+      <p id="passwordRule" class="password-rule">Ít nhất 8 ký tự, tối đa 72 byte.</p>
+      <label for="confirmNewPassword">Xác nhận mật khẩu mới</label>
+      <div class="password-field"><input id="confirmNewPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="72" required><button type="button" class="password-reveal" data-password-reveal="confirmNewPassword" aria-pressed="false" aria-label="Hiện mật khẩu" title="Hiện mật khẩu"><span aria-hidden="true"></span></button></div>
+      <footer><button type="submit" class="password-primary" data-password-submit>Đổi mật khẩu</button></footer>
+    </form>
+    <button type="button" class="password-primary" data-password-login hidden>Đăng nhập lại</button>
+  </section>
+</section>

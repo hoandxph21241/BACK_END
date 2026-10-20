@@ -49,6 +49,7 @@ const Model = require('../model/db_song');
 const { randomInt } = require('crypto');
 // Previous: const { saveProfileImages, cleanup } = require('../utils/profileImages');
 const { saveProfileImages, cleanup, cleanupReplacedImages } = require('../utils/profileImages');
+const { parseProfileForm } = require('../utils/profileFields');
 async function loadUser(req) {
   const sessionUser = req.session.userLogin;
   if (!sessionUser) return null;
@@ -70,10 +71,18 @@ async function ensureProfileTag(user) {
       if (error.code !== 11000) throw error;
     }
   }
-  throw new Error('Không thể tạo biệt danh. Vui lòng thử lại.');
+  // Previous: throw new Error('Không thể tạo biệt danh. Vui lòng thử lại.');
+  throw new Error('Unable to create a profile tag. Please try again.');
 }
 function publicProfile(user) {
-  return { fullName: user.fullName || '', imageAccount: user.imageAccount || '', bannerImage: user.bannerImage || '', profileTag: user.profileTag || '', bio: user.bio || '' };
+  // Previous: return { fullName: user.fullName || '', imageAccount: user.imageAccount || '', bannerImage: user.bannerImage || '', profileTag: user.profileTag || '', bio: user.bio || '' };
+  return {
+    fullName: user.fullName || '', imageAccount: user.imageAccount || '',
+    bannerImage: user.bannerImage || '', profileTag: user.profileTag || '', bio: user.bio || '',
+    firstName: user.firstName || '', lastName: user.lastName || '',
+    city: user.city || '', country: user.country || '',
+    links: (user.links || []).map(link => ({ label: link.label || '', url: link.url })),
+  };
 }
 function sessionProfile(user) {
   const fields = ['_id', 'userID', 'nameAccount', 'fullName', 'imageAccount',
@@ -90,7 +99,8 @@ async function renderProfile(req, res, editOpen = false, message = '', status = 
     return res.status(status).render('user/profile.ejs', { user, editOpen, message });
   } catch (error) {
     console.error('Cannot load profile:', error.message);
-    return res.status(500).send('Không thể tải hồ sơ.');
+    // Previous: return res.status(500).send('Không thể tải hồ sơ.');
+    return res.status(500).send('Unable to load your profile.');
   }
 }
 exports.getProfile = (req, res) => renderProfile(req, res);
@@ -100,22 +110,27 @@ exports.postEditProfile = async (req, res) => {
   let newFileIds = [];
   try {
     const user = await loadUser(req);
-    if (!user) return res.status(401).json({ success: false, message: 'Vui lòng đăng nhập lại.' });
+    // Previous: if (!user) return res.status(401).json({ success: false, message: 'Vui lòng đăng nhập lại.' });
+    if (!user) return res.status(401).json({ success: false, message: 'Please sign in again.' });
     if (req.profileUploadError) throw new Error(req.profileUploadError);
-    const fullName = typeof req.body.fullName === 'string' ? req.body.fullName.trim() : '';
-    const bio = typeof req.body.bio === 'string' ? req.body.bio.trim() : '';
-    const profileTag = typeof req.body.profileTag === 'string' ? req.body.profileTag.trim().toLowerCase().replace(/^#/, '') : '';
-    if (!fullName || fullName.length > 80) throw new Error('Họ tên cần từ 1 đến 80 ký tự.');
-    if (!/^hz\d{3,12}$/.test(profileTag)) throw new Error('Biệt danh có dạng #hz231: hz và từ 3 đến 12 chữ số.');
-    if (bio.length > 500) throw new Error('Giới thiệu tối đa 500 ký tự.');
+    // Previous form validation:
+    // const fullName = typeof req.body.fullName === 'string' ? req.body.fullName.trim() : '';
+    // const bio = typeof req.body.bio === 'string' ? req.body.bio.trim() : '';
+    // const profileTag = typeof req.body.profileTag === 'string' ? req.body.profileTag.trim().toLowerCase().replace(/^#/, '') : '';
+    // if (!fullName || fullName.length > 80) throw new Error('Họ tên cần từ 1 đến 80 ký tự.');
+    // if (!/^hz\d{3,12}$/.test(profileTag)) throw new Error('Biệt danh có dạng #hz231: hz và từ 3 đến 12 chữ số.');
+    // if (bio.length > 500) throw new Error('Giới thiệu tối đa 500 ký tự.');
+    const fields = parseProfileForm(req.body);
     // Previous: const images = await saveProfileImages(req.files);
     const images = await saveProfileImages(req.files, user._id);
     // Previous: newPaths = images.paths;
     newFileIds = images.fileIds;
     const updatedUser = await Model.UserModel.findByIdAndUpdate(user._id, {
-      $set: { fullName, bio, profileTag, ...images.changes },
+      // Previous: $set: { fullName, bio, profileTag, ...images.changes },
+      $set: { ...fields, ...images.changes },
     }, { new: true, runValidators: true });
-    if (!updatedUser) throw new Error('Không tìm thấy tài khoản.');
+    // Previous: if (!updatedUser) throw new Error('Không tìm thấy tài khoản.');
+    if (!updatedUser) throw new Error('Account not found.');
     // The DB now owns these uploads; a session-store failure must not remove them.
     // Previous: newPaths = [];
     newFileIds = [];
@@ -128,7 +143,8 @@ exports.postEditProfile = async (req, res) => {
   } catch (error) {
     // Previous: await cleanup(newPaths);
     await cleanup(newFileIds);
-    const message = error.code === 11000 ? 'Biệt danh này đã được sử dụng. Hãy chọn mã khác.' : error.message;
+    // Previous: const message = error.code === 11000 ? 'Biệt danh này đã được sử dụng. Hãy chọn mã khác.' : error.message;
+    const message = error.code === 11000 ? 'This profile tag is already taken. Please choose another.' : error.message;
     if (req.xhr) return res.status(400).json({ success: false, message });
     return renderProfile(req, res, true, message, 400);
   }

@@ -5,6 +5,7 @@ const verifyToken = require("../../../middlewares/verifyToken");
 
 const router = express.Router();
 router.use(require("../../../middlewares/browserIdentity"));
+router.use(require("./PasswordRouter"));
 
 /*
 |--------------------------------------------------------------------------
@@ -47,7 +48,8 @@ router.get("/profile", verifyToken, AuthController.profile);
 // );
 
 // Change password
-router.put("/change-password", verifyToken, AuthController.changePassword);
+// Previous: router.put("/change-password", verifyToken, AuthController.changePassword);
+router.put("/change-password", verifyToken, require("../../../middlewares/auth/passwordChangeLimit"), AuthController.changePassword);
 
 // Logout
 router.post("/logout", verifyToken, AuthController.logout);

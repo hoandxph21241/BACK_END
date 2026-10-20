@@ -20,6 +20,9 @@
   <link rel='stylesheet' href='/stylesheets/home/library.css'>
   <script src='/javascripts/home/library_v2_1.js' defer></script>
   <script src='/javascripts/user_profile.js' defer></script>
+  <link rel="stylesheet" href="/stylesheets/CSS_User/profile_user.css">
+  <link rel="stylesheet" href="/stylesheets/auth/password_settings.css">
+  <script src="/javascripts/auth/password_settings.js" defer></script>
   <link rel="stylesheet" href="/stylesheets/auth/login_popup.css">
   <script src="/javascripts/auth/login_popup.js" defer></script>
   <link rel='stylesheet' href='/stylesheets/home/track_detail.css'>
@@ -40,8 +43,14 @@
       <template id="libraryLoadingTemplate">
         <%- include('_library_skeleton') %>
       </template>
+      <template id="profileLoadingTemplate">
+        <%- include('../user/_profile_skeleton') %>
+      </template>
       <%- include('_login_popup') %>
       <main id="main">
+        <% if (typeof initialView === 'string' && /^\/users\/profile(?:\/edit)?\/?$/.test(initialView)) { %>
+          <%- include('../user/_profile_skeleton') %>
+        <% } %>
       </main>
 
       <!-- <div class="iframe-container" id="iframeContainer">
@@ -700,6 +709,32 @@
           const target = new URL(url, location.href);
           return tabPath(target.pathname.replace(/\/+$/, '') || '/') + target.search;
         }
+        function waitForProfileImages(content, signal) {
+          const template = document.createElement('template');
+          template.innerHTML = content;
+          const sources = [...new Set(Array.from(template.content.querySelectorAll('#profileBanner, #profileAvatar'),
+            image => image.getAttribute('src')).filter(Boolean))];
+          if (!sources.length || signal.aborted) return Promise.resolve();
+          return new Promise(resolve => {
+            const images = [];
+            let remaining = sources.length;
+            const finish = () => {
+              clearTimeout(timeout);
+              signal.removeEventListener('abort', finish);
+              images.forEach(image => { image.onload = image.onerror = null; });
+              resolve();
+            };
+            // A slow external avatar must not hold the profile indefinitely.
+            const timeout = setTimeout(finish, 1200);
+            signal.addEventListener('abort', finish, { once: true });
+            sources.forEach(source => {
+              const image = new Image();
+              images.push(image);
+              image.onload = image.onerror = () => { if (--remaining === 0) finish(); };
+              image.src = source;
+            });
+          });
+        }
         // Previous: async function loadPage(url, pushHistory = false) {
         async function loadPage(url, pushHistory = false, options = {}) {
           const destination = new URL(url, location.href);
@@ -718,17 +753,26 @@
           // Previous: main.innerHTML = '<div class="text-center text-light p-4" role="status">Loading...</div>';
           const libraryLoading = destination.pathname.replace(/\/+$/, '') === '/home/ct_home'
             ? document.getElementById('libraryLoadingTemplate') : null;
+          const profileLoading = /^\/users\/profile(?:\/edit)?\/?$/.test(destination.pathname)
+            ? document.getElementById('profileLoadingTemplate') : null;
           const previousLibrary = main.querySelector('.library-view:not(.library-skeleton)');
+          const previousProfile = main.querySelector('[data-profile-view]');
           main.classList.toggle('library-page-active', Boolean(libraryLoading));
+          main.classList.toggle('profile-page-active', Boolean(profileLoading));
           // Preserve scroll height on refresh; the next non-Library tab releases it.
-          main.style.minHeight = libraryLoading
-            ? Math.ceil(Math.max(previousLibrary ? main.getBoundingClientRect().height : 0,
+          // Previous: main.style.minHeight = libraryLoading
+          //   ? Math.ceil(Math.max(previousLibrary ? main.getBoundingClientRect().height : 0,
+          //       window.innerHeight - main.getBoundingClientRect().top)) + 'px' : '';
+          main.style.minHeight = libraryLoading || profileLoading
+            ? Math.ceil(Math.max((libraryLoading ? previousLibrary : previousProfile) ? main.getBoundingClientRect().height : 0,
                 window.innerHeight - main.getBoundingClientRect().top)) + 'px' : '';
-          main.innerHTML = libraryLoading?.innerHTML || '<div class="text-center text-light p-4" role="status">Loading...</div>';
+          // Previous: main.innerHTML = libraryLoading?.innerHTML || '<div class="text-center text-light p-4" role="status">Loading...</div>';
+          main.innerHTML = (profileLoading || libraryLoading)?.innerHTML || '<div class="text-center text-light p-4" role="status">Loading...</div>';
           const loadingStartedAt = Date.now();
           function commitPage(content) {
             main.innerHTML = content;
             if (libraryLoading) main.querySelector('.library-view')?.classList.add('library-content-ready');
+            if (profileLoading) main.querySelector('[data-profile-view]')?.classList.add('profile-content-ready');
             displayedPageKey = pageKey;
             if (pushHistory && navigationKey(location.href) !== pageKey) {
               history.pushState({ url: targetUrl }, '', targetUrl);
@@ -746,6 +790,7 @@
               const remaining = 1500 - (Date.now() - loadingStartedAt);
               if (remaining > 0) await new Promise(resolve => setTimeout(resolve, remaining));
             }
+            if (profileLoading) await waitForProfileImages(response.data, controller.signal);
             if (request !== navigationRequest || controller.signal.aborted) return;
             commitPage(response.data);
             initializeDynamicContent();

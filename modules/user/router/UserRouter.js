@@ -8,8 +8,11 @@ const router = express.Router();
 
 // Các API dành cho User đã đăng nhập.
 router.get("/me", verifyToken, UserController.getMe);
-router.put("/me/profile", verifyToken, UserController.updateMyProfile);
-router.put("/me/password", verifyToken, UserController.changeMyPassword);
+// Previous: router.put("/me/profile", verifyToken, UserController.updateMyProfile);
+router.put("/me/profile", verifyToken, (req, res, next) => req.body?.gmail
+  ? require("../../../middlewares/auth/passwordChangeLimit")(req, res, next) : next(), UserController.updateMyProfile);
+// Previous: router.put("/me/password", verifyToken, UserController.changeMyPassword);
+router.put("/me/password", verifyToken, require("../../../middlewares/auth/passwordChangeLimit"), UserController.changeMyPassword);
 
 // Xem User theo ID và liệt kê User cần middleware phân quyền quản trị.
 const requireAdmin = (req, res, next) => {

@@ -36,6 +36,7 @@ router.post('/profile/edit', check_login.yeu_cau_dang_nhap, uploadProfileImages,
 router.get('/likes', check_login.yeu_cau_dang_nhap, userController.getLikes);
 
 // Cài đặt
-router.get('/settings', check_login.yeu_cau_dang_nhap, userController.getSettings);
+// Previous: router.get('/settings', check_login.yeu_cau_dang_nhap, userController.getSettings);
+router.get('/settings', check_login.yeu_cau_dang_nhap, profilePage(userController.getSettings));
 
 module.exports = router;

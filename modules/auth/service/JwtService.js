@@ -9,6 +9,7 @@ class JwtService {
         userID: user.userID,
         role: user.role,
         tokenType: "access",
+        authVersion: user.authVersion || 0,
       },
       process.env.JWT_SECRET,
       {
@@ -23,6 +24,7 @@ class JwtService {
         id: user._id,
         userID: user.userID,
         tokenType: "refresh",
+        authVersion: user.authVersion || 0,
       },
       process.env.JWT_SECRET,
       {

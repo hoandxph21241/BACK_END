@@ -128,7 +128,13 @@ class SessionService {
       retained.splice(oldest, 1);
     }
     user.refreshTokens = retained;
-    await user.save();
+    // Previous: await user.save();
+    // A login that started before a password change must not write stale credentials back.
+    const previousWhere = user.$where;
+    user.$where = { ...(previousWhere || {}), ...((user.authVersion || 0)
+      ? { authVersion: user.authVersion } : { $or: [{ authVersion: 0 }, { authVersion: { $exists: false } }] }) };
+    try { await user.save(); }
+    finally { user.$where = previousWhere; }
     return { accessToken, refreshToken };
   }
   /**
@@ -153,6 +159,7 @@ class SessionService {
     if (!user) {
       throw new Error("User not found");
     }
+    if ((payload.authVersion || 0) !== (user.authVersion || 0)) throw new Error("Credentials changed");
 
     const now = new Date();
 
@@ -180,6 +187,7 @@ class SessionService {
       updatedUser = await UserRepository.model.findOneAndUpdate(
         {
           _id: user._id,
+          namePassword: user.namePassword,
           refreshTokens: {
             $elemMatch: {
               token: refreshToken,
