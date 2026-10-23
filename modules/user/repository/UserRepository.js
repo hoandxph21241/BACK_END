@@ -6,6 +6,11 @@ class UserRepository extends BaseRepository {
     super(UserModel);
   }
 
+  async create(data) {
+    // Previous inherited create(data): return this.model.create(data).
+    return require('../../../utils/permalinkService').createUser(data, value => super.create(value));
+  }
+
   findByAccount(nameAccount) {
     return this.model.findOne({
       nameAccount: nameAccount?.trim(),
@@ -37,6 +42,14 @@ class UserRepository extends BaseRepository {
     return this.model.findOne({
       "refreshTokens.token": refreshToken,
     });
+  }
+
+  updatePlayer(userId, songId) {
+    return this.model.updateOne({ _id: userId }, { $set: { currentSongId: songId } }, { runValidators: true });
+  }
+
+  clearPlayerIfSelected(userId, songId) {
+    return this.model.updateOne({ _id: userId, currentSongId: songId }, { $set: { currentSongId: null } });
   }
 
   async findAllUsers({ page = 1, limit = 20 } = {}) {

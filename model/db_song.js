@@ -5,9 +5,11 @@ var userSchema = new db.mongoose.Schema(
     nameAccount: { type: String, required: true, unique: true, trim: true },
     namePassword: { type: String, required: true },
     authVersion: { type: Number, default: 0 },
+    currentSongId: { type: db.mongoose.Schema.Types.ObjectId, ref: "MP3", default: null },
     imageAccount: { type: String, required: false },
     bannerImage: { type: String, default: '' },
     profileTag: { type: String, trim: true, lowercase: true, unique: true, sparse: true, match: /^hz\d{3,12}$/ },
+    profileSlug: { type: String, trim: true, lowercase: true, maxlength: 80, match: /^[a-z0-9]+(?:-[a-z0-9]+)*$/ },
     bio: { type: String, trim: true, maxlength: 500, default: '' },
     userName: { type: String, required: false },
     fullName: { type: String, required: false },
@@ -56,6 +58,8 @@ var userSchema = new db.mongoose.Schema(
     collection: "User",
   },
 );
+userSchema.index({ profileSlug: 1 }, { name: 'profile_slug_unique', unique: true,
+  partialFilterExpression: { profileSlug: { $type: 'string' } } });
 let UserModel = db.mongoose.model("UserModel", userSchema);
 // var mp3Schema = new db.mongoose.Schema(
 //   {
@@ -107,6 +111,9 @@ var MP3Schema = new db.mongoose.Schema(
   {
     songID: { type: String, required: true, unique: true, },
     name: { type: String,required: true,trim: true, },
+    // Stable uploader namespace and track permalink, independent of display names.
+    profileSlug: { type: String, trim: true, lowercase: true, maxlength: 80, match: /^[a-z0-9]+(?:-[a-z0-9]+)*$/ },
+    slug: { type: String, trim: true, lowercase: true, maxlength: 140, match: /^[a-z0-9]+(?:-[a-z0-9]+)*$/ },
     artist: { type: String,required: false, default: "Unknown", },
     album: {
       type: String,
@@ -136,6 +143,9 @@ var MP3Schema = new db.mongoose.Schema(
       type: String,
       required: false,
     },
+
+    // Upload sets this explicitly; old records keep their original createdAt fallback.
+    uploadDate: { type: Date, required: false },
 
     fileSize: {
       type: Number,
@@ -200,6 +210,8 @@ MP3Schema.index({name: "text",artist: "text",});
 MP3Schema.index({categoryId: 1,});
 MP3Schema.index({playCount: -1,});
 MP3Schema.index({createdAt: -1,});
+MP3Schema.index({ profileSlug: 1, slug: 1 }, { name: 'song_permalink_unique', unique: true,
+  partialFilterExpression: { profileSlug: { $type: 'string' }, slug: { $type: 'string' } } });
 let MP3 = db.mongoose.model("MP3", MP3Schema);
 
 // Bổ sung Table

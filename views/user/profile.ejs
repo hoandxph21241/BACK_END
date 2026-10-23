@@ -1,4 +1,5 @@
 <link rel="stylesheet" href="/stylesheets/CSS_User/profile_user.css">
+<link rel="stylesheet" href="/vendor/cropperjs-1.7.0/cropper.min.css">
 <%
   const avatar = user.imageAccount || '/images/auth/person-circle.svg';
   const banner = user.bannerImage || '/images/bg_main.png';
@@ -48,23 +49,31 @@
           <!-- Previous: <label for="profileBannerFile">Ảnh banner</label> -->
           <!-- Previous: <span class="profile-file-heading">Ảnh banner</span> -->
           <span class="profile-file-heading">Banner image</span>
-          <img id="profileBannerPreview" class="profile-banner-preview" src="<%= banner %>" alt="Banner preview">
+          <!-- Previous preview did not show a fixed crop frame or dimensions. -->
+          <div class="profile-preview-frame profile-banner-frame">
+            <img id="profileBannerPreview" class="profile-banner-preview" src="<%= banner %>" alt="Banner preview">
+            <span id="profileBannerDimensions" class="profile-image-dimensions" aria-label="Banner output size"></span>
+          </div>
           <!-- Previous: <input id="profileBannerFile" name="banner" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="profileImageHint"> -->
           <div class="profile-file-picker">
             <button type="button" class="profile-file-button" data-profile-file-target="profileBannerFile" aria-controls="profileBannerFile">Update banner</button>
+            <button type="button" class="profile-adjust-image" data-profile-adjust="profileBannerFile" aria-label="Adjust banner" title="Adjust banner"><span class="profile-icon profile-crop-icon" aria-hidden="true"></span></button>
             <!-- Previous: <span id="profileBannerFileName" class="profile-file-name" aria-live="polite">Chưa chọn ảnh</span> -->
             <span id="profileBannerFileName" class="profile-file-name" aria-live="polite" hidden></span>
           </div>
           <input id="profileBannerFile" name="banner" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Banner image" aria-describedby="profileImageHint" hidden>
         </div>
         <div class="profile-avatar-field">
-          <img id="profileAvatarPreview" src="<%= avatar %>" alt="Profile picture preview">
+          <!-- Previous: avatar preview without a crop frame. -->
+          <div class="profile-avatar-frame"><img id="profileAvatarPreview" src="<%= avatar %>" alt="Profile picture preview"></div>
+          <span id="profileAvatarDimensions" class="profile-image-dimensions" aria-label="Profile picture output size">512 x 512 px</span>
           <!-- Previous: <div><label for="profileAvatarFile">Ảnh đại diện</label><input id="profileAvatarFile" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="profileImageHint"></div> -->
           <div class="profile-avatar-picker">
             <!-- Previous: <span class="profile-file-heading">Ảnh đại diện</span> -->
             <div class="profile-file-picker">
               <!-- Previous: <button type="button" class="profile-file-button" data-profile-file-target="profileAvatarFile" aria-controls="profileAvatarFile">Chọn ảnh đại diện</button> -->
               <button type="button" class="profile-file-button" data-profile-file-target="profileAvatarFile" aria-controls="profileAvatarFile">Update image</button>
+              <button type="button" class="profile-adjust-image" data-profile-adjust="profileAvatarFile" aria-label="Adjust profile picture" title="Adjust profile picture"><span class="profile-icon profile-crop-icon" aria-hidden="true"></span></button>
               <!-- Previous: <span id="profileAvatarFileName" class="profile-file-name" aria-live="polite">Chưa chọn ảnh</span> -->
               <span id="profileAvatarFileName" class="profile-file-name" aria-live="polite" hidden></span>
             </div>
@@ -103,6 +112,34 @@
       </div>
       <div class="profile-form-actions"><button type="button" class="profile-cancel" data-close-profile>Cancel</button><button id="profileSaveButton" type="submit" class="profile-save">Save changes</button></div>
     </form>
+  </dialog>
+  <dialog id="profileCropDialog" class="profile-dialog profile-crop-dialog" aria-labelledby="profileCropTitle">
+    <div class="profile-dialog-header">
+      <h2 id="profileCropTitle">Adjust image</h2>
+      <button type="button" class="profile-close" data-close-crop aria-label="Close image editor" title="Close image editor"><span class="profile-icon profile-x" aria-hidden="true"></span></button>
+    </div>
+    <div class="profile-crop-body">
+      <p id="profileCropError" class="profile-form-error" role="alert" hidden></p>
+      <div id="profileCropStage" class="profile-crop-stage" tabindex="0" aria-label="Image position">
+        <img id="profileCropImage" alt="Image being adjusted">
+        <span id="profileCropStatus" class="profile-crop-status" role="status">Loading image...</span>
+        <span id="profileCropDimensions" class="profile-image-dimensions" aria-label="Cropped image output size"></span>
+        <button id="profileCropReset" type="button" class="profile-adjust-image profile-crop-reset" aria-label="Center image" title="Center image"><span class="profile-icon profile-reset-image" aria-hidden="true"></span></button>
+      </div>
+      <!-- Previous manual zoom toolbar, disabled: images now auto-fit only when too small.
+      <div class="profile-crop-tools">
+        <button type="button" class="profile-adjust-image" data-crop-zoom="-10" aria-label="Zoom out" title="Zoom out"><span class="profile-icon profile-zoom-out" aria-hidden="true"></span></button>
+        <input id="profileCropZoom" type="range" min="0" max="300" value="0" step="1" aria-label="Image zoom">
+        <button type="button" class="profile-adjust-image" data-crop-zoom="10" aria-label="Zoom in" title="Zoom in"><span class="profile-icon profile-zoom-in" aria-hidden="true"></span></button>
+        <output id="profileCropZoomValue" for="profileCropZoom">100%</output>
+        <button type="button" class="profile-adjust-image" aria-label="Reset image position" title="Reset image position"><span class="profile-icon profile-reset-image" aria-hidden="true"></span></button>
+      </div>
+      -->
+    </div>
+    <div class="profile-form-actions">
+      <button type="button" class="profile-cancel" data-close-crop>Cancel</button>
+      <button id="profileCropApply" type="button" class="profile-save" disabled>Apply</button>
+    </div>
   </dialog>
 </section>
 <!-- Previous profile template retained for reference:

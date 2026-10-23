@@ -79,6 +79,7 @@ function publicProfile(user) {
   return {
     fullName: user.fullName || '', imageAccount: user.imageAccount || '',
     bannerImage: user.bannerImage || '', profileTag: user.profileTag || '', bio: user.bio || '',
+    profileSlug: user.profileSlug || null,
     firstName: user.firstName || '', lastName: user.lastName || '',
     city: user.city || '', country: user.country || '',
     links: (user.links || []).map(link => ({ label: link.label || '', url: link.url })),
@@ -94,6 +95,7 @@ async function renderProfile(req, res, editOpen = false, message = '', status = 
     let user = await loadUser(req);
     if (!user) return res.redirect('/auth/signin');
     user = await ensureProfileTag(user);
+  user = await require('../utils/permalinkService').ensureUserProfileSlug(user);
     // Previous: req.session.userLogin = { ...req.session.userLogin, ...user };
     req.session.userLogin = sessionProfile(user);
     return res.status(status).render('user/profile.ejs', { user, editOpen, message });

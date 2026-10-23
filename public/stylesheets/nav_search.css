@@ -1,0 +1,63 @@
+.nav-main .nav-search { flex: 1; min-width: 0; margin: 0 10px; background: transparent; }
+.nav-search #navSearchForm {
+    display: flex; align-items: center; width: 100%; height: 36px;
+    border: 1px solid #494949; border-radius: 4px; background: #303030;
+    transition: border-color 150ms ease, background-color 150ms ease;
+}
+.nav-search #navSearchForm:focus-within { border-color: #f50; background: #363636; }
+.nav-search #navSearchInput {
+    flex: 1; min-width: 0; width: 100%; height: 100%; padding: 0 10px;
+    border: 0; border-radius: 4px; outline: 0; box-shadow: none;
+    background: transparent; color: #fff; caret-color: #fff; font: 14px Arial, sans-serif;
+}
+.nav-search #navSearchInput::placeholder { color: #b5b5b5; opacity: 1; }
+.nav-search #navSearchInput::-webkit-search-cancel-button { display: none; }
+.nav-search .nav-search-action {
+    display: inline-flex; align-items: center; justify-content: center;
+    flex: 0 0 32px; width: 32px; height: 32px; padding: 0;
+    border: 0; border-radius: 3px; background: transparent; color: #ccc; cursor: pointer;
+}
+.nav-search .nav-search-action:hover { color: #fff; background: #454545; }
+.nav-search .nav-search-action:focus-visible { outline: 2px solid #f50; outline-offset: -2px; }
+.nav-search #navSearchClear[hidden] { display: inline-flex; visibility: hidden; pointer-events: none; }
+.nav-search #navSearchSubmit { margin-right: 1px; }
+.search-results { padding: 32px 8px 80px; min-height: calc(100dvh - 100px); color: #f5f5f5; }
+.search-results-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.search-results-heading h1 { margin: 0; font-size: 26px; line-height: 32px; font-weight: 600; }
+.search-query { margin: 10px 0 28px; color: #aaa; font-size: 14px; overflow-wrap: anywhere; }
+.search-results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 26px 18px; }
+.search-results-grid .feed-track { width: 100%; min-width: 0; }
+.search-empty { margin: 0; padding: 56px 0; color: #aaa; font-size: 14px; }
+.search-pagination { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 32px; color: #bbb; font-size: 13px; }
+.search-pagination a { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #555; border-radius: 4px; color: #eee; text-decoration: none; }
+.search-pagination a:hover { color: #f50; border-color: #f50; }
+.search-placeholder { display: block; border-radius: 3px; background: #353535; animation: search-pulse 1.3s ease-in-out infinite alternate; }
+.search-placeholder-query { width: 180px; height: 16px; }
+.search-placeholder-cover { width: 100%; aspect-ratio: 1; }
+.search-placeholder-title { width: 85%; height: 14px; margin: 12px 0 8px; }
+.search-placeholder-artist { width: 60%; height: 12px; }
+@keyframes search-pulse { to { opacity: .45; } }
+@media (max-width: 760px) {
+    .nav-shell, .background_nav { height: 94px; }
+    .nav-main { width: calc(100% - 16px); padding: 0 4px 6px; flex-wrap: wrap; align-content: start; }
+    .nav-main > .nav { flex: 1; min-width: 0; flex-wrap: nowrap; height: 46px; padding: 0; }
+    .nav-main .nav-logo img { width: 28px; height: 36px; object-fit: contain; }
+    .nav-main .nav-item .btn, .nav-main .nav-item a { padding-inline: 5px; font-size: 12px; }
+    .nav-main .nav-search { order: 3; flex: 0 0 100%; margin: 0; }
+    .nav-main .nav-user { flex: 0 0 auto; height: 46px; margin-left: 4px; }
+    .nav-main .nav-auth-controls > .nav-item.p-2 { padding: 0 !important; }
+    .nav-main .nav-user .nav-item.p-2 .nav-link { padding: 0; }
+    .nav-main .nav-user .nav-item.p-2 .nav-link .btn { width: 28px; padding: 4px; }
+    .nav-main #notification, .nav-main #mail { flex: 0 0 30px; width: 30px; padding: 5px; margin: 0 !important; }
+    .nav-main .nav-user .nav-account-item { padding: 0; }
+    .nav-main .nav-user .nav-item .nav-account-trigger { width: 36px; gap: 2px; }
+    .nav-search #navSearchInput { font-size: 16px; }
+}
+@media (max-width: 480px) {
+    .search-results-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; }
+    .search-results-heading h1 { font-size: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .nav-search #navSearchForm { transition: none; }
+    .search-placeholder { animation: none; }
+}

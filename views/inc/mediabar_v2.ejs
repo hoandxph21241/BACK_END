@@ -4,6 +4,7 @@
 <script src="/javascripts/media_v2/history_service_v2_1.js" defer></script>
 <script src="/javascripts/media_v2/playlist_controller_v2_1.js" defer></script>
 <script src="/javascripts/media_v2/player_controller_v2_1.js" defer></script>
+<script src="/javascripts/media_v2/player_persistence_v2_1.js" defer></script>
 <script src="/javascripts/media_v2/player_ui_v2_1.js" defer></script>
 <link rel="stylesheet" href="/stylesheets/song_engagement.css">
 <script src="/javascripts/media_v2/song_engagement_v2_1.js" defer></script>
@@ -13,7 +14,9 @@
 
 <body>
 
-  <div class="media-control-bar fixed-bottom d-flex justify-content-between align-items-center">
+  <!-- Previous: the bar was visible before the player had a song. -->
+  <div class="media-control-bar fixed-bottom d-flex justify-content-between align-items-center" hidden inert aria-hidden="true"
+       data-player-owner="<%= typeof user !== 'undefined' && user ? String(user._id || user.id || '') : '' %>">
 
     <!-- Previous transport row: <div class="d-flex align-items-center" style="gap: 8px;"> -->
     <div class="player-main-controls d-flex align-items-center">

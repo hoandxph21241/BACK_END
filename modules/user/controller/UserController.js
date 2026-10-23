@@ -1,5 +1,6 @@
 
 const UserService = require("../service/UserService");
+const PlayerStateService = require("../service/PlayerStateService");
 const UserMapper = require("../mapper/UserMapper");
 const ApiResponse = require("../../../utils/ApiResponse");
 const ApiError = require("../../../utils/ApiError");
@@ -39,6 +40,14 @@ class UserController {
     const user = await UserService.updateProfile(identifier, req.body);
 
     return this.success(res, UserMapper.profile(user));
+  };
+
+  getMyPlayer = async (req, res) => {
+    return this.success(res, await PlayerStateService.get(this.getAuthenticatedIdentifier(req), req.get("X-Player-Owner")));
+  };
+
+  updateMyPlayer = async (req, res) => {
+    return this.success(res, await PlayerStateService.update(this.getAuthenticatedIdentifier(req), req.body, req.get("X-Player-Owner")));
   };
 
   changeMyPassword = async (req, res) => {

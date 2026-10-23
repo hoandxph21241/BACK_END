@@ -1,3 +1,4 @@
+// Previous single-file uploader retained for reference. The page now loads upload_queue.js.
 function initUploadForm() {
 //   if (window._uploadFormInitialized) {
 //     console.log('initUploadForm: already initialized');

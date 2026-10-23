@@ -1,0 +1,10 @@
+<section class="search-results search-skeleton" aria-busy="true" aria-label="Loading search results">
+  <header class="search-results-heading"><h1>Search results</h1></header>
+  <p class="search-query"><span class="search-placeholder search-placeholder-query" aria-hidden="true"></span></p>
+  <div class="search-results-grid" aria-hidden="true">
+    <% for (let i = 0; i < 8; i++) { %>
+      <div class="search-skeleton-item"><span class="search-placeholder search-placeholder-cover"></span><span class="search-placeholder search-placeholder-title"></span><span class="search-placeholder search-placeholder-artist"></span></div>
+    <% } %>
+  </div>
+  <span class="visually-hidden" role="status">Loading search results...</span>
+</section>

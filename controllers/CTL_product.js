@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
 const crypto = require("crypto");
+const { getUploadDate } = require("../utils/songResponse");
 
 const IMGBB_API_KEY = process.env.IMGBB_API_KEY;
 const IMGBB_API_URL = process.env.IMGBB_API_URL;
@@ -173,7 +174,8 @@ exports.EditSongsPage = async (req, res) => {
   try {
     const [songs, categories] = await Promise.all([
       db.MP3.find()
-        .select('name artist categoryId userID originalName fileSize duration uploadDate image')
+        // Previous projection omitted createdAt, leaving the upload-date editor empty.
+        .select('name artist categoryId userID originalName fileSize duration uploadDate createdAt image')
         .populate({ path: 'categoryId', select: 'nameCategory' })
         .sort({ uploadDate: -1 })
         .lean(),
@@ -181,7 +183,8 @@ exports.EditSongsPage = async (req, res) => {
     ]);
 
     res.render('product/V_update_songs.ejs', {
-      songs,
+      // Previous: songs,
+      songs: songs.map(song => ({ ...song, uploadDate: getUploadDate(song) })),
       categories,
       success: req.query.success || '',
       error: req.query.error || '',

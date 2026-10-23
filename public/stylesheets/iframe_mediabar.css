@@ -25,6 +25,8 @@
     z-index: 999;
 }
 
+#iframeContainer_v2[hidden] { display: none !important; }
+
 #iframeContainer_v2 iframe {
     position: fixed;
     bottom: 0;
@@ -350,6 +352,8 @@ body.home-centered-layout {
     --site-content-width: calc(100% - 24px);
 }
 body.home-centered-layout .background_nav { width: 100%; }
+/* Keep the shared navigation mounted; Upload has its own header and close action. */
+body.home-centered-layout:has(#main > .upload-view) .nav-shell { display: none !important; }
 body.home-centered-layout .nav-main {
     width: var(--site-content-width);
     margin: 0 auto;

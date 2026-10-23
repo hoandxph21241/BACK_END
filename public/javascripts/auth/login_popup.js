@@ -35,7 +35,9 @@
     const songId = pendingSong;
     generation++; clearTimeout(pollTimer); oauth?.close(); oauth = null;
     window.dispatchEvent(new CustomEvent('mediahz:authenticated', { detail: { user: data.user } }));
-    document.getElementById('mediaPlayerFrame')?.contentWindow.postMessage({ type: 'authChanged' }, location.origin);
+    // Previous message did not identify the newly signed-in account.
+    // document.getElementById('mediaPlayerFrame')?.contentWindow.postMessage({ type: 'authChanged' }, location.origin);
+    document.getElementById('mediaPlayerFrame')?.contentWindow.postMessage({ type: 'authChanged', userId: data.user?.id || null }, location.origin);
     setBusy(false); dialog.close();
     if (songId) await window.SongEngagementV2_1?.toggle(songId, true);
   }

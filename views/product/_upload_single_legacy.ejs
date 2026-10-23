@@ -1,0 +1,87 @@
+<!-- Previous single-file form retained for reference; V_product now renders the batch upload form. -->
+<link rel="stylesheet" href="/stylesheets/upload_notifications.css">
+<script src="/javascripts/upload_notifications.js" defer data-notification-owner="<%= typeof user !== 'undefined' && user ? (user.userID || user._id || user.id || 'user') : 'guest' %>"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+ <link rel='stylesheet' href='/stylesheets/CSS_Products/upload_file.css' />
+<body class="p-5">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4"><h2 class="mb-0">Upload Audio & Image</h2><a class="btn btn-outline-primary" href="/product/update">Update Songs</a></div>
+
+    <!-- Progress Bar -->
+    <div id="uploadProgressContainer" class="progress mb-3" style="height: 25px; display: none;">
+      <div id="uploadProgressBar" class="progress-bar progress-bar-striped bg-info progress-bar-animated"
+        role="progressbar" style="width: 0%;" aria-valuemin="0" aria-valuemax="100">0%</div>
+    </div>
+
+    <!-- Alert Messages -->
+    <div id="alertContainer"></div>
+
+    <div class="upload-container">
+      <!-- LEFT COLUMN: Form -->
+      <div class="form-section">
+        <!-- Upload Form -->
+        <form id="uploadForm" accept-charset="UTF-8" method="post" action="/product/upload"
+          enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="mp3Name" class="form-label">Name:</label>
+            <input type="text" class="form-control" id="mp3Name" name="name" placeholder="Nhập Tên Bài Hát">
+          </div>
+
+          <div class="mb-3">
+            <label for="categoryId" class="form-label">Category:</label>
+            <select class="form-select" id="categoryId" name="categoryId" required>
+              <option value="">-- Chọn Thể Loại --</option>
+              <% if (listidCategory && listidCategory.length> 0) { %>
+                <% listidCategory.forEach(function(category) { %>
+                  <option value="<%= category._id %>">
+                    <%= category.nameCategory %>
+                  </option>
+                  <% }); %>
+                    <% } %>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="mp3File" class="form-label">Select Audio File:</label>
+            <!-- Previous: <input type="file" class="form-control" id="mp3File" name="mp3File" accept=".mp3,.m4a,audio/mpeg,audio/mp4" required> -->
+            <!-- Previous: <input type="file" class="form-control" id="mp3File" name="song" accept=".mp3,.wav,.flac,audio/mpeg,audio/wav,audio/flac" required> -->
+            <input type="file" class="form-control" id="mp3File" name="song" accept=".mp3,.m4a,.wav,.flac,audio/mpeg,audio/mp4,audio/m4a,audio/x-m4a,audio/wav,audio/flac" required>
+            <div class="form-text"><!-- Previous: MP3, M4A (tối đa 50MB) --> MP3, M4A, WAV hoặc FLAC (tối đa 25 MB)</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="imageFile" class="form-label">Select Image (Optional):</label>
+            <input type="file" class="form-control" id="imageFile" name="imageFile" accept="image/jpeg,image/png,image/webp">
+            <div class="form-text">Chon anh bia cho bai hat (tuy chon, toi da 5MB)</div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary" id="uploadBtn">
+              <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+              Upload
+            </button>
+            <button type="button" class="btn btn-secondary" id="backBtn">Quay lại</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- RIGHT COLUMN: Image Preview -->
+      <div class="preview-section">
+        <h5>Preview:</h5>
+        <div class="preview-box" id="previewContainer">
+          <div class="preview-placeholder">
+            Chọn ảnh để xem trước
+          </div>
+          <img id="previewImg" src="" alt="Preview" style="display: none;">
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/javascripts/product/upload_Mediafile.js"></script>
+</body>
+
+</html>
+

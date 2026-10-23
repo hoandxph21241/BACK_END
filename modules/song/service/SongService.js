@@ -18,6 +18,11 @@ class SongService extends BaseService {
     super(SongRepository, ErrorCode.SONG.NOT_FOUND);
   }
 
+  async create(data) {
+    // Previous inherited create(data): return this.repository.create(data).
+    return require('../../../utils/permalinkService').createSong(data, value => this.repository.create(value));
+  }
+
   // Thay phương thức upload(data) hiện tại bằng phương thức này.
   async upload(data) {
     const file = data.file;

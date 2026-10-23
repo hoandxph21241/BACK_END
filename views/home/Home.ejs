@@ -19,6 +19,9 @@
   <link rel='stylesheet' href='/stylesheets/home/feed.css'>
   <link rel='stylesheet' href='/stylesheets/home/library.css'>
   <script src='/javascripts/home/library_v2_1.js' defer></script>
+  <link rel="stylesheet" href="/vendor/cropperjs-1.7.0/cropper.min.css">
+  <script src="/vendor/cropperjs-1.7.0/cropper.min.js" defer></script>
+  <script src="/javascripts/profile_image_cropper.js" defer></script>
   <script src='/javascripts/user_profile.js' defer></script>
   <link rel="stylesheet" href="/stylesheets/CSS_User/profile_user.css">
   <link rel="stylesheet" href="/stylesheets/auth/password_settings.css">
@@ -46,6 +49,9 @@
       <template id="profileLoadingTemplate">
         <%- include('../user/_profile_skeleton') %>
       </template>
+      <template id="searchLoadingTemplate">
+        <%- include('_search_skeleton') %>
+      </template>
       <%- include('_login_popup') %>
       <main id="main">
         <% if (typeof initialView === 'string' && /^\/users\/profile(?:\/edit)?\/?$/.test(initialView)) { %>
@@ -57,7 +63,8 @@
         <iframe src="/mediabar" id="mediaPlayerFrame"></iframe>
       </div> -->
       
-      <div class="iframe-container" id="iframeContainer_v2">
+      <!-- Previous: the player container was always visible, even without a selected song. -->
+      <div class="iframe-container" id="iframeContainer_v2" hidden inert aria-hidden="true">
         <iframe src="/mediabar_v2" id="mediaPlayerFrame"></iframe>
       </div>
 
@@ -370,6 +377,7 @@
         }
 
         function showVolumePopup(volume, buttonRect) {
+          if (document.getElementById('iframeContainer_v2')?.hidden) return;
           clearTimeout(volumePopupTimeout);
           updateVolumePopup(volume);
           const iframe = document.getElementById('mediaPlayerFrame');
@@ -435,7 +443,8 @@
             if (document.getElementById('uploadForm').dataset.uploadInitialized !== 'true') {
               if (typeof window.initUploadForm !== 'function') {
                 const script = document.createElement('script');
-                script.src = '/javascripts/product/upload_Mediafile.js';
+                // Previous single-file uploader: '/javascripts/product/upload_Mediafile.js'.
+                script.src = '/javascripts/product/upload_queue.js';
                 script.onload = () => {
                   if (typeof window.initUploadForm === 'function') {
                     window.initUploadForm();
@@ -512,14 +521,17 @@
         // });
 
         function createSlidingIndicator() {
-          const navContainer = document.querySelector('.navbar-nav, .nav, .d-flex');
+          // Previous: document.querySelector('.navbar-nav, .nav, .d-flex');
+          const navContainer = document.querySelector('.nav-main > .nav');
           if (!navContainer) return null;
 
-          let indicator = document.querySelector('.nav-indicator');
+          let indicator = navContainer.querySelector('.nav-indicator');
           if (indicator) return indicator;
 
           indicator = document.createElement('div');
           indicator.className = 'nav-indicator';
+          indicator.setAttribute('aria-hidden', 'true');
+          indicator.hidden = true;
           indicator.style.cssText = `
     position: absolute;
     top: 78%;
@@ -541,15 +553,24 @@
         }
 
         // Cập nhật vị trí indicator
+        let indicatorTimeout;
         function updateIndicatorPosition(activeLink) {
+          clearTimeout(indicatorTimeout);
           const indicator = createSlidingIndicator();
-          if (!indicator || !activeLink) return;
+          // Previous: if (!indicator || !activeLink) return;
+          if (!indicator) return;
+          const navContainer = indicator.parentElement;
+          if (!activeLink || !navContainer.contains(activeLink) || !activeLink.classList.contains('active')) {
+            indicator.hidden = true;
+            indicator.style.opacity = '0';
+            return;
+          }
 
-          const navContainer = activeLink.closest('.navbar-nav, .nav, .d-flex');
-          if (!navContainer) return;
+          // Previous: activeLink.closest('.navbar-nav, .nav, .d-flex') also matched account links.
 
           // Sử dụng setTimeout để đảm bảo DOM đã render xong
-          setTimeout(() => {
+          indicatorTimeout = setTimeout(() => {
+            if (!activeLink.isConnected || !activeLink.classList.contains('active')) return;
             const linkRect = activeLink.getBoundingClientRect();
             const navRect = navContainer.getBoundingClientRect();
 
@@ -558,6 +579,7 @@
 
             indicator.style.left = left + 'px';
             indicator.style.width = width + 'px';
+            indicator.hidden = false;
             indicator.style.opacity = '1';
 
             console.log('Indicator moved:', { left, width, text: activeLink.textContent.trim() });
@@ -652,17 +674,23 @@
         let navigationRequest = 0;
         const main = document.getElementById('main');
         function tabPath(path) {
-          return path === '/home' || path === '/home/' ? '/home/pratical' : path;
+          // Previous: return path === '/home' || path === '/home/' ? '/home/pratical' : path;
+          const normalized = path.replace(/\/+$/, '') || '/';
+          return normalized === '/home' ? '/home/pratical' : normalized;
         }
         function updateActiveTab(path) {
-          document.querySelectorAll('.nav-link[data-url]').forEach(link => {
+          let activeTab = null;
+          // Previous: document.querySelectorAll('.nav-link[data-url]') included content outside the nav.
+          document.querySelectorAll('.nav-main .nav-link[data-url]').forEach(link => {
             const active = link.dataset.url === tabPath(path);
             link.classList.toggle('active', active);
             if (active) {
               link.setAttribute('aria-current', 'page');
-              updateIndicatorPosition(link);
+              // Previous: updateIndicatorPosition(link) also moved the underline to account links.
+              if (link.closest('.nav-main > .nav')) activeTab = link;
             } else link.removeAttribute('aria-current');
           });
+          updateIndicatorPosition(activeTab);
         }
         // Previous track-only duplicate guard retained for reference.
 //         let pendingTrackId = null;
@@ -708,6 +736,15 @@
         function navigationKey(url) {
           const target = new URL(url, location.href);
           return tabPath(target.pathname.replace(/\/+$/, '') || '/') + target.search;
+        }
+        function trackPagePath(value) {
+          if (typeof value !== 'string' || !/^\/[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) return null;
+          const profile = value.split('/')[1];
+          const reserved = ['api', 'home', 'auth', 'users', 'user', 'media', 'product', 'dashboard', 'profile',
+            'admin', 'login', 'logout', 'signin', 'signup', 'register', 'settings', 'feed', 'library',
+            'song', 'track', 'search', 'upload', 'images', 'stylesheets', 'javascripts', 'assets',
+            'mediabar', 'mediabar-v2', 'mediabar-v3', 'network-popup'];
+          return reserved.includes(profile) ? null : value;
         }
         function waitForProfileImages(content, signal) {
           const template = document.createElement('template');
@@ -755,6 +792,8 @@
             ? document.getElementById('libraryLoadingTemplate') : null;
           const profileLoading = /^\/users\/profile(?:\/edit)?\/?$/.test(destination.pathname)
             ? document.getElementById('profileLoadingTemplate') : null;
+          const searchLoading = destination.pathname.replace(/\/+$/, '') === '/home/search'
+            ? document.getElementById('searchLoadingTemplate') : null;
           const previousLibrary = main.querySelector('.library-view:not(.library-skeleton)');
           const previousProfile = main.querySelector('[data-profile-view]');
           main.classList.toggle('library-page-active', Boolean(libraryLoading));
@@ -767,17 +806,25 @@
             ? Math.ceil(Math.max((libraryLoading ? previousLibrary : previousProfile) ? main.getBoundingClientRect().height : 0,
                 window.innerHeight - main.getBoundingClientRect().top)) + 'px' : '';
           // Previous: main.innerHTML = libraryLoading?.innerHTML || '<div class="text-center text-light p-4" role="status">Loading...</div>';
-          main.innerHTML = (profileLoading || libraryLoading)?.innerHTML || '<div class="text-center text-light p-4" role="status">Loading...</div>';
+          // Previous skeletons covered only Profile and Library.
+          main.innerHTML = (profileLoading || libraryLoading || searchLoading)?.innerHTML || '<div class="text-center text-light p-4" role="status">Loading...</div>';
           const loadingStartedAt = Date.now();
           function commitPage(content) {
             main.innerHTML = content;
             if (libraryLoading) main.querySelector('.library-view')?.classList.add('library-content-ready');
             if (profileLoading) main.querySelector('[data-profile-view]')?.classList.add('profile-content-ready');
-            displayedPageKey = pageKey;
-            if (pushHistory && navigationKey(location.href) !== pageKey) {
-              history.pushState({ url: targetUrl }, '', targetUrl);
+            // Previous: displayedPageKey = pageKey; history used the requested ID URL.
+            const canonical = trackPagePath(main.querySelector('[data-track-view]')?.dataset.trackUrl);
+            const visibleUrl = canonical ? canonical + destination.search + destination.hash : targetUrl;
+            displayedPageKey = navigationKey(visibleUrl);
+            if (pushHistory && navigationKey(location.href) !== displayedPageKey) {
+              history.pushState({ url: visibleUrl }, '', visibleUrl);
+            } else if (canonical && navigationKey(location.href) === pageKey && navigationKey(location.href) !== displayedPageKey) {
+              history.replaceState({ url: visibleUrl }, '', visibleUrl);
             }
-            updateActiveTab(destination.pathname);
+            // Previous: updateActiveTab(destination.pathname);
+            updateActiveTab(new URL(visibleUrl, location.href).pathname);
+            document.dispatchEvent(new CustomEvent('mediahz:navigated', { detail: { url: visibleUrl } }));
           }
           try {
             const response = await axios.get(pageKey, {
@@ -796,7 +843,8 @@
             initializeDynamicContent();
           } catch (error) {
             if (request !== navigationRequest || controller.signal.aborted) return;
-            if (error.response?.status === 404 && destination.pathname.startsWith('/home/song/') &&
+            // Previous missing-track handling was limited to /home/song/:id.
+            if (error.response?.status === 404 &&
                 typeof error.response.data === 'string' && error.response.data.includes('track-missing')) {
               commitPage(error.response.data);
               return;
@@ -832,7 +880,10 @@
           const frame = document.getElementById('mediaPlayerFrame');
           if (event.origin !== location.origin || event.source !== frame?.contentWindow || event.data?.type !== 'trackNavigate') return;
           const id = event.data.songId;
-          if (typeof id === 'string' && /^[a-f0-9]{24}$/i.test(id)) loadPage('/home/song/' + encodeURIComponent(id), true);
+          // Previous: only loadPage('/home/song/' + encodeURIComponent(id), true).
+          if (typeof id !== 'string' || !/^[a-f0-9]{24}$/i.test(id)) return;
+          if (main.querySelector('[data-track-view]')?.dataset.songId === id) return;
+          loadPage(trackPagePath(event.data.url) || '/home/song/' + encodeURIComponent(id), true);
         });
         window.addEventListener('popstate', () => loadPage(location.pathname + location.search));
         let resizeTimeout;
@@ -858,6 +909,41 @@
 
         // 🔍 KIỂM TRA VÀ SỬA IFRAME CONTAINER LOGIC
 
+document.getElementById('mediaPlayerFrame')?.addEventListener('load', function () {
+  this.contentWindow?.postMessage({ type: 'trackStateRequest' }, window.location.origin);
+});
+// Stop immediately, flush the selected ID, then let the existing server logout revoke the session.
+let playerSigningOut = false;
+document.addEventListener('click', event => {
+  const link = event.target.closest('a[href="/auth/signout"]');
+  if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+  event.preventDefault();
+  if (playerSigningOut) return;
+  playerSigningOut = true;
+  const frame = document.getElementById('mediaPlayerFrame'), requestId = crypto.randomUUID();
+  let timeout, done = false;
+  const finish = () => {
+    if (done) return;
+    done = true; clearTimeout(timeout); window.removeEventListener('message', receive);
+    location.assign(link.href);
+  };
+  const receive = event => {
+    if (event.origin === location.origin && event.source === frame?.contentWindow &&
+        event.data?.type === 'playerSignedOut' && event.data.requestId === requestId) finish();
+  };
+  window.addEventListener('message', receive);
+  timeout = setTimeout(finish, 2000);
+  frame?.contentWindow?.postMessage({ type: 'playerSignOut', requestId }, location.origin);
+});
+let lastPlayerSessionCheck = 0;
+function checkPlayerSession() {
+  if (document.hidden || Date.now() - lastPlayerSessionCheck < 1500) return;
+  lastPlayerSessionCheck = Date.now();
+  document.getElementById('mediaPlayerFrame')?.contentWindow?.postMessage({ type: 'playerSessionCheck' }, location.origin);
+}
+window.addEventListener('focus', checkPlayerSession);
+window.addEventListener('pageshow', event => { if (event.persisted) checkPlayerSession(); });
+document.addEventListener('visibilitychange', checkPlayerSession);
 window.addEventListener('message', function (event) {
 //   // Handle volume popup messages
 //   if (event.data && event.data.type === 'volumePopup') {
@@ -884,6 +970,16 @@ window.addEventListener('message', function (event) {
   const playerFrame = document.getElementById('mediaPlayerFrame');
   if (event.source !== playerFrame?.contentWindow || event.origin !== window.location.origin) return;
   const data = event.data;
+  if (data?.type === 'trackPlayback') {
+    const hasSong = typeof data.songId === 'string' && data.songId.length > 0;
+    const container = document.getElementById('iframeContainer_v2');
+    if (container) {
+      container.hidden = !hasSong;
+      container.inert = !hasSong;
+      container.setAttribute('aria-hidden', String(!hasSong));
+    }
+    if (!hasSong) closeVolumePopup();
+  }
   if (data?.type === 'volumePopup') {
     if (data.action === 'show') showVolumePopup(data.volume, data.buttonRect);
     else if (data.action === 'hide') hideVolumePopup();
@@ -1053,10 +1149,8 @@ window.smartIframeHandler = function(isExpanded) {
           setTimeout(() => {
             window.playHistoryAPI.updateSidebarHistory();
 
-            const activeLink = document.querySelector('.nav-link.active');
-            if (activeLink) {
-              updateIndicatorPosition(activeLink);
-            }
+            // Previous: repositioned any .nav-link.active, including profile/account menu items.
+            updateActiveTab(location.pathname);
           }, 500);
         });
 
@@ -1092,6 +1186,7 @@ window.smartIframeHandler = function(isExpanded) {
             console.warn('mediaPlayerFrame not found');
             return;
           }
+          if (document.getElementById('iframeContainer_v2')?.hidden) return;
 
           // Ignore if user is typing in input/textarea
           // if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {

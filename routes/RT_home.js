@@ -20,6 +20,7 @@ router.get("/pratical", pageRoute("/home/pratical", Controllers.Home_pratical));
 router.get("/ct_home_v2", pageRoute("/home/ct_home_v2", Controllers.CT_Home));
 router.get("/ct_home", pageRoute("/home/ct_home", Controllers.CT_Home_v2));
 router.get("/test", Controllers.Home_NEW);
+router.get('/search', require('../controllers/CTL_search').show);
 router.get("/song/:id", require("../controllers/CTL_track").show);
 router.get("/find/:id", Controllers.Find_ID);
 router.get("/fetch", Controllers.Fetch);

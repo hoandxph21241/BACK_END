@@ -26,6 +26,7 @@ class UserMapper {
       grender: user.grender,
       bannerImage: user.bannerImage || '',
       profileTag: user.profileTag || '',
+      profileSlug: user.profileSlug || null,
       bio: user.bio || '',
       firstName: user.firstName || '',
       lastName: user.lastName || '',

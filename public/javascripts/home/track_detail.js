@@ -51,7 +51,8 @@
         root.querySelector("[data-track-share]").addEventListener("click", async () => {
             const status = root.querySelector("[data-track-feedback]");
             try {
-                await navigator.clipboard.writeText(new URL("/home/song/" + encodeURIComponent(root.dataset.songId), location.origin).href);
+                // Previous: new URL("/home/song/" + encodeURIComponent(root.dataset.songId), location.origin).
+                await navigator.clipboard.writeText(new URL(root.dataset.trackUrl, location.origin).href);
                 status.textContent = "Đã sao chép liên kết bài hát.";
             } catch (error) { status.textContent = "Không thể sao chép liên kết."; }
         });

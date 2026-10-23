@@ -282,10 +282,18 @@ function initializeMediaV2() {
     });
 
     window.PlayerControllerV2_1.subscribe(function (state) {
+        const hasSong = Boolean(state.currentSong?.id);
         if (mediaControlBar) {
-            mediaControlBar.classList.toggle("active", state.status !== "idle");
-            mediaControlBar.classList.toggle("hidden", state.status === "idle");
+            // Previous: visibility classes depended on status !== "idle", including loading without a song.
+            // mediaControlBar.classList.toggle("active", state.status !== "idle");
+            // mediaControlBar.classList.toggle("hidden", state.status === "idle");
+            mediaControlBar.classList.toggle("active", hasSong);
+            mediaControlBar.classList.toggle("hidden", !hasSong);
+            mediaControlBar.hidden = !hasSong;
+            mediaControlBar.inert = !hasSong;
+            mediaControlBar.setAttribute("aria-hidden", String(!hasSong));
         }
+        if (!hasSong && playlistOpen) setPlaylistOpen(false);
 
         updatePlayPauseIcon(state.status === "playing");
         updateTrackTargets(state);
@@ -295,7 +303,8 @@ function initializeMediaV2() {
         const song = state.currentSong;
         if (song) {
             const stored = queue.songs.find(item => item.id === song.id);
-            if (stored && (stored.name !== song.name || stored.artist !== song.artist || stored.image !== song.image || stored.duration !== song.duration)) {
+            // Previous comparison did not refresh cached permalink metadata.
+            if (stored && (stored.name !== song.name || stored.artist !== song.artist || stored.image !== song.image || stored.duration !== song.duration || stored.url !== song.url)) {
                 window.PlaylistControllerV2_1.setPlaylist(
                     queue.songs.map(item => item.id === song.id ? { ...item, ...song } : item),
                     { currentSongId: song.id },
@@ -338,11 +347,19 @@ function initializeMediaV2() {
         event.preventDefault();
         const song = window.PlayerControllerV2_1.getState().currentSong;
         if (!song) return;
-        const path = "/home/song/" + encodeURIComponent(song.id);
+        // Previous: const path = "/home/song/" + encodeURIComponent(song.id);
+        const path = song.url || "/home/song/" + encodeURIComponent(song.id);
+        if (window.parent.document.querySelector('[data-track-view]')?.dataset.songId === song.id) return;
         if (window.parent.location.pathname.replace(/\/+$/, "") === path) return;
-        window.parent.postMessage({ type: "trackNavigate", songId: song.id }, window.location.origin);
+        // Previous message carried only songId.
+        window.parent.postMessage({ type: "trackNavigate", songId: song.id, url: song.url }, window.location.origin);
     }));
     mediaV2Initialized = true;
+    window.PlayerPersistenceV2_1?.init({
+        player: window.PlayerControllerV2_1,
+        playlist: window.PlaylistControllerV2_1,
+        ownerId: mediaControlBar?.dataset.playerOwner,
+    });
     return true;
 }
 
@@ -697,6 +714,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // if (event.source !== window.parent || !data) {
         if (event.source !== window.parent || event.origin !== window.location.origin || !data) {
+            return;
+        }
+
+        if (data.type === "authChanged") {
+            selectionVersion++;
+            if (Object.prototype.hasOwnProperty.call(data, "userId")) window.PlayerPersistenceV2_1?.changeAccount(data.userId);
+            else window.PlayerPersistenceV2_1?.refresh();
+            return;
+        }
+        if (data.type === "playerSessionCheck") {
+            window.PlayerPersistenceV2_1?.refresh();
+            return;
+        }
+        if (data.type === "playerSignOut") {
+            selectionVersion++;
+            Promise.resolve(window.PlayerPersistenceV2_1?.signOut()).catch(error => {
+                console.warn("Cannot finish player sync before logout:", error.message);
+            }).finally(() => {
+                window.parent.postMessage({ type: "playerSignedOut", requestId: data.requestId }, window.location.origin);
+            });
             return;
         }
 

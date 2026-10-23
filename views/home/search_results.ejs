@@ -1,0 +1,18 @@
+<section class="search-results feed-view" data-search-results data-search-query="<%= q %>" aria-labelledby="searchResultsTitle">
+  <header class="search-results-heading">
+    <h1 id="searchResultsTitle">Search results</h1>
+    <% if (q) { %><span id="libraryResultCount" role="status"><%= total.toLocaleString('en') %> <%= total === 1 ? 'track' : 'tracks' %></span><% } %>
+  </header>
+  <% if (q) { %><p class="search-query"><%= q %></p><% } %>
+  <div class="search-results-grid">
+    <% songs.forEach(song => { %><%- include('_feed_song_item', { song }) %><% }); %>
+  </div>
+  <% if (q && !songs.length) { %><p class="search-empty" role="status">No results found.</p><% } %>
+  <% if (pages > 1) { %>
+    <nav class="search-pagination" aria-label="Search pages">
+      <% if (page > 1) { %><a href="<%= searchUrl(q, page - 1) %>" data-search-navigation rel="prev" aria-label="Previous page" title="Previous page"><i class="fas fa-chevron-left" aria-hidden="true"></i></a><% } %>
+      <span>Page <%= page %> of <%= pages %></span>
+      <% if (page < pages) { %><a href="<%= searchUrl(q, page + 1) %>" data-search-navigation rel="next" aria-label="Next page" title="Next page"><i class="fas fa-chevron-right" aria-hidden="true"></i></a><% } %>
+    </nav>
+  <% } %>
+</section>

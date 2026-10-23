@@ -3,16 +3,19 @@
 <% } else {
   const seconds = Math.max(0, Math.floor(Number(song.duration) || 0));
   const durationText = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
-  const uploaded = song.uploadDate && !Number.isNaN(new Date(song.uploadDate).getTime()) ? new Date(song.uploadDate).toLocaleDateString('vi-VN') : 'Chưa cập nhật';
+  // Previous: only song.uploadDate was checked, even when createdAt existed in the DB.
+  const uploadDate = getUploadDate(song);
+  const uploaded = uploadDate ? uploadDate.toLocaleDateString('vi-VN') : 'Chưa cập nhật';
 %>
-<article class="track-page" data-track-view data-song-id="<%= song._id %>" data-song-name="<%= song.name %>" data-category-id="<%= song.categoryId?._id || '' %>" data-duration="<%= seconds %>">
+<%# Previous article used data-song-id only, without a canonical public URL. %>
+<article class="track-page" data-track-view data-track-url="<%= songPath(song) %>" data-song-id="<%= song._id %>" data-song-name="<%= song.name %>" data-category-id="<%= song.categoryId?._id || '' %>" data-duration="<%= seconds %>">
   <header class="track-header">
     <div class="track-main-info">
       <div class="track-heading">
         <button type="button" class="track-play" data-track-play aria-label="Phát bài hát" title="Phát bài hát"><span class="track-play-icon" aria-hidden="true"></span></button>
         <div class="track-heading-text"><p class="track-artist"><%= song.artist || 'Unknown Artist' %></p><h1><%= song.name %></h1></div>
       </div>
-      <div class="track-tags"><span><%= song.categoryId?.nameCategory || 'Âm nhạc' %></span><time><%= uploaded %></time></div>
+      <div class="track-tags"><span><%= song.categoryId?.nameCategory || 'Âm nhạc' %></span><time<% if (uploadDate) { %> datetime="<%= uploadDate.toISOString() %>"<% } %>><%= uploaded %></time></div>
       <div class="track-waveform-shell">
         <div class="track-waveform is-loading" data-track-waveform role="slider" tabindex="-1"
              aria-label="Tua trên waveform" aria-valuemin="0" aria-valuemax="<%= seconds %>" aria-valuenow="0" aria-disabled="true">
@@ -52,7 +55,8 @@
     </section>
     <aside class="track-related"><h2>Cùng thể loại</h2>
       <% if (!related.length) { %><p class="track-muted">Chưa có bài hát khác.</p><% } %>
-      <% related.forEach(item => { %><a class="track-related-item" href="/home/song/<%= item._id %>" data-track-navigation><img src="<%= imageUrl(item.image) %>" alt="" loading="lazy" data-track-image><span><small><%= item.artist || 'Unknown Artist' %></small><strong><%= item.name %></strong></span></a><% }); %>
+      <%# Previous related link: href="/home/song/" + item._id %>
+      <% related.forEach(item => { %><a class="track-related-item" href="<%= songPath(item) %>" data-track-navigation><img src="<%= imageUrl(item.image) %>" alt="" loading="lazy" data-track-image><span><small><%= item.artist || 'Unknown Artist' %></small><strong><%= item.name %></strong></span></a><% }); %>
     </aside>
   </div>
 </article>

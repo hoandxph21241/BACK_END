@@ -118,7 +118,8 @@ exports.googleCallback = (req, res, next) => {
       let existingUser = await Model.UserModel.findOne({ gmail: email });
 
       if (!existingUser) {
-        existingUser = await Model.UserModel.create({
+        // Previous: existingUser = await Model.UserModel.create({
+        existingUser = await require('../utils/permalinkService').createUser({
           userID: Date.now().toString(),
           nameAccount: email,
           // Previous: namePassword: '',
@@ -134,6 +135,11 @@ exports.googleCallback = (req, res, next) => {
 
       // Previous: req.session.userLogin = existingUser;
       // Previous: return res.redirect('/home');
+      if (!existingUser.profileSlug) {
+        await require('../utils/permalinkService').ensureUserProfileSlug(existingUser);
+        // SessionService requires a hydrated document, not the backfill's lean result.
+        existingUser = await Model.UserModel.findById(existingUser._id);
+      }
       return await WebAuthController.googleLogin(req, res, existingUser);
 
     } catch (error) {

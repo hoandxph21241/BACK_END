@@ -17,9 +17,12 @@
     });
 
     if (!response.ok) {
-      throw new Error(
+      // Previous: throw new Error(...) without an HTTP status for a deleted saved song.
+      const error = new Error(
         `API request failed: ${response.status} ${response.statusText}`
       );
+      error.status = response.status;
+      throw error;
     }
 
     return response.json();
@@ -40,6 +43,9 @@
 
     return {
       id: String(id),
+      profileSlug: song.profileSlug ?? null,
+      slug: song.slug ?? null,
+      url: song.url ?? null,
       // name: song.name ?? "Unknown Song",
       name: song.name ?? song.title ?? "Unknown Song",
       artist: song.artist ?? "Unknown Artist",

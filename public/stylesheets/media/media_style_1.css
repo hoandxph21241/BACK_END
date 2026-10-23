@@ -16,6 +16,9 @@ body {
   z-index: 1000;
 }
 
+/* Bootstrap's d-flex must not override the empty player's hidden state. */
+.media-control-bar[hidden] { display: none !important; }
+
 /* Ảnh album */
 #albumCover {
   width: 45px !important;

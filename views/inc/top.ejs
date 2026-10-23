@@ -4,6 +4,8 @@
 <script src="/javascripts/nav_user.js" defer></script>
 <link rel="stylesheet" href="/stylesheets/mail.css">
 <script src="/javascripts/mail.js" defer data-mail-user="<%= user ? String(user._id || '') : '' %>"></script>
+<!-- Search stylesheet is loaded after the legacy inline navigation styles below. -->
+<script src="/javascripts/nav_search.js" defer></script>
 <!-- Header -->
 <style>
     body {
@@ -90,6 +92,7 @@
         margin-right: 5px;
     }
 
+    /* Previous Search styles, superseded by nav_search.css.
     .nav-search {
         background: #303030;
         flex: 1;
@@ -103,6 +106,7 @@
     .nav-search .btn-find svg {
         fill: #ffffff;
     }
+    */
 
     .nav-user {
         display: flex;
@@ -160,6 +164,7 @@
         left: auto;
     }
 </style>
+<link rel="stylesheet" href="/stylesheets/nav_search.css">
 
 <body>
     <!-- Previous nav wrapper: <div class="container-fluid p-0"> -->
@@ -206,15 +211,25 @@
                     </ul>
 
                     <!-- Search Bar -->
+                    <!-- Previous unbound form:
+                    <form class="d-flex" role="search">
+                        <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-find" type="submit">Search</button>
+                    </form>
+                    -->
                     <div class="nav-search">
-                        <form class="d-flex" role="search">
-                            <input class="form-control" type="search" placeholder="Search" aria-label="Search">
-                            <button class="btn btn-find" type="submit">
+                        <form id="navSearchForm" action="/home/search" method="get" role="search">
+                            <input id="navSearchInput" name="q" type="search" maxlength="100" placeholder="Search tracks or artists" aria-label="Search tracks or artists" autocomplete="off" enterkeyhint="search">
+                            <button id="navSearchClear" class="nav-search-action" type="button" aria-label="Clear search" title="Clear search" hidden><i class="fas fa-times" aria-hidden="true"></i></button>
+                            <button id="navSearchSubmit" class="nav-search-action" type="submit" aria-label="Search" title="Search">
+                                <i class="fas fa-search" aria-hidden="true"></i>
+                                <!-- Previous inline search icon:
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                     class="bi bi-search" viewBox="0 0 16 16">
                                     <path
                                         d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
                                 </svg>
+                                -->
                             </button>
                         </form>
                     </div>

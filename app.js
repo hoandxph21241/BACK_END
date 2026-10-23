@@ -138,6 +138,8 @@ app.get("/profile", (req, res) => {
   res.send(`Welcome ${req.user.displayName}`);
 });
 
+app.get('/:profileSlug/:songSlug', require('./controllers/CTL_track').showBySlug);
+
 app.use(function (req, res, next) {
   next(createError(404));
 });

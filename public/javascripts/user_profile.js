@@ -20,6 +20,9 @@
             links: JSON.parse(find("profileLinksData").value),
         };
         let saving = false, linkSequence = 0;
+        let imageBusy = false, imageRevision = 0, imageRequest;
+        const cropEditor = window.ProfileImageCropper?.create(root);
+        const croppedFiles = new Map(), originalImages = new Map(), cropSizes = new Map();
         const previews = new Map();
         const fallbackAvatar = "/images/auth/person-circle.svg", fallbackBanner = "/images/bg_main.png";
         root.querySelectorAll("[data-image-fallback]").forEach(image => {
@@ -48,8 +51,68 @@
         let savedValues;
         function updateDirtyState() {
             const changed = JSON.stringify(editorValues()) !== savedValues || previews.size > 0;
-            save.disabled = saving || !changed;
+            // Previous: save.disabled = saving || !changed;
+            save.disabled = saving || imageBusy || !changed;
             addLink.disabled = saving || linkRows.children.length >= 5;
+            root.querySelectorAll('[data-profile-file-target]').forEach(button => { button.disabled = saving || imageBusy; });
+            root.querySelectorAll('[data-profile-adjust]').forEach(button => {
+                const id = button.dataset.profileAdjust;
+                const source = id === 'profileAvatarFile' ? current.imageAccount : current.bannerImage;
+                button.disabled = saving || imageBusy || (!originalImages.has(id) && (!source || source === fallbackAvatar || source === fallbackBanner));
+            });
+        }
+        function imageSize(inputId) {
+            if (inputId === 'profileAvatarFile') return { width: 512, height: 512 };
+            const bounds = root.querySelector('.profile-header').getBoundingClientRect();
+            return { width: Math.max(1, Math.round(bounds.width || 1240)), height: Math.max(1, Math.round(bounds.height || 320)) };
+        }
+        function updateDimensions() {
+            const size = cropSizes.get('profileBannerFile') || imageSize('profileBannerFile');
+            find('profileBannerDimensions').textContent = `${size.width} x ${size.height} px`;
+            find('profileBannerPreview').parentElement.style.setProperty('--profile-banner-ratio', String(size.width / size.height));
+        }
+        async function adjustImage(inputId, selectedFile) {
+            if (saving || imageBusy) return;
+            const request = ++imageRevision;
+            imageBusy = true;
+            error.hidden = true;
+            updateDirtyState();
+            try {
+                if (!cropEditor) throw new Error('Image editor is unavailable. Please reload the page.');
+                let original = selectedFile ? { file: selectedFile } : originalImages.get(inputId);
+                if (!original) {
+                    const source = inputId === 'profileAvatarFile' ? current.imageAccount : current.bannerImage;
+                    const url = new URL(source, location.origin);
+                    if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Please upload the image again to adjust it.');
+                    imageRequest = new AbortController();
+                    const response = await fetch(url, { signal: imageRequest.signal,
+                        credentials: url.origin === location.origin ? 'same-origin' : 'omit' });
+                    if (!response.ok || Number(response.headers.get('content-length')) > 5 * 1024 * 1024) throw new Error('Unable to load this image. Please upload it again.');
+                    const blob = await response.blob();
+                    if (!['image/jpeg', 'image/png', 'image/webp'].includes(blob.type) || !blob.size || blob.size > 5 * 1024 * 1024) throw new Error('Choose a JPG, PNG or WebP image up to 5 MB.');
+                    original = { file: new File([blob], inputId === 'profileAvatarFile' ? 'profile-picture' : 'profile-banner', { type: blob.type }) };
+                }
+                if (request !== imageRevision || !root.isConnected || !dialog.open) return;
+                const size = cropSizes.get(inputId) || imageSize(inputId);
+                const result = await cropEditor.open({ file: original.file, data: original.data,
+                    kind: inputId === 'profileAvatarFile' ? 'avatar' : 'banner', ...size });
+                if (!result || request !== imageRevision || !root.isConnected || !dialog.open) return;
+                if (previews.has(inputId)) URL.revokeObjectURL(previews.get(inputId));
+                const preview = URL.createObjectURL(result.file);
+                previews.set(inputId, preview);
+                croppedFiles.set(inputId === 'profileAvatarFile' ? 'avatar' : 'banner', result.file);
+                originalImages.set(inputId, { file: original.file, data: result.data });
+                cropSizes.set(inputId, { width: result.width, height: result.height });
+                find(inputId === 'profileAvatarFile' ? 'profileAvatarPreview' : 'profileBannerPreview').src = preview;
+                const filename = find(`${inputId}Name`);
+                filename.textContent = original.file.name; filename.title = original.file.name; filename.hidden = false;
+                updateDimensions();
+            } catch (failure) {
+                if (request !== imageRevision || failure.name === 'AbortError') return;
+                error.textContent = failure.message; error.hidden = false;
+            } finally {
+                if (request === imageRevision) { imageBusy = false; imageRequest = null; updateDirtyState(); }
+            }
         }
         function appendLink(link = { label: "", url: "" }, focus = false) {
             if (linkRows.children.length >= 5) return;
@@ -103,6 +166,11 @@
         });
         form.addEventListener("input", updateDirtyState);
         function resetEditor() {
+            imageRevision++;
+            imageRequest?.abort(); imageRequest = null;
+            cropEditor?.close();
+            imageBusy = false;
+            croppedFiles.clear(); originalImages.clear(); cropSizes.clear();
             previews.forEach(url => URL.revokeObjectURL(url));
             previews.clear();
             form.reset();
@@ -123,6 +191,7 @@
             find("profileAvatarPreview").src = current.imageAccount || fallbackAvatar;
             find("profileBannerPreview").src = current.bannerImage || fallbackBanner;
             savedValues = JSON.stringify(editorValues());
+            updateDimensions();
             updateDirtyState();
         }
         function openEditor() {
@@ -133,6 +202,9 @@
         find("editProfileButton").addEventListener("click", openEditor);
         root.querySelectorAll("[data-profile-file-target]").forEach(button => {
             button.addEventListener("click", () => find(button.dataset.profileFileTarget).click());
+        });
+        root.querySelectorAll('[data-profile-adjust]').forEach(button => {
+            button.addEventListener('click', () => adjustImage(button.dataset.profileAdjust));
         });
         // Previous: root.querySelectorAll("[data-close-profile]").forEach(button => button.addEventListener("click", () => dialog.close()));
         root.querySelectorAll("[data-close-profile]").forEach(button => button.addEventListener("click", () => { if (!saving) dialog.close(); }));
@@ -152,6 +224,7 @@
             if (!saving && pressedOutside && isOutsideDialog(event)) dialog.close();
             pressedOutside = false;
         });
+        /* Previous direct preview/upload handler; originals are now staged through the crop editor.
         [["profileAvatarFile", "profileAvatarPreview"], ["profileBannerFile", "profileBannerPreview"]].forEach(([inputId, previewId]) => {
             const input = find(inputId);
             input.addEventListener("change", () => {
@@ -184,10 +257,26 @@
                 updateDirtyState();
             });
         });
+        */
+        ['profileAvatarFile', 'profileBannerFile'].forEach(inputId => {
+            const input = find(inputId);
+            input.addEventListener('change', () => {
+                const file = input.files[0];
+                // Do not let an unconfirmed original enter FormData, including after Cancel.
+                input.value = ''; input.setCustomValidity('');
+                if (!file) return;
+                if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || !file.size || file.size > 5 * 1024 * 1024) {
+                    error.textContent = 'Choose a JPG, PNG or WebP image up to 5 MB.'; error.hidden = false; return;
+                }
+                adjustImage(inputId, file);
+            });
+        });
         form.addEventListener("submit", async event => {
             event.preventDefault();
             if (save.disabled || !form.reportValidity()) return;
             const payload = new FormData(form);
+            payload.delete('avatar'); payload.delete('banner');
+            croppedFiles.forEach((file, field) => payload.set(field, file, file.name));
             payload.set("links", JSON.stringify(readLinks()));
             saving = true;
             save.disabled = true;
@@ -250,6 +339,18 @@
         });
         resetEditor();
         if (root.dataset.editOpen === "true") dialog.showModal();
+        const resizeObserver = new ResizeObserver(updateDimensions);
+        resizeObserver.observe(root.querySelector('.profile-header'));
+        const removalObserver = new MutationObserver(() => { if (!root.isConnected) cleanupImages(); });
+        removalObserver.observe(root.parentElement, { childList: true });
+        function cleanupImages() {
+            imageRevision++; imageRequest?.abort(); cropEditor?.destroy();
+            previews.forEach(url => URL.revokeObjectURL(url)); previews.clear();
+            croppedFiles.clear(); originalImages.clear(); cropSizes.clear();
+            resizeObserver.disconnect(); removalObserver.disconnect();
+            window.removeEventListener('pagehide', cleanupImages);
+        }
+        window.addEventListener('pagehide', cleanupImages, { once: true });
     };
     document.addEventListener("DOMContentLoaded", window.initProfileView);
 })(window, document);

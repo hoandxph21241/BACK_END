@@ -84,7 +84,9 @@
 .profile-media-column { display: flex; flex-direction: column; min-width: 0; gap: 20px; }
 .profile-fields-column { min-width: 0; }
 .profile-avatar-field { position: relative; order: -1; width: 100%; aspect-ratio: 1; margin: 0; }
-.profile-avatar-field > img { display: block; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #303030; }
+/* Previous: .profile-avatar-field > img filled the avatar without a framed wrapper. */
+.profile-avatar-frame { width: 100%; height: 100%; overflow: hidden; border: 1px solid #777; border-radius: 50%; background: #303030; }
+.profile-avatar-frame > img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .profile-avatar-picker { position: absolute; inset: auto 8px 30px; }
 .profile-avatar-picker .profile-file-picker { justify-content: center; }
 .profile-avatar-picker .profile-file-name { position: absolute; top: calc(100% + 34px); left: 0; width: 100%; text-align: center; }
@@ -146,6 +148,40 @@
     .profile-form-body, .profile-dialog-header { padding: 16px; }
     .profile-edit-button { right: 12px; top: 12px; }
 }
+.profile-preview-frame { position: relative; overflow: hidden; border: 1px solid #666; border-radius: 3px; margin-bottom: 10px; }
+.profile-banner-frame .profile-banner-preview { aspect-ratio: var(--profile-banner-ratio, 3.875); margin: 0; border-radius: 0; }
+.profile-image-dimensions { position: absolute; right: 5px; bottom: 5px; z-index: 2; max-width: calc(100% - 10px); padding: 3px 5px; border-radius: 3px; background: rgba(0,0,0,.8); color: #eee; font-size: 10px; line-height: 14px; white-space: nowrap; pointer-events: none; }
+.profile-avatar-field > .profile-image-dimensions { top: 5px; bottom: auto; }
+.profile-adjust-image { display: inline-grid; place-items: center; flex: 0 0 32px; width: 32px; height: 34px; padding: 0; border: 1px solid #666; border-radius: 3px; background: #303030; color: #eee; cursor: pointer; }
+.profile-adjust-image:hover { border-color: #aaa; background: #424242; }
+.profile-adjust-image:disabled { opacity: .4; cursor: default; }
+.profile-avatar-picker .profile-file-picker { gap: 6px; }
+.profile-avatar-picker .profile-adjust-image { background: rgba(17,17,17,.85); }
+.profile-crop-icon { mask: url('/images/auth/crop.svg') center / contain no-repeat; -webkit-mask: url('/images/auth/crop.svg') center / contain no-repeat; }
+/* Previous manual zoom icon styles are no longer used. */
+.profile-reset-image { mask: url('/images/auth/arrow-counterclockwise.svg') center / contain no-repeat; -webkit-mask: url('/images/auth/arrow-counterclockwise.svg') center / contain no-repeat; }
+.profile-crop-dialog[open] { display: flex; flex-direction: column; animation: profile-crop-fade 160ms ease-out; }
+@keyframes profile-crop-fade { from { opacity: 0; } to { opacity: 1; } }
+.profile-crop-dialog .profile-dialog-header { padding: 18px 20px; }
+.profile-crop-dialog .profile-dialog-header h2 { font-size: 18px; }
+.profile-crop-body { min-height: 0; overflow-y: auto; padding: 0 20px; }
+.profile-crop-stage { position: relative; width: 100%; height: min(420px, 50svh); min-height: 180px; overflow: hidden; background: #080808; touch-action: none; }
+.profile-crop-stage > img { display: block; max-width: 100%; }
+.profile-crop-stage[data-ready='false'] > img { visibility: hidden; }
+.profile-crop-stage .cropper-view-box { outline: 2px solid #eee; outline-offset: -1px; }
+.profile-crop-stage.is-avatar-crop .cropper-view-box, .profile-crop-stage.is-avatar-crop .cropper-face { border-radius: 50%; }
+.profile-crop-stage .cropper-face { background: transparent; }
+.profile-crop-status { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #bbb; font-size: 13px; white-space: nowrap; }
+/* Previous zoom toolbar layout is disabled with the toolbar markup. */
+.profile-crop-reset { position: absolute; left: 8px; bottom: 8px; z-index: 2; }
+@media (max-width: 600px) {
+    .profile-crop-body { padding: 0 12px; }
+    /* Previous: .profile-crop-tools { gap: 6px; } */
+    .profile-crop-dialog .profile-dialog-header { padding: 16px 12px; }
+    .profile-crop-dialog .profile-form-actions { padding: 12px; }
+    .profile-avatar-picker .profile-adjust-image { flex-basis: 26px; width: 26px; height: 28px; }
+}
+@media (prefers-reduced-motion: reduce) { .profile-crop-dialog[open] { animation: none; } }
 /* body { */
 /*     font-family: Arial, sans-serif; */
 /*     background: #f2f2f2; */

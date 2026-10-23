@@ -23,7 +23,9 @@
       const link = document.createElement('a'); link.href = '/auth/signin'; link.dataset.openLogin = ''; link.className = 'btn'; link.textContent = 'Login'; slot.replaceChildren(link);
     }
     window.dispatchEvent(new CustomEvent('mediahz:authenticated', { detail: { user: null } }));
-    document.getElementById('mediaPlayerFrame')?.contentWindow.postMessage({ type: 'authChanged' }, location.origin);
+    // Previous: the player refreshed engagement but retained the previous account's song.
+    // document.getElementById('mediaPlayerFrame')?.contentWindow.postMessage({ type: 'authChanged' }, location.origin);
+    document.getElementById('mediaPlayerFrame')?.contentWindow.postMessage({ type: 'authChanged', userId: null }, location.origin);
   }
   function init(root) {
     const find = selector => root.querySelector(selector), form = find('[data-password-form]'), fields = form.elements;

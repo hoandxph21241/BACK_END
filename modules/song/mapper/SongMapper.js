@@ -1,3 +1,6 @@
+const { songPath } = require('../../../utils/permalink');
+const { getUploadDate } = require('../../../utils/songResponse');
+
 class SongMapper {
 
     //------------------------------------
@@ -13,6 +16,9 @@ class SongMapper {
         return {
 
             id: song._id,
+            profileSlug: song.profileSlug || null,
+            slug: song.slug || null,
+            url: songPath(song),
 
             name: song.name,
 
@@ -39,6 +45,9 @@ class SongMapper {
         return {
 
             id: song._id,
+            profileSlug: song.profileSlug || null,
+            slug: song.slug || null,
+            url: songPath(song),
 
             userID: song.userID,
 
@@ -54,7 +63,8 @@ class SongMapper {
 
             fileSize: song.fileSize,
 
-            uploadDate: song.uploadDate,
+            // Previous: uploadDate: song.uploadDate,
+            uploadDate: getUploadDate(song),
 
         };
 
