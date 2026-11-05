@@ -9,7 +9,8 @@ function requireAdmin(req, res, next) {
     }
     // Check Admin
     if (req.session.userLogin['role'] === 1) {
-      res.redirect('/home');
+      // Previous Home URL: /home.
+      res.redirect('/discover');
       return next();
     } else if (req.session.userLogin['role'] === 2) {
       return next();

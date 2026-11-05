@@ -1,0 +1,51 @@
+<!-- Mount inside [data-account-settings]. Owned controllers use data-ap-* only;
+     existing password/session dialogs and their selectors remain independent. -->
+<div class="account-preferences" data-account-preferences>
+  <p class="ap-status" data-ap-status role="status" aria-live="polite"></p>
+  <button type="button" class="ap-button" data-ap-retry data-i18n="common.retry" hidden>Thử lại</button>
+  <fieldset class="ap-fields" data-ap-fields disabled>
+    <section class="ap-group" aria-labelledby="apNotificationsTitle">
+      <h2 id="apNotificationsTitle" data-i18n="prefs.notifications">Thông báo</h2>
+      <p class="ap-description" data-i18n="prefs.notificationsHelp">Chọn những thông báo bạn muốn nhận.</p>
+      <% for (const [key, label] of [['follows','Người theo dõi mới'],['tracks','Bài hát mới từ người đang theo dõi'],['messages','Tin nhắn mới'],['uploads','Kết quả tải bài hát lên']]) { %>
+      <label class="ap-row ap-toggle"><span data-i18n="prefs.<%= key %>"><%= label %></span><input type="checkbox" role="switch" data-pref="notifications.<%= key %>"><span class="ap-switch" aria-hidden="true"></span></label>
+      <% } %>
+    </section>
+    <section class="ap-group" aria-labelledby="apPrivacyTitle">
+      <h2 id="apPrivacyTitle" data-i18n="prefs.privacy">Quyền riêng tư</h2>
+      <label class="ap-row" for="apMessages"><span data-i18n="prefs.messagesFrom">Ai có thể nhắn tin cho bạn</span><select id="apMessages" data-pref="privacy.messages"><option value="everyone" data-i18n="prefs.everyone">Mọi người</option><option value="following" data-i18n="prefs.following">Người bạn theo dõi</option><option value="nobody" data-i18n="prefs.nobody">Không ai</option></select></label>
+      <div class="ap-row"><div><h3 data-i18n="blocks.title">Tài khoản đã chặn</h3><p data-i18n="blocks.help">Ngăn theo dõi và nhắn tin giữa hai tài khoản.</p></div><button type="button" class="ap-button" data-ap-open="blocks" aria-controls="apBlocksDialog" aria-haspopup="dialog" data-i18n="common.manage">Quản lý</button></div>
+    </section>
+    <section class="ap-group" aria-labelledby="apPlaybackTitle">
+      <h2 id="apPlaybackTitle" data-i18n="prefs.playback">Phát nhạc</h2>
+      <% for (const [key, label] of [['rememberSong','Nhớ bài hát gần nhất'],['rememberVolume','Nhớ âm lượng'],['autoNext','Tự động phát bài tiếp theo']]) { %>
+      <label class="ap-row ap-toggle"><span data-i18n="prefs.<%= key %>"><%= label %></span><input type="checkbox" role="switch" data-pref="playback.<%= key %>"><span class="ap-switch" aria-hidden="true"></span></label>
+      <% } %>
+      <p class="ap-description" data-i18n="prefs.playbackHelp">Không lưu vị trí phát. Tắt ghi nhớ bài hát không dừng nhạc đang phát.</p>
+      <label class="ap-row" for="apLanguage"><span data-i18n="prefs.language">Ngôn ngữ giao diện</span><select id="apLanguage" data-pref="language"><option value="vi" lang="vi">Tiếng Việt</option><option value="en" lang="en">English</option></select></label>
+    </section>
+    <section class="ap-group" data-ap-security-section aria-labelledby="apSecurityTitle" hidden>
+      <h2 id="apSecurityTitle" data-i18n="security.title">Bảo mật nâng cao</h2>
+      <div class="ap-row"><div><h3 data-i18n="security.email">Email và xác minh</h3><p data-ap-email-summary></p></div><button type="button" class="ap-button" data-ap-open="email" aria-haspopup="dialog" aria-controls="apEmailDialog" data-i18n="common.manage">Quản lý</button></div>
+      <div class="ap-row"><div><h3 data-i18n="security.google">Tài khoản Google</h3><p data-ap-google-summary></p></div><button type="button" class="ap-button" data-ap-open="google" aria-haspopup="dialog" aria-controls="apGoogleDialog" data-i18n="common.manage">Quản lý</button></div>
+      <div class="ap-row"><div><h3 data-i18n="security.twoFactor">Xác thực hai bước</h3><p data-ap-totp-summary></p></div><button type="button" class="ap-button" data-ap-open="totp" aria-haspopup="dialog" aria-controls="apTotpDialog" data-i18n="common.manage">Quản lý</button></div>
+      <div class="ap-row"><div><h3 data-i18n="security.activity">Hoạt động bảo mật</h3><p data-i18n="security.activityHelp">Xem các thay đổi gần đây của tài khoản.</p></div><button type="button" class="ap-button" data-ap-open="activity" aria-haspopup="dialog" aria-controls="apActivityDialog" data-i18n="common.view">Xem</button></div>
+      <div class="ap-row"><div><h3 data-i18n="security.closure">Ngừng sử dụng tài khoản</h3><p data-i18n="security.closureHelp">Yêu cầu vô hiệu hóa hoặc xóa tài khoản, hoặc hủy yêu cầu đang chờ.</p></div><button type="button" class="ap-button ap-danger" data-ap-open="closure" aria-haspopup="dialog" aria-controls="apClosureDialog" data-i18n="common.manage">Quản lý</button></div>
+    </section>
+    <section class="ap-group" aria-labelledby="apDataTitle">
+      <h2 id="apDataTitle" data-i18n="data.title">Dữ liệu của bạn</h2>
+      <div class="ap-row"><div><h3 data-i18n="data.export">Tải bản sao dữ liệu</h3><p data-i18n="data.exportHelp">Tệp JSON gồm hồ sơ và dữ liệu thư viện của bạn.</p></div><button type="button" class="ap-button" data-ap-export data-i18n="common.download">Tải xuống</button></div>
+      <div class="ap-row"><div><h3 data-i18n="data.history">Xóa lịch sử nghe</h3><p data-i18n="data.historyHelp">Chỉ xóa lịch sử nghe của tài khoản hiện tại.</p></div><button type="button" class="ap-button ap-danger" data-ap-open="history" aria-haspopup="dialog" aria-controls="apHistoryDialog" data-i18n="common.clear">Xóa lịch sử</button></div>
+    </section>
+  </fieldset>
+  <dialog class="ap-dialog" id="apBlocksDialog" data-ap-dialog="blocks" aria-labelledby="apBlocksTitle">
+    <header><h2 id="apBlocksTitle" data-i18n="blocks.title" tabindex="-1">Tài khoản đã chặn</h2><button type="button" class="ap-close" data-ap-close data-i18n-aria-label="common.close" aria-label="Đóng">×</button></header>
+    <div class="ap-dialog-body"><p class="ap-status" data-ap-dialog-status role="status" aria-live="polite"></p><form data-ap-block-form><label for="apBlockTarget" data-i18n="blocks.target">Tên tài khoản công khai hoặc biệt danh #hz</label><div class="ap-input-action"><input id="apBlockTarget" data-ap-target autocomplete="off" maxlength="80" required aria-describedby="apBlockHint"><button type="submit" class="ap-button" data-ap-block-add data-i18n="blocks.block">Chặn</button></div><p class="ap-description" id="apBlockHint" data-i18n="blocks.inputHelp">Nhập chính xác tên tài khoản công khai hoặc biệt danh #hz, hoặc chọn kết quả tìm kiếm. Chặn cũng xóa theo dõi giữa hai tài khoản.</p></form><ul class="ap-user-list" data-ap-suggestions aria-label="Kết quả tìm tài khoản" data-i18n-aria-label="blocks.results"></ul><button type="button" class="ap-text-button" data-ap-block-refresh data-i18n="common.refresh">Làm mới</button><ul class="ap-user-list" data-ap-block-list aria-label="Danh sách đã chặn" data-i18n-aria-label="blocks.list"></ul><footer><button type="button" class="ap-button" data-ap-close data-i18n="common.close">Đóng</button></footer></div>
+  </dialog>
+  <dialog class="ap-dialog" id="apHistoryDialog" data-ap-dialog="history" aria-labelledby="apHistoryTitle" aria-describedby="apHistoryHelp">
+    <header><h2 id="apHistoryTitle" data-i18n="data.history" tabindex="-1">Xóa lịch sử nghe</h2><button type="button" class="ap-close" data-ap-close aria-label="Đóng" data-i18n-aria-label="common.close">×</button></header><div class="ap-dialog-body"><p id="apHistoryHelp" data-i18n="data.historyConfirm">Xóa toàn bộ lịch sử nghe của tài khoản hiện tại? Không thể khôi phục lịch sử đã xóa.</p><p class="ap-status" data-ap-dialog-status role="status"></p><footer><button type="button" class="ap-button" data-ap-close data-i18n="common.cancel">Hủy</button><button type="button" class="ap-button ap-danger" data-ap-clear-history data-i18n="common.clear">Xóa lịch sử</button></footer></div>
+  </dialog>
+  <% for (const [kind, title] of [['email','Email và xác minh'],['google','Tài khoản Google'],['totp','Xác thực hai bước'],['activity','Hoạt động bảo mật'],['closure','Ngừng sử dụng tài khoản']]) { %>
+  <dialog class="ap-dialog" id="ap<%= kind[0].toUpperCase()+kind.slice(1) %>Dialog" data-ap-dialog="<%= kind %>" aria-labelledby="ap<%= kind %>Title"><header><h2 id="ap<%= kind %>Title" data-i18n="security.<%= {email:'email',google:'google',totp:'twoFactor',activity:'activity',closure:'closure'}[kind] %>" tabindex="-1"><%= title %></h2><button type="button" class="ap-close" data-ap-close data-i18n-aria-label="common.close" aria-label="Đóng">×</button></header><div class="ap-dialog-body"><p class="ap-status" data-ap-dialog-status role="status" aria-live="polite"></p><div data-ap-security-content="<%= kind %>"></div><footer><button type="button" class="ap-button" data-ap-close data-i18n="common.close">Đóng</button></footer></div></dialog>
+  <% } %>
+</div>

@@ -122,12 +122,18 @@ createDefaultData().catch((error) => {
   console.error("Error:", error);
 });
 
-exports.yeu_cau_dang_nhap = (req, res, next) => {
-  if (req.session.userLogin) {
-    console.log("Đã Đăng Nhập");
-    next();
-  } else {
-    console.log("Chưa Đăng Nhập");
-    res.redirect("/auth/signin");
-  }
+// Previous guard trusted userLogin alone, even for a revoked browser session:
+// exports.yeu_cau_dang_nhap = (req,res,next) => req.session.userLogin ? next() : res.redirect('/auth/signin');
+exports.yeu_cau_dang_nhap = (req,res,next) => {
+  if (!req.session?.userLogin) return res.redirect('/auth/signin');
+  require('./auth/webAccessToken')(req,res,error => {
+    if (!error) return next();
+    if (error.status !== 401) return next(error);
+    req.session.destroy(failure => {
+      if (failure) return next(failure);
+      // Previous: res.clearCookie('connect.sid',{path:'/'});
+      // Invalidate this server session without overwriting a newer browser login cookie.
+      res.redirect('/auth/signin');
+    });
+  });
 };

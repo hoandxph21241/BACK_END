@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+<link rel="stylesheet" href="/stylesheets/auth/login_security_fields.css">
+<script src="/javascripts/account_language.js" defer></script>
+<script src="/javascripts/account_page_translations.js" defer></script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark">
@@ -11,7 +15,8 @@
 </head>
 <body class="signin-page">
   <header class="signin-header">
-    <a href="/home" class="signin-brand" aria-label="MediaHz - Trang chủ">
+    <!-- Previous Home links: /home. -->
+    <a href="/discover" class="signin-brand" aria-label="MediaHz - Trang chủ">
       <span class="signin-logo"><img src="/images/bg.png" alt=""></span>
       <span>MediaHz</span>
     </a>
@@ -19,7 +24,7 @@
   </header>
   <main class="signin-main">
     <section class="signin-content" aria-labelledby="signinTitle">
-      <a class="signin-back" href="/home"><span class="signin-icon icon-back" aria-hidden="true"></span>Trang chủ</a>
+      <a class="signin-back" href="/discover"><span class="signin-icon icon-back" aria-hidden="true"></span>Trang chủ</a>
       <h1 id="signinTitle">Đăng nhập</h1>
       <p class="signin-subtitle">Chào mừng trở lại MediaHz.</p>
       <% if (typeof msg === 'string' && msg) { %>
@@ -42,6 +47,7 @@
             </button>
           </div>
         </div>
+        <%- include('_login_security_fields',{securityPrefix:'signin'}) %>
         <button id="signinSubmit" type="submit" class="signin-submit">Đăng nhập</button>
       </form>
       <div class="signin-divider"><span>hoặc</span></div>
@@ -56,6 +62,8 @@
 <html lang="en">
 
 <head>
+<link rel="stylesheet" href="/stylesheets/auth/login_security_fields.css">
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign In</title>

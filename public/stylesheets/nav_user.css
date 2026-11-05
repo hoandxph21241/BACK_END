@@ -1,4 +1,51 @@
 /* Database-backed account photo; the earlier decorative avatar styles remain below. */
+/* Account dropdown overrides the older generic dropdown rules in top.ejs. */
+.nav-main .nav-user { position: relative; z-index: 2; }
+.nav-main .nav-user .nav-account-menu {
+    z-index: 1100;
+    min-width: 208px;
+    max-width: calc(100vw - 24px);
+    padding: 6px;
+    margin: 6px 0 0;
+    background: #1c1c1c;
+    border: 1px solid #383838;
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0,0,0,.45);
+    text-align: left;
+    overflow: hidden;
+}
+.nav-main .nav-user .nav-account-menu.show { display: block; animation: account-menu-in 130ms ease-out; }
+.nav-main .nav-user .nav-account-menu > li { display: block; width: 100%; padding: 0; height: auto; }
+.nav-main .nav-user .nav-account-menu .dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    width: 100%;
+    min-height: 40px;
+    height: auto;
+    padding: 10px 12px;
+    margin: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #ccc;
+    font: 500 13px/20px Arial, sans-serif;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 120ms ease, background-color 120ms ease;
+}
+.nav-main .nav-user .nav-account-menu .dropdown-item svg { flex: 0 0 16px; width: 16px; height: 16px; margin: 0 !important; opacity: .85; }
+.nav-main .nav-user .nav-account-menu .dropdown-item:hover,
+.nav-main .nav-user .nav-account-menu .dropdown-item:focus-visible { color: #fff; background: #303030; }
+.nav-main .nav-user .nav-account-menu .dropdown-item:focus-visible { outline: 1px solid #f50; outline-offset: -1px; }
+.nav-main .nav-user .nav-account-menu .dropdown-item[href="/auth/signout"]:hover { color: #ffad8a; }
+.nav-main .nav-user .nav-account-menu .dropdown-divider { margin: 5px 6px; border-color: #353535; opacity: 1; }
+@keyframes account-menu-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+    .nav-main .nav-user .nav-account-menu.show { animation: none; }
+    .nav-main .nav-user .nav-account-menu .dropdown-item { transition: none; }
+}
 .nav-main .nav-user .nav-account-item { padding: 0 8px; }
 .nav-main .nav-user .nav-item .nav-account-trigger {
     display: inline-flex;

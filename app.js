@@ -35,7 +35,8 @@ app.use(requestLogger);
 app.use(cors({ origin: "http://localhost:5000" }));
 
 app.listen(() => {
-  console.log(`✅ Server đang chạy tại http://localhost:3000/home`);
+  // Previous displayed path: http://localhost:3000/home.
+  console.log(`✅ Server đang chạy tại http://localhost:${process.env.PORT || 3000}/discover`);
 });
 
 //session check
@@ -67,6 +68,8 @@ app.use((req, res, next) => {
   next();
 });
 
+// Main pages and legacy redirects precede the old index and song permalink routes.
+app.use(require('./routes/PageRouter'));
 app.use("/", indexRouter);
 
 //user
@@ -125,6 +128,12 @@ app.use("/api/songs", SongRouter);
 
 const UserRouter = require("./modules/user/router/UserRouter");
 app.use("/api/users", UserRouter);
+app.use('/api/feed', require('./modules/feed/router/FeedRouter'));
+app.use('/api/home', require('./modules/home/router/HomeRouter'));
+app.use('/api/library', require('./modules/library/router/LibraryRouter'));
+app.use('/api/profiles', require('./modules/profile/router/ProfileRouter'));
+app.use('/api/account', require('./modules/account/router/AccountSettingsRouter'));
+app.use('/profile', require('./modules/profile/router/ProfilePageRouter'));
 
 const AuthRouter = require("./modules/auth/router/AuthRouter");
 app.use("/api/auth", AuthRouter);

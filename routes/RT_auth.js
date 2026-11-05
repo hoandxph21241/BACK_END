@@ -29,6 +29,7 @@ router.get("/session", WebauthController.session);
 
 router.get('/google', Contronlers.googleLogin);
 router.get('/google/callback', Contronlers.googleCallback);
+router.post('/two-factor', WebauthController.completeGoogleFactor);
 
 router.get("/signout", Contronlers.SignOut);
 router.post("/signout", Contronlers.SignOut);

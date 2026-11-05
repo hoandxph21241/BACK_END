@@ -6,6 +6,11 @@ const account = Joi.string().trim().max(254).required();
 const loginSchema = Joi.object({
   nameAccount: account,
   namePassword: Joi.string().required(),
+  // Previous: Joi.string().max(32) rejected the empty optional native form field.
+  twoFactorCode: Joi.string().trim().empty('').max(32),
+  // Native form checkboxes submit "true"; these flags still require fresh credentials and 2FA.
+  reactivate: Joi.boolean(),
+  cancelDeletion: Joi.boolean(),
 });
 const registerSchema = Joi.object({
   nameAccount: account,

@@ -98,6 +98,7 @@ class SessionService {
     if (!user || typeof user.save !== "function") {
       throw new Error("SessionService.createSession: user must be a Mongoose document");
     }
+    await require("../../account/service/AccountSecurityService").authorizeSession(user, context.securityGrant);
     const now = new Date();
     const browserId = context.browserId;
     const activeSessions = (user.refreshTokens || []).filter(session =>
@@ -110,9 +111,11 @@ class SessionService {
     // Preserve the existing subdocument (including its _id), not just its position.
     const existing = (user.refreshTokens || []).filter(matchesBrowser)
       .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0];
-    const accessToken = JwtService.generateAccessToken(user);
-    const refreshToken = JwtService.generateRefreshToken(user);
-    const entry = existing || {};
+    // Previous tokens had no stable session identity, so deleting a refresh token
+    // could not immediately reject an already-issued access token.
+    const entry = existing || { _id: new (require('mongoose').Types.ObjectId)() };
+    const accessToken = JwtService.generateAccessToken(user, entry._id);
+    const refreshToken = JwtService.generateRefreshToken(user, entry._id);
     entry.token = refreshToken;
     entry.device = device;
     if (browserId) entry.browserId = browserId;
@@ -131,10 +134,15 @@ class SessionService {
     // Previous: await user.save();
     // A login that started before a password change must not write stale credentials back.
     const previousWhere = user.$where;
-    user.$where = { ...(previousWhere || {}), ...((user.authVersion || 0)
-      ? { authVersion: user.authVersion } : { $or: [{ authVersion: 0 }, { authVersion: { $exists: false } }] }) };
+    // Previous save predicate checked authVersion only. A stale login must also
+    // fail after session revocation instead of restoring its old session array.
+    user.$where = { $and: [previousWhere || {}, (user.authVersion || 0)
+      ? { authVersion: user.authVersion } : { $or: [{ authVersion: 0 }, { authVersion: { $exists: false } }] },
+      (user.sessionRevision || 0) ? { sessionRevision: user.sessionRevision }
+        : { $or: [{ sessionRevision: 0 }, { sessionRevision: { $exists: false } }] }] };
     try { await user.save(); }
     finally { user.$where = previousWhere; }
+    await require("../../account/service/AccountSecurityService").record(user, "login_success");
     return { accessToken, refreshToken };
   }
   /**
@@ -159,6 +167,7 @@ class SessionService {
     if (!user) {
       throw new Error("User not found");
     }
+    await require("../../account/service/AccountSecurityService").assertActive(user);
     if ((payload.authVersion || 0) !== (user.authVersion || 0)) throw new Error("Credentials changed");
 
     const now = new Date();
@@ -176,8 +185,9 @@ class SessionService {
     }
 
     // Tạo token mới trước khi cập nhật database.
-    const newRefreshToken = JwtService.generateRefreshToken(user);
-    const accessToken = JwtService.generateAccessToken(user);
+    // Preserve the subdocument ID through rotation, including legacy refresh upgrades.
+    const newRefreshToken = JwtService.generateRefreshToken(user, session._id);
+    const accessToken = JwtService.generateAccessToken(user, session._id);
     const expiresAt = new Date(now.getTime() + REFRESH_TOKEN_TTL_MS);
 
     let updatedUser;
@@ -235,26 +245,15 @@ class SessionService {
       return false;
     }
 
-    const user = await UserRepository.findByRefreshToken(refreshToken);
-
-    if (!user) {
-      return false;
-    }
-
-    const sessions = user.refreshTokens || [];
-    const originalLength = sessions.length;
-
-    user.refreshTokens = sessions.filter(
-      (session) => session.token !== refreshToken,
+    // Previous read/filter/user.save() could restore concurrently revoked sessions.
+    // const user = await UserRepository.findByRefreshToken(refreshToken);
+    // user.refreshTokens = user.refreshTokens.filter(session => session.token !== refreshToken);
+    // await user.save();
+    const result = await UserRepository.model.updateOne(
+      { 'refreshTokens.token': refreshToken },
+      { $pull: { refreshTokens: { token: refreshToken } }, $inc: { sessionRevision: 1 } },
     );
-
-    if (user.refreshTokens.length === originalLength) {
-      return false;
-    }
-
-    await user.save();
-
-    return true;
+    return result.modifiedCount > 0;
   }
 }
 

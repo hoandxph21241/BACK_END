@@ -74,6 +74,17 @@
     return getState();
   }
 
+  function enqueueSong(item) {
+    const song = normalizeSongs([item])[0];
+    if (!song || songs.some(value => value.id === song.id)) return getState();
+    removedSongIds.delete(song.id);
+    songs.push(song); originalOrder.push({ ...song });
+    initialized = true; editVersion++;
+    if (currentIndex < 0) currentIndex = 0;
+    emitState();
+    return getState();
+  }
+
   function setPlaylist(items, options = {}) {
     if (!Array.isArray(items)) {
       throw new Error("Danh sách phát phải là một mảng.");
@@ -273,6 +284,7 @@
   window.PlaylistControllerV2_1 = Object.freeze({
     setPlaylist,
     appendSongs,
+    enqueueSong,
     setShuffle,
     cycleRepeat,
     setCurrentSong,

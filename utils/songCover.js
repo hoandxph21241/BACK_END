@@ -1,5 +1,6 @@
 const fs = require("fs/promises");
 const axios = require("axios");
+const { analyzeCover } = require('./coverTheme');
 
 async function uploadImageToImgBB(imagePath) {
   const key = process.env.IMGBB_API_KEY;
@@ -22,9 +23,11 @@ async function uploadImageToImgBB(imagePath) {
       console.error("ImgBB cover upload failed:", { reason: "invalid_response" });
       return { success: false, status: 502, error: "Dịch vụ ImgBB trả về dữ liệu ảnh không hợp lệ. Vui lòng thử lại." };
     }
+    const theme = await analyzeCover(imageBuffer);
     return { success: true, data: {
       url: image.url, display_url: image.display_url,
       delete_url: image.delete_url, thumb: image.thumb,
+      ...(theme ? { theme } : {}),
     } };
   } catch (error) {
     const timedOut = ["ECONNABORTED", "ETIMEDOUT"].includes(error.code);

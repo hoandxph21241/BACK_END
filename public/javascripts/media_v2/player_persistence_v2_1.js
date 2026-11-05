@@ -12,9 +12,14 @@
     let owner = validId(ownerId) ? ownerId : null, epoch = 0, ready = false, suspended = false, applying = false;
     let desired = null, acknowledged = null, dirty = false, timer, writing = null, reading = null;
     let revision = 0, lastSong = player.getState().currentSong?.id || null, lastStatus = player.getState().status;
+    const preferences = window.PlayerPreferencesV2_1;
+    let rememberSong = preferences?.getState()?.playback.rememberSong !== false;
+    let restoring = null;
     const cacheKey = id => KEY + ':' + (id || 'guest');
     function cache(id, account = owner) {
-      try { if (id) storage?.setItem(cacheKey(account), id); else storage?.removeItem(cacheKey(account)); } catch { }
+      // Previous: any selected ID was cached, including with song memory disabled.
+      // try { if (id) storage?.setItem(cacheKey(account), id); else storage?.removeItem(cacheKey(account)); } catch { }
+      try { if (id && rememberSong) storage?.setItem(cacheKey(account), id); else storage?.removeItem(cacheKey(account)); } catch { }
     }
     function cached() {
       try { const id = storage?.getItem(cacheKey(owner)); return validId(id) ? id : null; } catch { return null; }
@@ -28,6 +33,7 @@
       clearTimeout(timer); reading?.abort(); reading = null;
       cache(null); cache(null, null);
       epoch++; revision++; owner = nextOwner; ready = false; dirty = false; suspended = false;
+      restoring = null;
       desired = acknowledged = null;
       stop();
     }
@@ -45,21 +51,27 @@
     }
     function schedule() {
       clearTimeout(timer);
-      if (ready && owner && !suspended && dirty) timer = setTimeout(save, 300);
+      // Previous: readiness/owner were the only persistence policy gates.
+      // if (ready && owner && !suspended && dirty) timer = setTimeout(save, 300);
+      if (rememberSong && ready && owner && !suspended && dirty) timer = setTimeout(save, 300);
     }
     function save(force = false) {
-      if (writing || !ready || !owner || (!force && suspended) || !dirty) return writing || Promise.resolve();
+      // Previous: a disabled song-memory policy did not suppress pending writes.
+      // if (writing || !ready || !owner || (!force && suspended) || !dirty) return writing || Promise.resolve();
+      if (!rememberSong || writing || !ready || !owner || (!force && suspended) || !dirty) return writing || Promise.resolve();
       const account = owner, generation = epoch, songId = desired;
       dirty = false;
       const task = api({ method: 'PUT', keepalive: true,
         headers: { 'Content-Type': 'application/json', 'X-Player-Owner': account },
         body: JSON.stringify({ currentSongId: songId }),
       }).then(data => {
-        if (generation !== epoch || account !== owner) return;
+        // if (generation !== epoch || account !== owner) return;
+        if (generation !== epoch || account !== owner || !rememberSong) return;
         if (data.userId !== account) throw new Error('Player account changed.');
         acknowledged = songId; dirty = desired !== acknowledged;
       }).catch(error => {
-        if (generation !== epoch || account !== owner) return;
+        // if (generation !== epoch || account !== owner) return;
+        if (generation !== epoch || account !== owner || !rememberSong) return;
         dirty = desired !== acknowledged;
         if (!suspended && (error.status === 401 || error.status === 409)) refresh();
         else console.warn('Cannot save selected song:', error.message);
@@ -77,11 +89,16 @@
       if (dirty) await save(force);
     }
     async function restore(songId, generation) {
-      if (!songId || generation !== epoch || player.getState().currentSong || player.getState().status === 'loading') return;
+      // Previous: restore was not gated by account preferences.
+      // if (!songId || generation !== epoch || player.getState().currentSong || player.getState().status === 'loading') return;
+      if (!rememberSong || !songId || generation !== epoch || player.getState().currentSong || player.getState().status === 'loading') return;
       lastSong = songId; cache(songId);
+      const restoration = {}; restoring = restoration;
       try {
         const state = await player.playSong(songId, { autoplay: false });
-        if (generation !== epoch || state?.currentSong?.id !== songId || player.getState().currentSong?.id !== songId) return;
+        // Previous: only generation/selection guarded the restored queue.
+        // if (generation !== epoch || state?.currentSong?.id !== songId || player.getState().currentSong?.id !== songId) return;
+        if (!rememberSong || generation !== epoch || state?.currentSong?.id !== songId || player.getState().currentSong?.id !== songId) return;
         if (!playlist.getState().initialized) playlist.setPlaylist([state.currentSong], { currentSongId: songId });
       } catch (error) {
         if (generation !== epoch || player.getState().currentSong) return;
@@ -89,7 +106,7 @@
           lastSong = desired = null; cache(null); dirty = Boolean(owner); schedule();
         }
         console.warn('Cannot restore saved song:', error.message);
-      }
+      } finally { if (restoring === restoration) restoring = null; }
     }
     async function refresh(initial = false) {
       if (suspended) return;
@@ -97,11 +114,26 @@
       const controller = new AbortController(); reading = controller;
       let generation = epoch;
       const selectedAtStart = revision;
+      const writingAtStart = writing;
       try {
+        // Preference hydration precedes saved-song restoration. No module keeps
+        // the original behavior for legacy pages and existing controller mocks.
+        await preferences?.whenReady();
+        if (generation !== epoch || controller.signal.aborted || suspended) return;
+        if (!rememberSong) { ready = true; return; }
         const data = await api({ signal: AbortSignal.any([controller.signal, AbortSignal.timeout(10000)]) });
         if (generation !== epoch || controller.signal.aborted || suspended) return;
         const accountChanged = data.userId !== owner;
-        if (accountChanged) { reset(data.userId); generation = epoch; }
+        // Previous: reset(data.userId) immediately restored the new owner's song.
+        // if (accountChanged) { reset(data.userId); generation = epoch; }
+        if (accountChanged) {
+          reset(data.userId); generation = epoch;
+          await preferences?.changeAccount(data.userId);
+          if (generation !== epoch || suspended || !rememberSong) return;
+        }
+        // A saved-state read started before/during a local write cannot replace
+        // the acknowledgement of the newer selection when it completes later.
+        if (!accountChanged && ready && (revision !== selectedAtStart || writingAtStart || writing)) { schedule(); return; }
         // A local selection made while GET was pending must win over restoration.
         const hydrate = !ready && !dirty && (revision === selectedAtStart || accountChanged);
         acknowledged = data.currentSongId;
@@ -130,26 +162,58 @@
       if (state.status === 'loading') { if (previousStatus !== 'loading') revision++; return; }
       const songId = validId(state.currentSong?.id) ? state.currentSong.id : state.status === 'idle' ? null : undefined;
       if (songId === undefined || songId === lastSong) return;
+      if (!rememberSong) { lastSong = songId; revision++; return; }
       lastSong = songId; revision++; desired = songId; cache(songId);
       dirty = Boolean(owner) && (!ready || desired !== acknowledged); schedule();
+    });
+    preferences?.subscribe(state => {
+      if (suspended) return;
+      if (state.viewerId !== owner) reset(state.viewerId);
+      const previous = rememberSong; rememberSong = state.playback.rememberSong !== false;
+      if (!rememberSong) {
+        if (previous) epoch++; // Invalidate writes that the server ignored while memory was off.
+        clearTimeout(timer); reading?.abort(); reading = null; cache(null); cache(null, null);
+        if (state.ready) ready = true;
+        desired = acknowledged = null; dirty = false; revision++;
+        // Cancel only a not-yet-loaded restore; keep all live/manual music.
+        if (restoring && !player.getState().currentSong) {
+          applying = true;
+          try { player.stop(); } finally { applying = false; restoring = null; }
+          lastSong = null;
+        }
+      } else if (!previous) {
+        desired = lastSong = player.getState().currentSong?.id || null;
+        cache(desired); dirty = Boolean(owner && desired); schedule();
+      }
+      if (state.ready && !ready && !reading) refresh();
     });
     async function changeAccount(id) {
       const next = validId(id) ? id : null;
       if (next !== owner || suspended) reset(next);
       return refresh();
     }
+    function beginSelection() {
+      // A status snapshot alone cannot distinguish volumechange while loading
+      // from another playSong call. The mediabar marks intentional selections.
+      restoring = null; revision++;
+    }
     async function signOut() {
       const generation = epoch;
       suspended = true; reading?.abort(); clearTimeout(timer);
+      preferences?.signOut();
       cache(null); cache(null, null);
       stop();
       await flush(true);
       if (generation !== epoch) return;
       epoch++; owner = null; ready = false; desired = acknowledged = null; dirty = false;
     }
-    window.addEventListener('online', () => refresh());
+    // Previous: online refreshed only the selected-song endpoint.
+    // window.addEventListener('online', () => refresh());
+    window.addEventListener('online', () => { preferences?.refresh(); refresh(); });
     window.addEventListener('pagehide', event => { if (!event.persisted && !suspended) flush(); });
-    return { start: () => refresh(true), changeAccount, signOut, refresh, flush };
+    // Previous public lifecycle did not expose an explicit selection boundary.
+    // return { start: () => refresh(true), changeAccount, signOut, refresh, flush };
+    return { start: () => refresh(true), changeAccount, signOut, refresh, flush, beginSelection };
   }
   function init(options) {
     if (!instance) { instance = create(options); instance.ready = instance.start(); }
@@ -160,5 +224,6 @@
     signOut: () => instance?.signOut(),
     refresh: () => instance?.refresh(),
     flush: () => instance?.flush(),
+    beginSelection: () => instance?.beginSelection(),
   });
 })(window);

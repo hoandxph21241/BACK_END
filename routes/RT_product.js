@@ -8,7 +8,8 @@ function requireAdmin(req, res, next) {
   }
 
   if (req.session.userLogin['role'] === 1) {
-    return res.redirect('/home');
+    // Previous Home URL: /home.
+    return res.redirect('/discover');
   }
 
   if (req.session.userLogin['role'] === 2) {
@@ -29,6 +30,8 @@ const SongValidator = require("../modules/song/validator/SongValidator");
 const SongController = require("../modules/song/controller/SongController");
 router.post("/upload", webAccessToken, (req, res, next) => {
   if (req.user.role !== 2) return res.status(403).json({ success: false, message: "Bạn không có quyền upload." });
+  const expectedOwner = req.get('X-Upload-Owner');
+  if (expectedOwner && expectedOwner !== String(req.user.id)) return res.status(409).json({ success: false, message: 'Tài khoản đã thay đổi. Vui lòng mở lại trang tải lên.' });
   next();
 }, uploadSongToGridFS, validate(SongValidator.upload), SongController.upload);
 router.use("/upload", (error, req, res, next) => {

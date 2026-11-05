@@ -49,6 +49,8 @@
       // name: song.name ?? "Unknown Song",
       name: song.name ?? song.title ?? "Unknown Song",
       artist: song.artist ?? "Unknown Artist",
+      creator: typeof song.creator?.id === 'string' && /^[a-f0-9]{24}$/i.test(song.creator.id)
+        ? { id: song.creator.id.toLowerCase(), name: typeof song.creator.name === 'string' ? song.creator.name : 'MediaHz' } : null,
       // image: normalizeImage(song.image),
       image: normalizeImage(song.image ?? song.albumCover ?? song.thumbnail ?? song.cover),
       categoryId:

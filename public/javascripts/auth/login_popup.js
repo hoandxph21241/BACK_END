@@ -22,7 +22,8 @@
   }
   function close() {
     if (oauth) { generation++; clearTimeout(pollTimer); oauth.close(); oauth = null; setBusy(false); }
-    if (!busy) dialog.close();
+    // Previous: if (!busy) dialog.close(); secrets waited for the queued close event.
+    if (!busy) { form.reset(); password.type='password'; dialog.close(); }
   }
   async function finish(data) {
     if (!data?.authenticated || typeof data.nav !== 'string') throw new Error('Chưa xác nhận được tài khoản. Vui lòng thử lại.');
@@ -50,7 +51,12 @@
       const response = await fetch('/auth/signin', {
         method: 'POST', credentials: 'same-origin', signal: controller.signal,
         headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-        body: JSON.stringify({ nameAccount: form.elements.nameAccount.value.trim(), namePassword: password.value }),
+        // Previous payload contained only account/password and could not complete enabled 2FA.
+        body: JSON.stringify({ nameAccount: form.elements.nameAccount.value.trim(), namePassword: password.value,
+          ...(form.elements.twoFactorCode?.value.trim()?{twoFactorCode:form.elements.twoFactorCode.value.trim()}:{}),
+          ...(form.elements.reactivate?.checked?{reactivate:true}:{}),
+          ...(form.elements.cancelDeletion?.checked?{cancelDeletion:true}:{}),
+        }),
       });
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.message || 'Đăng nhập thất bại.');

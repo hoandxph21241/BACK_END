@@ -38,11 +38,14 @@
     window.initTrackView = function () {
         const root = document.querySelector("[data-track-view]");
         // Previous: if (!root || root.dataset.initialized) return;
-        if (!root) { window.TrackWaveform?.mount(null); return; }
+        // Previous: only the waveform was unmounted when leaving track detail.
+        if (!root) { window.TrackWaveform?.mount(null); window.TrackCreator?.mount(null); return; }
         if (root.dataset.initialized) return;
         root.dataset.initialized = "true";
+        window.TrackCreator?.mount(root);
         window.SongEngagementV2_1?.bind(root);
-        root.querySelectorAll("[data-track-image]").forEach(image => image.addEventListener("error", () => { image.src = "/images/chibi.gif"; }, { once: true }));
+        // Previous: every broken image, including user avatars, fell back to chibi.gif.
+        root.querySelectorAll("[data-track-image]").forEach(image => image.addEventListener("error", () => { image.src = image.dataset.trackImageFallback || "/images/chibi.gif"; }, { once: true }));
         root.querySelector("[data-track-play]").addEventListener("click", () => send({ type: "trackToggle", songId: root.dataset.songId, name: root.dataset.songName, categoryId: root.dataset.categoryId || null }));
         // Previous timeline listeners retained for reference:
         // const seek = root.querySelector("[data-track-seek]");

@@ -3,6 +3,17 @@ const Home = require('./CTL_home');
 const { SONG_SUMMARY_SELECT } = require('../utils/songResponse');
 const { PAGE_SIZE, parseSearch, searchFilter, searchUrl } = require('../utils/songSearch');
 
+exports.suggest = async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  try {
+    const data = await require('../utils/searchSuggestions').get(req.query, req.session?.userLogin?._id);
+    res.json({ success: true, data });
+  } catch (error) {
+    if (!error.status) console.error('Search suggestions failed:', error.code || error.name);
+    res.status(error.status || 503).json({ success: false, message: 'Unable to load search suggestions.' });
+  }
+};
+
 exports.show = async (req, res, next) => {
   res.vary('X-Requested-With');
   try {

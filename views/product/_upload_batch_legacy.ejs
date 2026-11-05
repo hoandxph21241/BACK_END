@@ -1,0 +1,78 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/stylesheets/upload_notifications.css">
+<script src="/javascripts/upload_notifications.js" defer data-notification-owner="<%= typeof user !== 'undefined' && user ? (user.userID || user._id || user.id || 'user') : 'guest' %>"></script>
+<!-- Previous form and styles remain in _upload_single_legacy.ejs and upload_file.css. -->
+<link rel="stylesheet" href="/stylesheets/CSS_Products/upload_queue.css">
+<section class="upload-view" data-upload-view data-upload-step="select">
+  <header class="upload-heading">
+    <!-- Previous heading: <h1>Tải nhạc lên</h1>; the editor link now belongs to the details step. -->
+    <div class="upload-brand"><span class="upload-brand-logo"><img src="/images/bg.png" alt="" width="120" height="120"></span><h1>MediaHz Upload</h1></div>
+    <!-- Previous close/back URL: /home/pratical. -->
+    <a class="upload-icon-button upload-close" href="/discover" data-upload-link aria-label="Đóng trang tải lên" title="Đóng trang tải lên"><i class="upload-icon icon-close" aria-hidden="true"></i></a>
+  </header>
+  <form id="uploadForm" action="/product/upload" method="post" enctype="multipart/form-data" accept-charset="UTF-8" novalidate>
+    <div id="uploadAlert" class="upload-alert" role="alert" hidden></div>
+    <!-- The shared picker serves both the first step and the existing multi-track editor. -->
+    <input type="file" id="mp3File" accept=".mp3,.m4a,.wav,.flac,audio/mpeg,audio/mp4,audio/wav,audio/flac" multiple hidden>
+    <section id="uploadSelectStep" class="upload-select-step" aria-labelledby="uploadSelectTitle">
+      <div class="upload-selection-limits"><span><i class="upload-icon icon-upload" aria-hidden="true"></i>Tối đa 20 bài mỗi lượt</span><span>25 MB / tệp</span></div>
+      <div class="upload-select-intro"><h2 id="uploadSelectTitle">Tải tệp âm thanh</h2><p>WAV · FLAC · MP3 · M4A</p></div>
+      <div id="uploadDropzone" class="upload-dropzone" role="region" aria-label="Vùng nhận tệp âm thanh kéo thả">
+        <i class="upload-icon icon-upload upload-drop-icon" aria-hidden="true"></i>
+        <span class="upload-drop-formats" aria-hidden="true">WAV / FLAC / MP3 / M4A</span>
+        <button class="upload-button upload-choose-button" id="uploadChooseFiles" type="button">Chọn tệp</button>
+      </div>
+      <div class="upload-select-links"><a class="upload-button upload-button-quiet" href="/product/update" data-upload-link><i class="upload-icon icon-edit" aria-hidden="true"></i>Quản lý bài hát</a></div>
+    </section>
+    <section id="uploadDetailsStep" class="upload-details-step" aria-labelledby="uploadDetailsTitle" hidden>
+    <div class="upload-details-heading"><h2 id="uploadDetailsTitle" tabindex="-1">Thông tin bài hát</h2><a class="upload-button upload-button-quiet" href="/product/update" data-upload-link><i class="upload-icon icon-edit" aria-hidden="true"></i>Chỉnh sửa bài hát</a></div>
+    <div class="upload-toolbar">
+      <button class="upload-button" type="button" id="uploadAddFiles"><i class="upload-icon icon-plus" aria-hidden="true"></i>Thêm bài hát</button>
+      <!-- Previous: the file input was inside this toolbar; it is shared above both steps now. -->
+      <label class="upload-default-category" for="categoryId">Thể loại mặc định
+        <select id="categoryId">
+          <option value="">Chọn thể loại</option>
+          <% (listidCategory || []).forEach(function(category) { %>
+            <option value="<%= category._id %>"><%= category.nameCategory %></option>
+          <% }); %>
+        </select>
+      </label>
+      <span class="upload-limits">MP3 / M4A / WAV / FLAC · 25 MB/bài · Tối đa 20 bài</span>
+    </div>
+    <div class="upload-summary" id="uploadProgressContainer" hidden>
+      <div class="upload-summary-line"><span id="uploadSummaryText" role="status"></span><span>Tổng thời gian <output id="uploadElapsed">00:00</output></span></div>
+      <div class="upload-transfer-summary" id="uploadTransferSummary"></div>
+      <!-- Previous aria-label was "Tiến độ hàng đợi"; this bar now measures transmitted bytes only. -->
+      <progress id="uploadProgressBar" max="100" value="0" aria-label="Tiến độ truyền tệp"></progress>
+    </div>
+    <div class="upload-list-heading" aria-hidden="true"><span>Bài hát</span><span>Thể loại</span><span>Trạng thái & thời gian</span></div>
+    <div id="uploadQueue" class="upload-queue" role="list" aria-label="Danh sách tải lên"></div>
+    <!-- Previous empty state, replaced by the first-step file selector:
+    <div class="upload-empty" id="uploadEmpty"><i class="upload-icon icon-music" aria-hidden="true"></i><p>Chưa có bài hát</p></div>
+    -->
+    <footer class="upload-footer">
+      <a class="upload-button upload-button-quiet" href="/discover" data-upload-link><i class="upload-icon icon-back" aria-hidden="true"></i>Quay lại</a>
+      <button class="upload-button upload-button-quiet" type="button" id="uploadClear" hidden><i class="upload-icon icon-trash" aria-hidden="true"></i>Xóa bài đã tải</button>
+      <span class="upload-footer-spacer"></span>
+      <button class="upload-button" type="button" id="uploadPause" hidden title="Dừng gửi bài tiếp theo; các bài đang tải vẫn được hoàn tất"><i class="upload-icon icon-pause" aria-hidden="true"></i>Tạm dừng hàng đợi</button>
+      <button class="upload-button upload-button-primary" id="uploadBtn" type="submit" disabled><i class="upload-icon icon-upload" aria-hidden="true"></i><span>Tải lên</span></button>
+    </footer>
+    </section>
+  </form>
+  <template id="uploadRowTemplate">
+    <article class="upload-row" role="listitem" data-state="pending">
+      <div class="upload-cover-field">
+        <button class="upload-cover" type="button" data-action="cover" title="Chọn ảnh bìa (JPG, PNG, WebP; tối đa 5 MB)" aria-label="Chọn ảnh bìa"><i class="upload-icon icon-image" aria-hidden="true"></i><img alt="" hidden></button>
+        <button class="upload-remove-cover" type="button" data-action="remove-cover" aria-label="Bỏ ảnh bìa" title="Bỏ ảnh bìa" hidden><i class="upload-icon icon-close" aria-hidden="true"></i></button>
+        <input class="upload-cover-input" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+      </div>
+      <div class="upload-track"><label class="upload-title-label"><span class="upload-sr-only">Tên bài hát</span><input class="upload-title" type="text" maxlength="200"></label><div class="upload-file-meta"><span class="upload-filename"></span><span class="upload-size"></span></div></div>
+      <select class="upload-category" aria-label="Thể loại bài hát"></select>
+      <!-- Previous Library URL: /home/ct_home. -->
+      <div class="upload-row-result"><span class="upload-row-status" role="status"></span><progress class="upload-row-progress" value="0" max="100" aria-label="Tiến độ truyền tệp bài hát"></progress><span class="upload-row-transfer" hidden></span><span class="upload-row-time"></span><p class="upload-row-message" hidden></p><a class="upload-library-link" href="/library" data-upload-link hidden>Kiểm tra Library</a></div>
+      <div class="upload-row-actions"><button class="upload-icon-button" type="button" data-action="retry" title="Thử tải lại bài lỗi" aria-label="Thử tải lại bài lỗi" hidden><i class="upload-icon icon-retry" aria-hidden="true"></i></button><button class="upload-icon-button" type="button" data-action="remove" title="Bỏ khỏi danh sách tải lên" aria-label="Bỏ khỏi danh sách tải lên"><i class="upload-icon icon-close" aria-hidden="true"></i></button></div>
+    </article>
+  </template>
+</section>
+<script src="/javascripts/product/upload_queue.js" defer></script>

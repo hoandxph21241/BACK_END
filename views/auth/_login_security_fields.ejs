@@ -1,0 +1,8 @@
+<div class="login-security-fields">
+  <label for="<%= securityPrefix %>TwoFactor">Mã xác thực hai bước hoặc mã khôi phục</label>
+  <input id="<%= securityPrefix %>TwoFactor" name="twoFactorCode" type="text" autocomplete="one-time-code" maxlength="128" placeholder="Chỉ nhập khi tài khoản đã bật 2FA">
+  <details><summary>Tài khoản đã tạm đóng</summary>
+    <label><input type="checkbox" name="reactivate" value="true"> Kích hoạt lại tài khoản đã vô hiệu hóa</label>
+    <label><input type="checkbox" name="cancelDeletion" value="true"> Hủy yêu cầu xóa tài khoản</label>
+  </details>
+</div>

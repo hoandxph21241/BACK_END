@@ -5,7 +5,12 @@ var userSchema = new db.mongoose.Schema(
     nameAccount: { type: String, required: true, unique: true, trim: true },
     namePassword: { type: String, required: true },
     authVersion: { type: Number, default: 0 },
+    // Enable strict session binding per account when session management revokes tokens.
+    sessionBindingRequired: { type: Boolean, default: false },
+    sessionRevision: { type: Number, default: 0, min: 0 },
+    accountStatus: { type: String, enum: ['active','deactivated','deletion-pending'], default: 'active' },
     currentSongId: { type: db.mongoose.Schema.Types.ObjectId, ref: "MP3", default: null },
+    rememberSongEnabled: { type: Boolean, default: true },
     imageAccount: { type: String, required: false },
     bannerImage: { type: String, default: '' },
     profileTag: { type: String, trim: true, lowercase: true, unique: true, sparse: true, match: /^hz\d{3,12}$/ },
@@ -172,6 +177,13 @@ var MP3Schema = new db.mongoose.Schema(
       },
 
       originalName: String,
+      theme: {
+        type: new db.mongoose.Schema({
+          version: { type: Number, required: true, enum: [1] },
+          background: { type: String, required: true, match: /^#[0-9a-f]{6}$/i },
+        }, { _id: false }),
+        default: undefined,
+      },
     },
 
     playCount: {
@@ -186,6 +198,11 @@ var MP3Schema = new db.mongoose.Schema(
 
     likedBy: { type: [String], default: [], select: false },
     recentPlayIds: { type: [String], default: [], select: false },
+    // Bound retry receipts to their original account without storing playback position.
+    recentPlayOwners: {
+      type: [new db.mongoose.Schema({ playbackId: String, owner: String, acceptedAt: Date }, { _id: false })],
+      default: [], select: false,
+    },
     waveform: {
       type: new db.mongoose.Schema({ version: Number, duration: Number, peaks: [Number] }, { _id: false }),
       select: false,
@@ -210,6 +227,10 @@ MP3Schema.index({name: "text",artist: "text",});
 MP3Schema.index({categoryId: 1,});
 MP3Schema.index({playCount: -1,});
 MP3Schema.index({createdAt: -1,});
+MP3Schema.index({ userID: 1 }, { name: 'song_uploader_index' });
+MP3Schema.index({ likedBy: 1 }, { name: 'library_liked_by' });
+MP3Schema.index({ createdAt: -1, _id: -1 }, { name: 'feed_newest' });
+MP3Schema.index({ playCount: -1, likeCount: -1, _id: -1 }, { name: 'feed_popular' });
 MP3Schema.index({ profileSlug: 1, slug: 1 }, { name: 'song_permalink_unique', unique: true,
   partialFilterExpression: { profileSlug: { $type: 'string' }, slug: { $type: 'string' } } });
 let MP3 = db.mongoose.model("MP3", MP3Schema);

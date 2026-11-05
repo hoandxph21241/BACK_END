@@ -1,5 +1,9 @@
 # Web Batch Upload
 
+> Historical implementation, retained for reference. The active form now uses
+> `upload_single.js`; see [single-upload.md](single-upload.md). The full former
+> template is preserved in `_upload_batch_legacy.ejs` and is not rendered.
+
 The web form at `/product` uses `public/javascripts/product/upload_queue.js`.
 The earlier single-file form remains in `views/product/_upload_single_legacy.ejs`,
 with its JavaScript and CSS retained for reference. They are no longer loaded.

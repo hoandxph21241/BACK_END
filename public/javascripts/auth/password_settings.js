@@ -30,6 +30,8 @@
   function init(root) {
     const find = selector => root.querySelector(selector), form = find('[data-password-form]'), fields = form.elements;
     const status = find('[data-password-status]'), send = find('[data-password-send-otp]'), submit = find('[data-password-submit]'), login = find('[data-password-login]');
+    const dialog = find('[data-password-dialog]'), opener = find('[data-password-open]');
+    const closers = Array.from(root.querySelectorAll('[data-password-close]'));
     const tabs = Array.from(root.querySelectorAll('[data-password-method]'));
     let method = 'password', changing = false, sending = false, complete = false, needsLogin = false;
     let loaded = false, canEmail = false, optionsLoading = false, challengeId = null, expiresAt = 0, retryAt = 0, generation = 0, controller;
@@ -39,15 +41,18 @@
       retryAt = Date.now() + (Number.isFinite(seconds) && seconds >= 0 ? seconds : fallback) * 1000;
     }
     function controls() {
+      const signedOutAccount = root.dataset.accountAuthenticated === 'false';
+      opener.disabled = changing || sending || signedOutAccount;
+      closers.forEach(button => { button.disabled = changing || sending; });
       tabs.forEach(tab => { const active = tab.dataset.passwordMethod === method; tab.disabled = changing || sending || complete; tab.setAttribute('aria-selected', String(active)); tab.tabIndex = active ? 0 : -1; });
       find('[data-password-current]').hidden = method !== 'password'; find('[data-password-email]').hidden = method !== 'otp';
       find('#passwordProof').setAttribute('aria-labelledby', method === 'otp' ? 'passwordMethodOtp' : 'passwordMethodCurrent');
       fields.oldPassword.disabled = changing || complete || method !== 'password'; fields.oldPassword.required = method === 'password';
       fields.otp.disabled = changing || complete || method !== 'otp' || !challengeId; fields.otp.required = method === 'otp';
       fields.newPassword.disabled = changing || complete; fields.confirmPassword.disabled = changing || complete;
-      submit.disabled = changing || sending || complete || needsLogin; submit.textContent = changing ? 'Đang cập nhật...' : 'Đổi mật khẩu';
+      submit.disabled = changing || sending || complete || needsLogin || signedOutAccount; submit.textContent = changing ? 'Đang cập nhật...' : 'Đổi mật khẩu';
       const seconds = Math.max(0, Math.ceil((retryAt - Date.now()) / 1000));
-      send.disabled = changing || sending || complete || needsLogin || optionsLoading || (loaded && !canEmail) || seconds > 0;
+      send.disabled = changing || sending || complete || needsLogin || signedOutAccount || optionsLoading || (loaded && !canEmail) || seconds > 0;
       // Previous countdown displayed seconds only, including a hard-coded 60s for hourly limits.
       const wait = seconds >= 60 ? Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0') : seconds + 's';
       send.textContent = sending ? 'Đang gửi...' : optionsLoading ? 'Đang tải...' : seconds ? 'Gửi lại (' + wait + ')' : !loaded ? 'Thử lại' : challengeId ? 'Gửi lại OTP' : 'Gửi OTP';
@@ -76,12 +81,43 @@
         message(error.message);
       } finally { if (request === generation) { optionsLoading = false; controls(); } }
     }
-    function reset() {
-      generation++; controller?.abort(); form.reset(); challengeId = null; expiresAt = 0; retryAt = 0; complete = false; needsLogin = false; loaded = false; canEmail = false;
-      method = 'password'; message(''); login.hidden = true; form.hidden = false; find('[data-password-otp-status]').textContent = '';
+    function clearSecrets() {
+      form.reset(); fields.confirmPassword.setCustomValidity(''); fields.newPassword.setCustomValidity('');
       root.querySelectorAll('[data-password-reveal]').forEach(button => { find('#' + button.dataset.passwordReveal).type = 'password'; button.setAttribute('aria-pressed', 'false'); button.title = 'Hiện mật khẩu'; button.setAttribute('aria-label', button.title); });
-      controls(); loadOptions();
     }
+    function reset() {
+      // Previously reset eagerly fetched options for the full-page form.
+      generation++; controller?.abort(); clearSecrets(); challengeId = null; expiresAt = 0; retryAt = 0; complete = false; needsLogin = false; loaded = false; canEmail = false;
+      changing = sending = optionsLoading = false;
+      method = 'password'; message(''); login.hidden = true; form.hidden = false; find('[data-password-otp-status]').textContent = '';
+      find('[data-password-destination]').textContent = 'Đang tải...';
+      // Previous: controls(); loadOptions(); The server challenge/cooldown reloads only on open.
+      controls();
+    }
+    function closeDialog() {
+      if (changing || sending) return;
+      // Clear sensitive inputs immediately; the browser dispatches 'close' asynchronously.
+      clearSecrets(); dialog.close();
+    }
+    opener.addEventListener('click', () => {
+      if (dialog.open || changing || sending) return;
+      if (!complete) reset();
+      dialog.showModal();
+      if (!complete) loadOptions();
+      (complete ? login : fields.oldPassword).focus();
+    });
+    closers.forEach(button => button.addEventListener('click', closeDialog));
+    dialog.addEventListener('cancel', event => { event.preventDefault(); closeDialog(); });
+    let outside = false;
+    const isOutside = event => { const bounds = dialog.getBoundingClientRect(); return event.target === dialog && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom); };
+    dialog.addEventListener('pointerdown', event => { outside = event.button === 0 && isOutside(event); });
+    dialog.addEventListener('pointerup', event => { if (outside && isOutside(event)) closeDialog(); outside = false; });
+    dialog.addEventListener('close', () => {
+      // A queued close event must not reset a newly reopened dialog or a removed view.
+      if (dialog.open || !root.isConnected) return;
+      if (!complete) reset(); else clearSecrets();
+      if (!document.querySelector('dialog[open]')) opener.focus({ preventScroll:true });
+    });
     tabs.forEach(tab => tab.addEventListener('click', () => {
       if (changing || sending) return; method = tab.dataset.passwordMethod; fields.oldPassword.value = ''; fields.otp.value = ''; message(''); controls();
     }));
@@ -109,7 +145,8 @@
         // Previous: if (error.status === 429 || error.status === 503) retryAt = Date.now() + 60000;
         if (error.status === 429 || error.status === 503) setRetry(error, 60);
         message(error.message || 'Chưa gửi được OTP. Vui lòng thử lại.');
-      } finally { sending = false; controls(); if (challengeId && method === 'otp' && root.isConnected) fields.otp.focus(); }
+      // A previous dialog/account must not unlock or focus a newer request.
+      } finally { if (request === generation && root.isConnected) { sending = false; controls(); if (challengeId && method === 'otp' && dialog.open) fields.otp.focus(); } }
     });
     form.addEventListener('input', () => { fields.confirmPassword.setCustomValidity(''); fields.newPassword.setCustomValidity(''); });
     form.addEventListener('submit', async event => {
@@ -130,12 +167,14 @@
         if (request !== generation || !root.isConnected) return;
         if (error.status === 401) { needsLogin = true; login.hidden = false; }
         message(['TimeoutError', 'TypeError', 'AbortError'].includes(error.name) ? 'Chưa xác nhận kết quả đổi mật khẩu. Hãy thử đăng nhập bằng mật khẩu mới trước khi gửi lại.' : error.message);
-      } finally { changing = false; controls(); }
+      } finally { if (request === generation && root.isConnected) { changing = false; controls(); } }
     });
-    login.addEventListener('click', () => window.MediaHzLogin ? window.MediaHzLogin.open() : location.assign('/auth/signin'));
+    // Previous login action left the password view/dialog underneath the login popup.
+    login.addEventListener('click', () => { dialog.close(); if (window.MediaHzLogin) window.MediaHzLogin.open(); else location.assign('/auth/signin'); });
     const timer = setInterval(() => { if (root.isConnected) controls(); }, 1000);
-    views.set(root, { authChanged(user) { if (complete && !user) return; reset(); }, dispose() { generation++; controller?.abort(); clearInterval(timer); form.reset(); } });
-    loadOptions();
+    views.set(root, { authChanged(user) { if (complete && !user) return; if (dialog.open) dialog.close(); reset(); }, dispose() { generation++; controller?.abort(); clearInterval(timer); clearSecrets(); if (dialog.open) dialog.close(); } });
+    // Previous: loadOptions(); Options are now loaded lazily when opening the dialog.
+    controls();
   }
   function scan() {
     for (const [root, state] of views) if (!root.isConnected) { state.dispose(); views.delete(root); }

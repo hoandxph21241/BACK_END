@@ -7,11 +7,30 @@ const GridFS = require("../../../utils/GridFS");
 const SongMapper = require("../mapper/SongMapper");
 const fs = require("fs/promises");
 const uploadImageToImgBB = require("../../../utils/songCover");
+const UserRepository = require('../../user/repository/UserRepository');
 
 class SongController extends BaseController {
   constructor() {
     super(SongService, SongMapper);
   }
+
+  // Previous inherited getById returned mapper.detail(data) without the uploader identity.
+  getById = async (req, res) => {
+    const data = await this.service.getById(req.params.id);
+    let creator = null;
+    if (data.userID && data.isDeleted !== true && data.isPublic !== false) {
+      try {
+        const user = await UserRepository.findByIdentifier(String(data.userID))
+          .select('_id fullName userName profileTag').maxTimeMS(1500).lean();
+        if (user) creator = { id: String(user._id),
+          name: user.fullName || user.userName || (user.profileTag ? '#' + user.profileTag : 'MediaHz') };
+      } catch (error) {
+        // A missing uploader lookup must not prevent audio metadata from loading.
+        console.warn('Cannot load song creator:', error.code || 'LOOKUP_FAILED');
+      }
+    }
+    return this.success(res, { ...this.mapper.detail(data), creator });
+  };
 
   upload = async (req, res) => {
     try {
@@ -39,6 +58,9 @@ class SongController extends BaseController {
         fileSize: req.file.size,
       });
 
+      // Notification delivery must not turn a successfully stored upload into a retry/duplicate.
+      require('../../account/service/AccountNotificationService').track(data)
+        .catch(error=>console.warn('Cannot create track notifications:',error.code||'NOTIFICATION_FAILED'));
       return this.success(res, this.mapper.detail(data));
     } finally {
       // Xóa file tạm sau khi upload thành công hoặc thất bại.

@@ -1,0 +1,64 @@
+/* Scoped to the expansion so password/session dialog behavior stays with its owner. */
+.account-preferences { --ap-border:#343434; --ap-muted:#a5a5a5; --ap-accent:#ff6a2a; color:#eee; font:14px/1.5 Arial,sans-serif; color-scheme:dark; }
+.account-preferences *, .account-preferences *::before, .account-preferences *::after { box-sizing:border-box; }
+.account-preferences [hidden] { display:none!important; }
+.ap-fields { min-width:0; margin:0; padding:0; border:0; }
+.ap-group { padding-top:28px; }
+.account-preferences .ap-group>h2 { margin:0 0 8px; color:#ddd; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+.ap-description { margin:6px 0 10px; color:var(--ap-muted); font-size:12px; line-height:1.6; }
+.ap-row { display:flex!important; align-items:center; justify-content:space-between; gap:20px; min-height:57px; margin:0!important; padding:15px 0; border-bottom:1px solid var(--ap-border); font-size:13px!important; font-weight:400!important; }
+.ap-row>div { min-width:0; }
+.ap-row h3 { margin:0 0 3px; font-size:13px; font-weight:500; }
+.ap-row p { margin:0; color:var(--ap-muted); font-size:12px; line-height:1.6; overflow-wrap:anywhere; }
+.ap-row>button, .ap-row>select { flex-shrink:0; }
+.ap-toggle { position:relative; cursor:pointer; }
+.ap-toggle>span:first-child { flex:1; }
+.account-preferences .ap-toggle input { position:absolute; right:0; width:40px; height:24px; opacity:0; margin:0; padding:0; z-index:1; cursor:pointer; }
+.ap-switch { position:relative; display:block; flex:0 0 38px; height:22px; background:#444; border:1px solid #666; border-radius:20px; pointer-events:none; }
+.ap-switch::after { content:''; position:absolute; top:3px; left:3px; width:14px; height:14px; border-radius:50%; background:#eee; transition:transform .15s; }
+.ap-toggle input:checked+.ap-switch { background:#d94d0c; border-color:#ff6a2a; }
+.ap-toggle input:checked+.ap-switch::after { transform:translateX(16px); background:#fff; }
+.ap-toggle input:focus-visible+.ap-switch { outline:2px solid #ff9b6b; outline-offset:3px; }
+.ap-toggle input:disabled+.ap-switch { opacity:.45; }
+.account-preferences :is(input,select,textarea) { min-width:0; max-width:100%; min-height:38px; padding:8px 10px; border:1px solid #555; border-radius:5px; background:#141414; color:#eee; font:inherit; }
+.account-preferences select { width:190px; }
+.account-preferences :is(button,input,select,textarea):focus-visible { outline:2px solid #ff9b6b; outline-offset:3px; }
+.ap-button { display:inline-flex; align-items:center; justify-content:center; min-height:36px; padding:7px 12px; border:1px solid #555; border-radius:5px; background:transparent; color:#eee; font:inherit; font-size:12px; cursor:pointer; text-decoration:none; }
+.ap-button:hover { background:#ffffff0a; border-color:#999; }
+.ap-danger { color:#ffb29e; border-color:#815343; }
+.ap-text-button { border:0; padding:8px 0; background:transparent; color:#ffad88; font:inherit; font-size:12px; cursor:pointer; }
+.account-preferences button:disabled, .account-preferences select:disabled { cursor:default; opacity:.5; }
+.ap-status { margin:12px 0; min-height:0; color:#aacbb8; font-size:12px; line-height:1.6; overflow-wrap:anywhere; }
+.ap-status:empty { display:none; }
+.ap-status.is-error { color:#ffb4a8; }
+.ap-dialog { width:min(570px,calc(100vw - 28px)); max-height:calc(100dvh - 28px); padding:0; margin:auto; border:1px solid #454545; border-radius:12px; background:#191919; color:#eee; overflow:auto; font:14px/1.5 Arial,sans-serif; color-scheme:dark; }
+.ap-dialog::backdrop { background:#000b; }
+.ap-dialog>header { position:sticky; z-index:2; top:0; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 24px; border-bottom:1px solid #383838; background:#191919; }
+.account-preferences .ap-dialog>header h2 { margin:0; font-size:19px; line-height:1.4; }
+.ap-close { flex:0 0 32px; width:32px; height:32px; border:0; background:transparent; color:#bbb; font:26px/1 Arial; cursor:pointer; }
+.ap-dialog-body { padding:8px 24px 22px; }
+.ap-dialog-body>p { overflow-wrap:anywhere; }
+.account-preferences .ap-dialog label { display:block; margin:16px 0 7px; color:#ccc; font-size:12px; font-weight:600; }
+.ap-dialog input, .ap-dialog textarea { display:block; width:100%; }
+.ap-input-action { display:flex; align-items:center; gap:8px; }
+.ap-input-action input { flex:1; }
+.ap-input-action button { flex-shrink:0; }
+.account-preferences .ap-dialog footer { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; margin-top:20px; padding-top:16px; border-top:1px solid #383838; }
+.ap-user-list, .ap-activity-list { margin:0; padding:0; list-style:none; }
+.ap-user-list li { display:flex; align-items:center; gap:10px; padding:12px 0; border-bottom:1px solid #333; }
+.ap-user-list .ap-user-copy { flex:1; min-width:0; }
+.ap-user-copy strong, .ap-user-copy small { display:block; overflow-wrap:anywhere; }
+.ap-user-copy small { color:var(--ap-muted); font-size:11px; }
+.ap-user-list img { width:32px; height:32px; border-radius:50%; object-fit:cover; }
+.ap-secret { display:block; width:100%; margin:12px 0; padding:12px; border:1px solid #555; border-radius:5px; background:#101010; color:#eee; white-space:pre-wrap; overflow-wrap:anywhere; font:13px/1.7 monospace; user-select:all; }
+.ap-activity-list li { padding:12px 0; border-bottom:1px solid #333; overflow-wrap:anywhere; }
+.ap-activity-list time { display:block; color:var(--ap-muted); font-size:12px; }
+.ap-panel { margin-top:16px; padding:14px; border:1px solid #514338; border-radius:7px; }
+.ap-dialog .ap-inline-check { display:flex; align-items:flex-start; gap:10px; font-weight:400; }
+.ap-inline-check input { width:18px; height:18px; min-height:18px; margin-top:2px; }
+html:has(.ap-dialog[open]) { overflow:hidden; }
+@media(max-width:480px) { .ap-row { gap:12px; } .account-preferences select { width:145px; font-size:12px; } .ap-dialog>header { padding:16px; } .ap-dialog-body { padding:4px 16px 18px; } .ap-row .ap-button { max-width:140px; } }
+@media(prefers-reduced-motion:reduce) { .ap-switch::after { transition:none; } }
+
+.ap-dialog form>.ap-button, .ap-dialog [data-ap-security-content]>.ap-button { margin:12px 8px 0 0; }
+.ap-dialog-body :is(p,label,a), .ap-user-copy a { overflow-wrap:anywhere; }

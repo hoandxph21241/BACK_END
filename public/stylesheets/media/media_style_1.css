@@ -1252,3 +1252,47 @@ body {
 .media-control-bar .player-track-section button[data-track-page]:disabled { cursor:default; pointer-events:none; }
 .media-control-bar .player-track-section button[data-track-page]:focus-visible { outline:2px solid #f50; outline-offset:2px; }
 @media(prefers-reduced-motion:reduce) { .media-control-bar .player-track-section button[data-track-page] { transition:none; } }
+
+/* Follow shares the trailing action sizes without changing the artwork or metadata order. */
+.media-control-bar .player-track-actions { flex:0 0 auto; gap:4px !important; padding:0; }
+.media-control-bar .player-track-actions > .btn { display:inline-flex; align-items:center; justify-content:center; flex:0 0 30px; width:30px; height:32px; padding:0 !important; margin:0 !important; }
+.player-follow-icon { display:block; width:18px; height:18px; background:currentColor; mask:url('/images/player/person-plus.svg') center/contain no-repeat; -webkit-mask:url('/images/player/person-plus.svg') center/contain no-repeat; }
+.media-control-bar #mediaFollowBtn[aria-pressed="true"] { color:#f50 !important; }
+#mediaFollowBtn[aria-pressed="true"] .player-follow-icon { mask-image:url('/images/player/person-check-fill.svg'); -webkit-mask-image:url('/images/player/person-check-fill.svg'); }
+.media-control-bar #mediaFollowBtn:disabled { color:#aaa !important; opacity:.45; cursor:default; }
+.media-control-bar #mediaFollowBtn[aria-busy="true"] { cursor:wait; }
+.media-control-bar #mediaFollowBtn:focus-visible { outline:2px solid #f50; outline-offset:1px; box-shadow:none; }
+@media(max-width:600px) {
+    /* Previous mobile flex layout allowed controls to overlap the track metadata. */
+    .media-control-bar { display:grid !important; grid-template-columns:98px minmax(0,1fr); gap:8px; padding-inline:8px; }
+    .media-control-bar > .player-main-controls { gap:4px !important; padding:0 !important; }
+    .media-control-bar .player-main-controls > :is(#shuffleBtn,#repeatBtn,.time-display,.volume-control) { display:none !important; }
+    .media-control-bar .player-main-controls > .progress-container { position:absolute; top:0; left:0; right:0; width:100%; height:4px; margin:0; padding:0; }
+    .media-control-bar > .player-track-section { min-width:0; gap:6px !important; padding:0 !important; }
+    .media-control-bar .player-track-meta { flex:1 1 0; width:auto; min-width:0; }
+    .media-control-bar .player-song-cover-button #albumCover { width:32px !important; height:32px !important; }
+    .media-control-bar .player-track-actions { gap:2px !important; margin-left:0 !important; padding:0 !important; }
+    .media-control-bar .player-track-actions > .btn { flex-basis:28px; width:28px; }
+}
+
+/* Compact player: preserve the timeline instead of letting fixed track details squeeze it to zero.
+   Previous desktop/tablet sizes and the <=600px top-edge timeline remain above for reference. */
+@media (max-width: 1280px) {
+    .media-control-bar .player-main-controls > :is(#shuffleBtn, #repeatBtn) {
+        display: none !important;
+    }
+}
+@media (min-width: 601px) and (max-width: 1280px) {
+    .media-control-bar { gap: 10px; }
+    .media-control-bar > .player-main-controls { gap: 4px !important; padding: 0 !important; }
+    .media-control-bar > .player-track-section {
+        flex: 0 1 38%;
+        max-width: 340px;
+        min-width: 0;
+        gap: 8px !important;
+        padding: 0 !important;
+    }
+    .media-control-bar .player-track-meta { flex: 1 1 0; width: auto; min-width: 0; }
+    .media-control-bar .player-track-actions { margin-left: 0 !important; }
+}
+.media-control-bar .seekbar { min-width: 0; }

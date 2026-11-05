@@ -107,6 +107,7 @@ let volumeHovered = false;
 let playlistOpen = false;
 let playlistCloseTimer;
 let mediaV2Initialized = false;
+let queuePreparation = null;
 let repeatMode = "none";
 let shuffleEnabled = false;
 
@@ -281,6 +282,7 @@ function initializeMediaV2() {
         muteButtonSelector: "#volumeBtn",
     });
 
+    window.PlayerFollowV2_1?.init({ player: window.PlayerControllerV2_1 });
     window.PlayerControllerV2_1.subscribe(function (state) {
         const hasSong = Boolean(state.currentSong?.id);
         if (mediaControlBar) {
@@ -327,6 +329,10 @@ function initializeMediaV2() {
             window.parent.postMessage({ type: "volumeState", value }, window.location.origin);
         }
     });
+    // Sample waiting/seeking/rate changes even when timeupdate has not fired yet.
+    ['waiting', 'playing', 'seeking', 'seeked', 'ratechange'].forEach(eventName => {
+        audioPlayer.addEventListener(eventName, () => sendTrackPlayback());
+    });
 
     // window.PlaylistControllerV2_1.subscribe(renderPlaylist);
     window.PlaylistControllerV2_1.subscribe(state => {
@@ -355,6 +361,10 @@ function initializeMediaV2() {
         window.parent.postMessage({ type: "trackNavigate", songId: song.id, url: song.url }, window.location.origin);
     }));
     mediaV2Initialized = true;
+    window.PlayerPreferencesV2_1?.init({
+        player: window.PlayerControllerV2_1,
+        ownerId: mediaControlBar?.dataset.playerOwner,
+    });
     window.PlayerPersistenceV2_1?.init({
         player: window.PlayerControllerV2_1,
         playlist: window.PlaylistControllerV2_1,
@@ -364,8 +374,13 @@ function initializeMediaV2() {
 }
 
 function sendTrackPlayback(state = window.PlayerControllerV2_1.getState()) {
+    const ready = !['idle', 'loading', 'error'].includes(state.status);
     window.parent.postMessage({ type: "trackPlayback", songId: state.currentSong?.id || null,
-        status: state.status, currentTime: state.currentTime, duration: state.duration }, window.location.origin);
+        // Previous: currentTime: state.currentTime, duration: state.duration
+        status: state.status, currentTime: ready && Number.isFinite(audioPlayer.currentTime) ? audioPlayer.currentTime : state.currentTime,
+        duration: ready && Number.isFinite(audioPlayer.duration) ? audioPlayer.duration : state.duration,
+        advancing: state.status === 'playing' && !audioPlayer.paused && !audioPlayer.seeking && !audioPlayer.ended && audioPlayer.readyState >= 3,
+        playbackRate: audioPlayer.playbackRate }, window.location.origin);
 }
 // Previous href updates for anchor controls:
 // function updateTrackLinks(state) {
@@ -476,6 +491,7 @@ let selectionVersion = 0;
 // Previous: async function playPlaylistSong(song)
 async function playPlaylistSong(song, options = {}) {
     if (!song) return null;
+    window.PlayerPersistenceV2_1?.beginSelection();
     window.PlaylistControllerV2_1.setCurrentSong(song.id);
     const state = await window.PlayerControllerV2_1.playSong(song.id, options);
     if (options.autoplay !== false && state?.currentSong && window.HistoryServiceV2_1) {
@@ -673,6 +689,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
+            // Previous: natural end always advanced. Explicit Repeat One above
+            // and manual next/back remain intentional playback actions.
+            if (window.PlayerPreferencesV2_1?.getState()?.playback.autoNext === false && repeatMode !== "all") return;
             playNextSong({ automatic: true }).catch((error) => {
                 console.error("Không thể tự động chuyển bài:", error);
             });
@@ -719,12 +738,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (data.type === "authChanged") {
             selectionVersion++;
+            if (Object.prototype.hasOwnProperty.call(data, "userId")) window.PlayerPreferencesV2_1?.changeAccount(data.userId);
+            else window.PlayerPreferencesV2_1?.refresh();
             if (Object.prototype.hasOwnProperty.call(data, "userId")) window.PlayerPersistenceV2_1?.changeAccount(data.userId);
             else window.PlayerPersistenceV2_1?.refresh();
             return;
         }
         if (data.type === "playerSessionCheck") {
+            window.PlayerPreferencesV2_1?.refresh();
             window.PlayerPersistenceV2_1?.refresh();
+            return;
+        }
+        if (data.type === "accountPreferencesChanged") {
+            window.PlayerPreferencesV2_1?.apply({ viewerId: data.userId, preferences: data.preferences });
             return;
         }
         if (data.type === "playerSignOut") {
@@ -756,6 +782,33 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         if (data.type === "queueReady") {
             if (initializeMediaV2()) sendQueueState();
+            return;
+        }
+        if (data.type === 'queueAdd' && /^[a-f0-9]{24}$/i.test(data.song?.id || '') && typeof data.requestId === 'string') {
+            if (!initializeMediaV2()) return;
+            const queue = window.PlaylistControllerV2_1, player = window.PlayerControllerV2_1;
+            // Previous: !player.getState().currentSong && queue.getState().songs.length === 0;
+            // A failed metadata request can leave a nonempty queue with no selected audio.
+            const song = { id: data.song.id, name: typeof data.song.name === 'string' ? data.song.name : 'Unknown Song',
+                artist: typeof data.song.artist === 'string' ? data.song.artist : 'Unknown Artist',
+                image: typeof data.song.image === 'string' ? data.song.image : null,
+                url: typeof data.song.url === 'string' ? data.song.url : null };
+            queue.enqueueSong(song);
+            if (!player.getState().currentSong && !queuePreparation) {
+                const preparedSong = queue.getState().currentSong;
+                queuePreparation = playPlaylistSong(preparedSong, { autoplay: false }).then(state => {
+                    if (!state?.currentSong) throw new Error('Queue preparation was interrupted.');
+                }).catch(error => {
+                    // Do not leave a failed first item inaccessible behind the empty-player rule.
+                    // An explicit retry can restore this ID through enqueueSong.
+                    if (!player.getState().currentSong && player.getState().status === 'error') queue.removeSong(preparedSong.id);
+                    throw error;
+                }).finally(() => { queuePreparation = null; });
+            }
+            // Previous: Promise.resolve(first ? playPlaylistSong(song, { autoplay: false }) : null)
+            Promise.resolve(queuePreparation).then(() => {
+                window.parent.postMessage({ type: 'queueAdded', songId: song.id, requestId: data.requestId, success: true }, location.origin);
+            }).catch(() => window.parent.postMessage({ type: 'queueAdded', songId: song.id, requestId: data.requestId, success: false }, location.origin));
             return;
         }
         if (data.type === "queueMove") {

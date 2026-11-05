@@ -3,6 +3,7 @@ const JwtService = require("../modules/auth/service/JwtService");
 const { UserModel } = require("../model/db_song");
 const ApiError = require("../utils/ApiError");
 const { ErrorCode } = require("../constants");
+const accessPolicy = require('./auth/accessTokenPolicy');
 
 module.exports = async (req, res, next) => {
   try {
@@ -28,13 +29,18 @@ module.exports = async (req, res, next) => {
       throw new ApiError(ErrorCode.AUTH.INVALID_TOKEN);
     }
 
-    const user = await UserModel.findById(payload.id);
+    // Previous: const user = await UserModel.findById(payload.id);
+    const filter = accessPolicy.filter(payload);
+    if (!filter) throw new ApiError(ErrorCode.AUTH.INVALID_TOKEN);
+    const user = await UserModel.findOne(filter);
 
     if (!user) {
-      throw new ApiError(ErrorCode.USER.NOT_FOUND);
+      // Previous: ErrorCode.USER.NOT_FOUND. The account may exist with a revoked sid.
+      throw new ApiError(ErrorCode.AUTH.INVALID_TOKEN);
     }
 
-    if ((payload.authVersion || 0) !== (user.authVersion || 0)) {
+    // Previous comparison checked authVersion only, accepting revoked session tokens.
+    if (!accessPolicy.accepts(user,payload)) {
       throw new ApiError(ErrorCode.AUTH.INVALID_TOKEN);
     }
 

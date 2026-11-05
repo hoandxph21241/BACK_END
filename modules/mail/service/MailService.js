@@ -1,6 +1,7 @@
 const Joi = require("joi");
 const Mail = require("../model/Mail");
 const { UserModel } = require("../../../model/db_song");
+const Privacy = require('../../account/service/AccountPrivacyService');
 const isId = value => typeof value === "string" && /^[a-f0-9]{24}$/i.test(value);
 const failure = (status, message) => Object.assign(new Error(message), { status });
 const PUBLIC_USER = "_id fullName userName imageAccount profileTag";
@@ -69,9 +70,21 @@ exports.recipients = async function (actor, input) {
     { profileTag: prefix }, { nameAccount: prefix },
     { fullName: new RegExp(escaped, "i") }, { userName: prefix },
   ];
-  const users = await UserModel.find({ _id: { $ne: actor._id }, $or: targets })
-    .select(PUBLIC_USER).sort({ fullName: 1, _id: 1 }).limit(8).maxTimeMS(1500).lean();
-  return { items: users.map(userDto) };
+  // Previous unfiltered search:
+  // const users = await UserModel.find({ _id: { $ne: actor._id }, $or: targets })
+  //   .select(PUBLIC_USER).sort({ fullName: 1, _id: 1 }).limit(8).maxTimeMS(1500).lean();
+  // return { items: users.map(userDto) };
+  const excluded = await Privacy.excluded(actor._id);
+  const users = await UserModel.find({ _id: { $nin: [actor._id, ...excluded] }, $or: targets })
+    .select(PUBLIC_USER).sort({ fullName: 1, _id: 1 }).limit(40).maxTimeMS(1500).lean();
+  const allowed = await Promise.all(users.map(async user => {
+    try { await Privacy.assertMessage(actor._id, user._id); return user; }
+    catch (error) {
+      if (error.status === 403 || error.status === 404) return null;
+      throw error;
+    }
+  }));
+  return { items: allowed.filter(Boolean).slice(0, 8).map(userDto) };
 };
 exports.list = async function (actor, input) {
   const { box, page } = validate(listSchema, input);
@@ -93,16 +106,36 @@ exports.send = async function (actor, input) {
   const data = validate(createSchema, input);
   const recipient = data.kind === "message" ? await resolveRecipient(data.recipient) : null;
   if (same(actor, recipient)) throw failure(400, "Bạn không thể gửi thư cho chính mình.");
+  if (recipient) await Privacy.assertMessage(actor._id, recipient._id);
   if (data.replyTo && !await Mail.exists(readable(actor, data.replyTo))) throw failure(404, "Không tìm thấy thư cần trả lời.");
   const payload = { sender: actor._id, recipient: recipient?._id || null, kind: data.kind,
     subject: data.subject, body: data.body, clientId: data.clientId, replyTo: data.replyTo };
-  let mail;
-  try { mail = (await Mail.create(payload)).toObject(); }
+  // Previous creation did not distinguish a new write from an idempotent retry:
+  // let mail;
+  // try { mail = (await Mail.create(payload)).toObject(); }
+  let mail, created = false;
+  try { mail = (await Mail.create(payload)).toObject(); created = true; }
   catch (error) {
     if (error.code !== 11000) throw error;
     mail = await Mail.findOne({ sender: actor._id, clientId: data.clientId }).lean();
     if (!mail || !same(mail.recipient, payload.recipient) || mail.kind !== payload.kind || mail.subject !== payload.subject || mail.body !== payload.body || !same(mail.replyTo, payload.replyTo)) {
       throw failure(409, "Mã gửi thư đã được dùng cho nội dung khác. Vui lòng mở một thư mới.");
+    }
+  }
+  if (recipient) {
+    try { await Privacy.assertMessage(actor._id, recipient._id); }
+    catch (error) {
+      // A policy change during creation must not leave a newly delivered message.
+      if (created) await Mail.deleteOne({ _id: mail._id, sender: actor._id });
+      throw error;
+    }
+    if (created) {
+      try {
+        await require('../../account/service/AccountNotificationService').publish({
+          owner: recipient._id, actor: actor._id, type: 'messages', title: 'New message',
+          message: data.subject, url: '/#mail', dedupeKey: 'message:' + mail._id,
+        });
+      } catch (_) { /* Notification delivery is optional; the message is already saved. */ }
     }
   }
   return dto({ ...mail, sender: actor, recipient }, actor, true);

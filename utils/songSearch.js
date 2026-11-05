@@ -20,11 +20,19 @@ function parseSearch(query = {}) {
   return { q, page };
 }
 
-function searchFilter(q) {
-  // Match both precomposed Vietnamese and combining-mark filenames, treating input as literal text.
-  const folded = q.normalize('NFD').replace(/\p{M}/gu, '').replace(/[\u0111\u0110]/g, 'd').toLowerCase();
-  const pattern = [...folded].map(char => char === ' ' ? '\\s+' :
+function foldSearch(q) {
+  return q.normalize('NFD').replace(/\p{M}/gu, '').replace(/[\u0111\u0110]/g, 'd').toLowerCase();
+}
+
+function literalPattern(q) {
+  // Match precomposed Vietnamese and combining marks; never interpret input as regex.
+  return [...foldSearch(q)].map(char => char === ' ' ? '\\s+' :
     vowels[char] ? `[${vowels[char]}][\u0300-\u036f]*` : escapeRegex(char)).join('');
+}
+
+function searchFilter(q) {
+  // Previous inline pattern construction is now shared with live suggestions above.
+  const pattern = literalPattern(q);
   const alternatives = ['name', 'artist'].map(field => ({ [field]: { $regex: pattern, $options: 'i' } }));
   const slug = slugify(q, '');
   if (slug) alternatives.push({ slug: { $regex: escapeRegex(slug), $options: 'i' } });
@@ -37,4 +45,4 @@ function searchUrl(q, page = 1) {
   return `/home/search?${params}`;
 }
 
-module.exports = { MAX_QUERY, PAGE_SIZE, parseSearch, searchFilter, searchUrl };
+module.exports = { MAX_QUERY, PAGE_SIZE, parseSearch, searchFilter, searchUrl, literalPattern, foldSearch };

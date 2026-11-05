@@ -1,5 +1,6 @@
 <link rel="stylesheet" href="/stylesheets/upload_notifications.css">
-<script src="/javascripts/upload_notifications.js" defer data-notification-owner="<%= user ? (user.userID || user._id || user.id || 'user') : 'guest' %>"></script>
+<!-- Previous script carried only the upload storage owner; account ID now scopes server notices. -->
+<script src="/javascripts/upload_notifications.js" defer data-notification-owner="<%= user ? (user.userID || user._id || user.id || 'user') : 'guest' %>" data-notification-account="<%= user ? String(user._id || user.id || '') : '' %>"></script>
 <link rel="stylesheet" href="/stylesheets/nav_user.css">
 <script src="/javascripts/nav_user.js" defer></script>
 <link rel="stylesheet" href="/stylesheets/mail.css">
@@ -177,14 +178,17 @@
                     <ul class="nav d-flex align-items-center mb-0">
 
                         <li class="nav-logo">
-                            <a href="/home">
+                            <!-- Previous Home URL: /home. -->
+                            <!-- Previous plain link reloaded the shell and player: <a href="/discover"> -->
+                            <a href="/discover" data-url="/discover" aria-label="MediaHz Home">
                                 <img src="/images/bg.png" alt="Logo Icon" title="Back To Home" />
                             </a>
                         </li>
 
                         <!-- Home Icon -->
                         <li class="nav-item">
-                            <a href="/home/pratical" class="btn nav-link d-inline" data-url="/home/pratical">
+                            <!-- Previous Home fragment: /home/pratical. -->
+                            <a href="/discover" class="btn nav-link d-inline" data-url="/discover">
                                 <samp class="fw-bold">
                                     Home
                                 </samp>
@@ -193,7 +197,8 @@
 
                         <!-- Feed Icon -->
                         <li class="nav-item">
-                            <a href="/home/ct_home_v2" class="btn nav-link d-inline" data-url="/home/ct_home_v2">
+                            <!-- Previous Feed fragment: /home/ct_home_v2. -->
+                            <a href="/feed" class="btn nav-link d-inline" data-url="/feed">
                                 <samp class="fw-bold">
                                     Feed
                                 </samp>
@@ -202,7 +207,8 @@
 
                         <!--Library  Icon -->
                         <li class="nav-item">
-                            <a href="/home/ct_home" class="btn nav-link d-inline" data-url="/home/ct_home">
+                            <!-- Previous Library fragment: /home/ct_home. -->
+                            <a href="/library" class="btn nav-link d-inline" data-url="/library">
                                 <samp class="fw-bold">
                                     Library
                                 </samp>
@@ -219,7 +225,8 @@
                     -->
                     <div class="nav-search">
                         <form id="navSearchForm" action="/home/search" method="get" role="search">
-                            <input id="navSearchInput" name="q" type="search" maxlength="100" placeholder="Search tracks or artists" aria-label="Search tracks or artists" autocomplete="off" enterkeyhint="search">
+                            <!-- Previous plain Search behavior retained in nav_search_legacy.js. -->
+                            <input id="navSearchInput" name="q" type="search" maxlength="100" placeholder="Search tracks or artists" aria-label="Search tracks or artists" autocomplete="off" enterkeyhint="search" role="combobox" aria-autocomplete="list" aria-controls="navSearchOptions" aria-expanded="false">
                             <button id="navSearchClear" class="nav-search-action" type="button" aria-label="Clear search" title="Clear search" hidden><i class="fas fa-times" aria-hidden="true"></i></button>
                             <button id="navSearchSubmit" class="nav-search-action" type="submit" aria-label="Search" title="Search">
                                 <i class="fas fa-search" aria-hidden="true"></i>
@@ -232,6 +239,11 @@
                                 -->
                             </button>
                         </form>
+                        <div id="navSearchSuggestions" class="nav-search-suggestions" hidden>
+                            <p id="navSearchStatus" class="nav-search-status" role="status" aria-live="polite"></p>
+                            <ul id="navSearchOptions" class="nav-search-options" role="listbox" aria-label="Search suggestions"></ul>
+                            <a id="navSearchAll" class="nav-search-all" data-search-navigation href="/home/search">View all results</a>
+                        </div>
                     </div>
 
                     <!-- User Navigation -->

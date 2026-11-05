@@ -11,7 +11,9 @@ module.exports = (req, res, next) => {
     // Replace revoked state with an untouched guest session, including on login POSTs.
     req.session.regenerate(failure => {
       if (failure) return next(failure);
-      req.user = null; res.clearCookie("connect.sid"); return next();
+      // Previous: res.clearCookie("connect.sid");
+      // An older invalidated request must not erase a more recent login cookie.
+      req.user = null; return next();
     });
   });
 };

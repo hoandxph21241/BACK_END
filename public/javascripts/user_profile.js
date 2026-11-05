@@ -19,7 +19,7 @@
             ...Object.fromEntries(Object.entries(extraFields).map(([name, input]) => [name, input.value])),
             links: JSON.parse(find("profileLinksData").value),
         };
-        let saving = false, linkSequence = 0;
+        let saving = false, linkSequence = 0, saveRequest;
         let imageBusy = false, imageRevision = 0, imageRequest;
         const cropEditor = window.ProfileImageCropper?.create(root);
         const croppedFiles = new Map(), originalImages = new Map(), cropSizes = new Map();
@@ -166,6 +166,8 @@
         });
         form.addEventListener("input", updateDirtyState);
         function resetEditor() {
+            // A queued close event can arrive after SPA/account navigation has removed the form.
+            if (!root.isConnected || root.dataset.editInvalid === 'true') return;
             imageRevision++;
             imageRequest?.abort(); imageRequest = null;
             cropEditor?.close();
@@ -274,6 +276,7 @@
         form.addEventListener("submit", async event => {
             event.preventDefault();
             if (save.disabled || !form.reportValidity()) return;
+            if (root.dataset.editInvalid === 'true' || root.dataset.sessionState && root.dataset.sessionState !== 'ready') { error.textContent = 'Please verify your account before saving.'; error.hidden = false; return; }
             const payload = new FormData(form);
             payload.delete('avatar'); payload.delete('banner');
             croppedFiles.forEach((file, field) => payload.set(field, file, file.name));
@@ -288,27 +291,35 @@
                 .filter(control => !control.disabled);
             lockedControls.forEach(control => { control.disabled = true; });
             try {
+                saveRequest = new AbortController();
                 const response = await fetch(form.action, {
                     // Previous: method: "POST", body: new FormData(form),
                     method: "POST", body: payload,
-                    headers: { "X-Requested-With": "XMLHttpRequest", Accept: "application/json" },
+                    headers: { "X-Requested-With": "XMLHttpRequest", Accept: "application/json", 'X-Profile-Owner': root.dataset.profileOwnerId },
+                    signal: AbortSignal.any([saveRequest.signal, AbortSignal.timeout(20000)]),
                 });
                 // Previous: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
                 if (!response.headers.get("content-type")?.includes("application/json")) throw new Error("Your session has expired. Please sign in again.");
                 const data = await response.json();
                 // Previous fallback: "Không thể lưu hồ sơ."
-                if (!response.ok || !data.success) throw new Error(data.message || "Unable to save your profile.");
-                if (!root.isConnected) return;
+                if (!response.ok || !data.success) throw Object.assign(new Error(data.message || "Unable to save your profile."), { status: response.status });
+                if (!root.isConnected || root.dataset.editInvalid === 'true') return;
                 current = data.user;
                 avatar.src = current.imageAccount || fallbackAvatar;
                 banner.src = current.bannerImage || fallbackBanner;
                 find("profileFullName").textContent = current.fullName;
                 find("profileTagLabel").textContent = `#${current.profileTag}`;
+                find('profileTagLabel').hidden = !current.profileTag;
                 // Previous: find("profileBio").textContent = current.bio || "Chưa có giới thiệu.";
                 find("profileBio").textContent = current.bio || "No bio yet.";
                 const location = [current.city, current.country].filter(Boolean).join(", ");
                 find("profileLocation").textContent = location;
                 find("profileLocation").hidden = !location;
+                if (find('profileHeaderLocation')) { find('profileHeaderLocation').textContent = location; find('profileHeaderLocation').hidden = !location; }
+                root.querySelectorAll('[data-profile-live-name]').forEach(n => { n.textContent = current.fullName; });
+                root.querySelectorAll('[data-profile-live-bio]').forEach(n => { n.textContent = current.bio || 'No bio yet.'; });
+                root.querySelectorAll('[data-profile-live-location]').forEach(n => { n.textContent = location; n.hidden = !location; });
+                if (root.querySelector('[data-profile-links-empty]')) root.querySelector('[data-profile-links-empty]').hidden = Boolean(current.links?.length);
                 const links = find("profileLinks");
                 links.replaceChildren();
                 (current.links || []).filter(link => isWebLink(link.url)).forEach(link => {
@@ -324,7 +335,10 @@
                 dialog.close();
                 // Previous: find("profileSaveStatus").textContent = "Đã lưu thay đổi.";
                 find("profileSaveStatus").textContent = "Changes saved.";
+                window.dispatchEvent(new CustomEvent('mediahz:profile-updated', { detail: { ...current, id: root.dataset.profileOwnerId } }));
             } catch (failure) {
+                if (!root.isConnected || root.dataset.editInvalid === 'true' || failure.name === 'AbortError') return;
+                if ([401,409].includes(failure.status)) { window.dispatchEvent(new Event('mediahz:session-stale')); return; }
                 error.textContent = failure.message;
                 error.hidden = false;
             } finally {
@@ -344,7 +358,7 @@
         const removalObserver = new MutationObserver(() => { if (!root.isConnected) cleanupImages(); });
         removalObserver.observe(root.parentElement, { childList: true });
         function cleanupImages() {
-            imageRevision++; imageRequest?.abort(); cropEditor?.destroy();
+            imageRevision++; imageRequest?.abort(); saveRequest?.abort(); cropEditor?.destroy();
             previews.forEach(url => URL.revokeObjectURL(url)); previews.clear();
             croppedFiles.clear(); originalImages.clear(); cropSizes.clear();
             resizeObserver.disconnect(); removalObserver.disconnect();

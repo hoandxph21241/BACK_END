@@ -2,6 +2,8 @@
 <html lang="en">
 
 <head>
+<link rel="stylesheet" href="/stylesheets/auth/login_security_fields.css">
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Home</title>
@@ -17,25 +19,45 @@
   <script src='/javascripts/media_v2/parent_queue_v2_1.js' defer></script>
   <link rel='stylesheet' href='/stylesheets/home/music-card.css'>
   <link rel='stylesheet' href='/stylesheets/home/feed.css'>
+  <!-- Previous active page assets: feed_stream.css/js and discover.css/js. -->
+  <link rel='stylesheet' href='/stylesheets/home/feed-page.css'>
+  <script src='/javascripts/home/feed-page.js' defer></script>
+  <link rel='stylesheet' href='/stylesheets/home/discover-page.css'>
+  <script src='/javascripts/home/discover-page.js' defer></script>
   <link rel='stylesheet' href='/stylesheets/home/library.css'>
-  <script src='/javascripts/home/library_v2_1.js' defer></script>
+  <!-- Previous catalogue Library: <script src='/javascripts/home/library_v2_1.js' defer></script> -->
+  <!-- Previous Library assets: collection.css/js. -->
+  <link rel='stylesheet' href='/stylesheets/home/library-page.css'>
+  <script src='/javascripts/home/library-page.js' defer></script>
+  <script src='/javascripts/page_paths.js'></script>
   <link rel="stylesheet" href="/vendor/cropperjs-1.7.0/cropper.min.css">
   <script src="/vendor/cropperjs-1.7.0/cropper.min.js" defer></script>
   <script src="/javascripts/profile_image_cropper.js" defer></script>
   <script src='/javascripts/user_profile.js' defer></script>
   <link rel="stylesheet" href="/stylesheets/CSS_User/profile_user.css">
+  <link rel="stylesheet" href="/stylesheets/CSS_User/profile_page.css">
+  <script src="/javascripts/profile_page.js" defer></script>
   <link rel="stylesheet" href="/stylesheets/auth/password_settings.css">
   <script src="/javascripts/auth/password_settings.js" defer></script>
+  <link rel="stylesheet" href="/stylesheets/auth/account_settings.css">
+  <link rel="stylesheet" href="/stylesheets/auth/account_preferences.css">
+  <script src="/javascripts/account_language.js" defer></script>
+  <script src="/javascripts/account_page_translations.js" defer></script>
+  <script src="/javascripts/auth/account_settings.js" defer></script>
+  <script src="/javascripts/auth/account_preferences.js" defer></script>
   <link rel="stylesheet" href="/stylesheets/auth/login_popup.css">
   <script src="/javascripts/auth/login_popup.js" defer></script>
   <link rel='stylesheet' href='/stylesheets/home/track_detail.css'>
   <script src='/javascripts/home/track_waveform.js' defer></script>
+  <script src='/javascripts/user_follow_events.js' defer></script>
+  <script src='/javascripts/home/track_creator.js' defer></script>
   <script src='/javascripts/home/track_detail.js' defer></script>
 </head>
 
 <!-- Previous page wrapper: <body> -->
 <!-- Previous narrowed body: <body class="home-compact-layout"> -->
-<body class="home-centered-layout">
+<!-- Previous body had no initial statistics owner for the parent/player bridge. -->
+<body class="home-centered-layout" data-player-owner="<%= typeof user !== 'undefined' && user ? String(user._id || user.id || '') : '' %>">
   <% let mp3data %>
     <%- include('../inc/top.ejs', { mp3List: mp3List }) %>
 
@@ -44,18 +66,22 @@
       </iframe> -->
 
       <template id="libraryLoadingTemplate">
-        <%- include('_library_skeleton') %>
+        <% /* Previous: include('_library_skeleton'); legacy partial retained. */ %>
+        <% /* Previous active skeleton: _collection_skeleton.ejs. */ %>
+        <%- include('_library-skeleton') %>
       </template>
       <template id="profileLoadingTemplate">
-        <%- include('../user/_profile_skeleton') %>
+        <% /* Previous profile skeleton retained: ../user/_profile_skeleton.ejs. */ %>
+        <%- include('../user/_profile-page-skeleton') %>
       </template>
       <template id="searchLoadingTemplate">
         <%- include('_search_skeleton') %>
       </template>
       <%- include('_login_popup') %>
       <main id="main">
-        <% if (typeof initialView === 'string' && /^\/users\/profile(?:\/edit)?\/?$/.test(initialView)) { %>
-          <%- include('../user/_profile_skeleton') %>
+        <% /* Previous self/public paths: users/profile(/edit), profile/:slug. */ %>
+        <% if (typeof initialView === 'string' && /^\/(?:users\/profile(?:\/[a-z0-9-]+(?:\/edit)?)?|profile\/[a-z0-9-]+)\/?(?:\?|$)/i.test(initialView)) { %>
+          <%- include('../user/_profile-page-skeleton') %>
         <% } %>
       </main>
 
@@ -435,8 +461,11 @@
 
         // Initialize dynamic content
         function initializeDynamicContent() {
+          if (typeof window.initHomeView === "function") window.initHomeView();
+          if (typeof window.initFeedView === "function") window.initFeedView();
           if (typeof window.initLibraryView === "function") window.initLibraryView();
           if (typeof window.initProfileView === "function") window.initProfileView();
+          if (typeof window.initProfilePage === "function") window.initProfilePage();
           if (typeof window.initTrackView === "function") window.initTrackView();
           if (document.getElementById('uploadForm')) {
             // if (!window._uploadFormInitialized) {
@@ -444,7 +473,8 @@
               if (typeof window.initUploadForm !== 'function') {
                 const script = document.createElement('script');
                 // Previous single-file uploader: '/javascripts/product/upload_Mediafile.js'.
-                script.src = '/javascripts/product/upload_queue.js';
+                // Previous batch controller remains unloaded: '/javascripts/product/upload_queue.js'.
+                script.src = '/javascripts/product/upload_single.js';
                 script.onload = () => {
                   if (typeof window.initUploadForm === 'function') {
                     window.initUploadForm();
@@ -676,7 +706,8 @@
         function tabPath(path) {
           // Previous: return path === '/home' || path === '/home/' ? '/home/pratical' : path;
           const normalized = path.replace(/\/+$/, '') || '/';
-          return normalized === '/home' ? '/home/pratical' : normalized;
+          // Previous: normalized === '/home' ? '/home/pratical' : normalized.
+          return window.MediaHzPagePaths.canonicalPath(normalized);
         }
         function updateActiveTab(path) {
           let activeTab = null;
@@ -746,6 +777,9 @@
             'mediabar', 'mediabar-v2', 'mediabar-v3', 'network-popup'];
           return reserved.includes(profile) ? null : value;
         }
+        function profilePagePath(value) {
+          return typeof value === 'string' && /^\/users\/profile\/[a-z0-9]+(?:-[a-z0-9]+)*(?:\/edit)?$/.test(value) ? value : null;
+        }
         function waitForProfileImages(content, signal) {
           const template = document.createElement('template');
           template.innerHTML = content;
@@ -776,6 +810,7 @@
         async function loadPage(url, pushHistory = false, options = {}) {
           const destination = new URL(url, location.href);
           if (destination.origin !== location.origin) return;
+          destination.pathname = tabPath(destination.pathname);
           const pageKey = navigationKey(destination.href);
           // Previous: if (pendingPageKey === pageKey || (!pendingPageKey && displayedPageKey === pageKey)) return;
           if (pendingPageKey === pageKey || (!options.refresh && !pendingPageKey && displayedPageKey === pageKey)) return;
@@ -788,14 +823,17 @@
           displayedPageKey = null;
           main.setAttribute('aria-busy', 'true');
           // Previous: main.innerHTML = '<div class="text-center text-light p-4" role="status">Loading...</div>';
-          const libraryLoading = destination.pathname.replace(/\/+$/, '') === '/home/ct_home'
+          // Previous Library path: /home/ct_home.
+          const libraryLoading = destination.pathname === '/library'
             ? document.getElementById('libraryLoadingTemplate') : null;
-          const profileLoading = /^\/users\/profile(?:\/edit)?\/?$/.test(destination.pathname)
+          // Previous skeleton covered only the self profile.
+          const profileLoading = /^(?:\/users\/profile(?:\/[a-z0-9-]+(?:\/edit)?)?|\/profile\/[a-z0-9-]+)\/?$/i.test(destination.pathname)
             ? document.getElementById('profileLoadingTemplate') : null;
           const searchLoading = destination.pathname.replace(/\/+$/, '') === '/home/search'
             ? document.getElementById('searchLoadingTemplate') : null;
-          const previousLibrary = main.querySelector('.library-view:not(.library-skeleton)');
-          const previousProfile = main.querySelector('[data-profile-view]');
+          // Previous: '.library-view:not(.library-skeleton)'.
+          const previousLibrary = main.querySelector('[data-library-view]');
+          const previousProfile = main.querySelector('[data-profile-screen],[data-profile-view]');
           main.classList.toggle('library-page-active', Boolean(libraryLoading));
           main.classList.toggle('profile-page-active', Boolean(profileLoading));
           // Preserve scroll height on refresh; the next non-Library tab releases it.
@@ -808,13 +846,16 @@
           // Previous: main.innerHTML = libraryLoading?.innerHTML || '<div class="text-center text-light p-4" role="status">Loading...</div>';
           // Previous skeletons covered only Profile and Library.
           main.innerHTML = (profileLoading || libraryLoading || searchLoading)?.innerHTML || '<div class="text-center text-light p-4" role="status">Loading...</div>';
-          const loadingStartedAt = Date.now();
+          // Previous: const loadingStartedAt = Date.now(); Library's minimum wait now lives in library-page.js.
           function commitPage(content) {
             main.innerHTML = content;
-            if (libraryLoading) main.querySelector('.library-view')?.classList.add('library-content-ready');
-            if (profileLoading) main.querySelector('[data-profile-view]')?.classList.add('profile-content-ready');
+            // Previous Library root: '.library-view'.
+            if (libraryLoading) main.querySelector('[data-library-view]')?.classList.add('library-content-ready');
+            if (profileLoading) main.querySelector('[data-profile-screen],[data-profile-view]')?.classList.add('profile-content-ready');
             // Previous: displayedPageKey = pageKey; history used the requested ID URL.
-            const canonical = trackPagePath(main.querySelector('[data-track-view]')?.dataset.trackUrl);
+            // Previous canonicalization covered song URLs only; axios redirects do not update browser history.
+            const canonical = profilePagePath(main.querySelector('[data-profile-screen]')?.dataset.profileUrl)
+              || trackPagePath(main.querySelector('[data-track-view]')?.dataset.trackUrl);
             const visibleUrl = canonical ? canonical + destination.search + destination.hash : targetUrl;
             displayedPageKey = navigationKey(visibleUrl);
             if (pushHistory && navigationKey(location.href) !== displayedPageKey) {
@@ -833,10 +874,8 @@
               signal: controller.signal,
             });
             if (request !== navigationRequest) return;
-            if (libraryLoading) {
-              const remaining = 1500 - (Date.now() - loadingStartedAt);
-              if (remaining > 0) await new Promise(resolve => setTimeout(resolve, remaining));
-            }
+            // Previous: wait 1500ms here before committing Library.
+            // library-page.js runs its initial 1500ms skeleton and data request concurrently.
             if (profileLoading) await waitForProfileImages(response.data, controller.signal);
             if (request !== navigationRequest || controller.signal.aborted) return;
             commitPage(response.data);
@@ -844,8 +883,8 @@
           } catch (error) {
             if (request !== navigationRequest || controller.signal.aborted) return;
             // Previous missing-track handling was limited to /home/song/:id.
-            if (error.response?.status === 404 &&
-                typeof error.response.data === 'string' && error.response.data.includes('track-missing')) {
+            if (error.response?.status === 404 && typeof error.response.data === 'string' &&
+                (error.response.data.includes('track-missing') || error.response.data.includes('data-profile-missing'))) {
               commitPage(error.response.data);
               return;
             }
@@ -870,7 +909,8 @@
         //   });
         // });
         document.addEventListener('click', event => {
-          const link = event.target.closest('.nav-main .nav-link[data-url]');
+          // Previous selector excluded the logo: '.nav-main .nav-link[data-url]'.
+          const link = event.target.closest('.nav-main .nav-link[data-url], .nav-main .nav-logo a[data-url]');
           if (!link || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
           event.preventDefault();
           loadPage(link.dataset.url, true, { refresh: true });
@@ -891,7 +931,8 @@
           clearTimeout(resizeTimeout);
           resizeTimeout = setTimeout(() => updateActiveTab(location.pathname), 100);
         });
-        loadPage(<%- JSON.stringify(typeof initialView === 'string' ? initialView : '/home/pratical') %>);
+        // Previous fallback: /home/pratical. Escape '<' in query data inside this script.
+        loadPage(<%- JSON.stringify(typeof initialView === 'string' ? initialView : '/discover').replace(/</g, '\\u003c') %>);
         // Handle iframe messages
         // window.addEventListener('message', function (event) {
         //   if (event.data && event.data.type === 'playlistState') {

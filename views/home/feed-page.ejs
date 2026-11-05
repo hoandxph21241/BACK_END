@@ -1,0 +1,29 @@
+<section class="mediahz-feed" data-feed-view data-owner-id="<%= ownerId %>" aria-labelledby="feedHeading" aria-busy="true">
+  <header class="mh-feed-heading">
+    <div><p class="mh-feed-eyebrow">MEDIAHZ / COMMUNITY</p><h1 id="feedHeading">Feed</h1></div>
+    <button type="button" class="mh-feed-refresh" data-feed-refresh aria-label="Làm mới Feed"><span class="mh-feed-icon mh-feed-icon-refresh" aria-hidden="true"></span>Làm mới</button>
+  </header>
+  <div class="mh-feed-toolbar">
+    <div class="mh-feed-tabs" role="tablist" aria-label="Dòng bài hát">
+      <button id="feedFollowingTab" type="button" role="tab" aria-controls="feedPanel" aria-selected="false" data-feed-tab="following">Following</button>
+      <button id="feedDiscoverTab" type="button" role="tab" aria-controls="feedPanel" aria-selected="true" data-feed-tab="discover">Khám phá</button>
+    </div>
+    <div class="mh-feed-filters">
+      <label>Thể loại<select data-feed-category><option value="">Tất cả thể loại</option><% categories.forEach(category => { %><option value="<%= category._id %>"><%= category.nameCategory %></option><% }); %></select></label>
+      <label data-feed-sort-label>Sắp xếp<select data-feed-sort><option value="newest">Mới nhất</option><option value="popular">Nghe nhiều</option></select></label>
+    </div>
+  </div>
+  <div class="mh-feed-layout">
+    <div id="feedPanel" class="mh-feed-stream" role="tabpanel" aria-labelledby="feedDiscoverTab">
+      <button type="button" class="mh-feed-change" data-feed-changed hidden>Danh sách theo dõi đã thay đổi. Cập nhật Feed</button>
+      <p class="mh-feed-status" data-feed-status role="status" aria-live="polite"></p>
+      <div data-feed-list></div>
+      <div class="mh-feed-loading" data-feed-loading aria-hidden="true">
+        <% for (let i = 0; i < 3; i++) { %><div class="mh-feed-skeleton"><div class="mh-feed-skeleton-byline"></div><div class="mh-feed-skeleton-body"><div class="mh-feed-skeleton-art"></div><div><div class="mh-feed-skeleton-title"></div><div class="mh-feed-skeleton-artist"></div><div class="mh-feed-skeleton-wave"></div></div></div></div><% } %>
+      </div>
+      <div class="mh-feed-empty" data-feed-empty hidden><span class="mh-feed-empty-icon mh-feed-icon mh-feed-icon-music" aria-hidden="true"></span><h2 data-feed-empty-title></h2><p data-feed-empty-text></p><button type="button" class="mh-feed-primary" data-feed-login hidden>Đăng nhập</button><button type="button" class="mh-feed-primary" data-feed-discover hidden>Khám phá âm nhạc</button></div>
+      <div class="mh-feed-footer"><button type="button" class="mh-feed-secondary" data-feed-retry hidden>Thử lại</button><button type="button" class="mh-feed-secondary" data-feed-more hidden>Xem thêm</button><span data-feed-end hidden>Bạn đã xem hết các bài hát.</span></div>
+    </div>
+    <aside class="mh-feed-sidebar" aria-labelledby="feedCreatorsHeading"><div class="mh-feed-sidebar-heading"><h2 id="feedCreatorsHeading">Người đăng nổi bật</h2><span>Khám phá thêm âm nhạc</span></div><div data-feed-creators></div><p class="mh-feed-sidebar-status" data-feed-creators-status role="status">Đang tìm người đăng…</p><button type="button" class="mh-feed-secondary" data-feed-creators-retry hidden>Thử lại</button></aside>
+  </div>
+</section>

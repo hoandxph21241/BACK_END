@@ -3,6 +3,7 @@ const router = express.Router();
 const userController = require('../controllers/CTL_user');
 const check_login = require("../middlewares/check_login");
 const profileImagesController = require('../controllers/CTL_profileImages');
+const profileController = require('../modules/profile/controller/ProfileController');
 router.get('/profile-images/:id', profileImagesController.getProfileImage);
 
 router.get("/", check_login.yeu_cau_dang_nhap, function (req, res, next) {
@@ -19,18 +20,25 @@ function profilePage(handler) {
   return (req, res, next) => {
     res.vary('X-Requested-With');
     if (req.xhr) return handler(req, res, next);
-    res.locals.initialView = req.baseUrl + req.path;
+    // Previous baseUrl + path dropped Profile tab/search query parameters on F5.
+    res.locals.initialView = req.originalUrl;
     return homeController.Home(req, res, next);
   };
 }
 // router.get('/profile', check_login.yeu_cau_dang_nhap, userController.getProfile);
-router.get('/profile', check_login.yeu_cau_dang_nhap, profilePage(userController.getProfile));
+// Previous: router.get('/profile', check_login.yeu_cau_dang_nhap, profilePage(userController.getProfile));
+router.get('/profile', check_login.yeu_cau_dang_nhap, userController.redirectProfile);
 
 // Chỉnh sửa hồ sơ
 // router.get('/profile/edit', check_login.yeu_cau_dang_nhap, userController.getEditProfile);
-router.get('/profile/edit', check_login.yeu_cau_dang_nhap, profilePage(userController.getEditProfile));
+// Previous: router.get('/profile/edit', check_login.yeu_cau_dang_nhap, profilePage(userController.getEditProfile));
+// Previous authenticated alias: userController.redirectEditProfile. Resolve an existing 'edit' profile first.
+router.get('/profile/edit', profileController.editEntry);
 // router.post('/profile/edit', check_login.yeu_cau_dang_nhap, userController.postEditProfile);
 router.post('/profile/edit', check_login.yeu_cau_dang_nhap, uploadProfileImages, userController.postEditProfile);
+// Register the legacy /edit entry before /:slug so it cannot become a username.
+router.get('/profile/:slug/edit', check_login.yeu_cau_dang_nhap, profileController.editPage);
+router.get('/profile/:slug', profileController.page);
 
 // Danh sách yêu thích
 router.get('/likes', check_login.yeu_cau_dang_nhap, userController.getLikes);

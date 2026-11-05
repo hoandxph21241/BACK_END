@@ -86,7 +86,7 @@ function publicProfile(user) {
   };
 }
 function sessionProfile(user) {
-  const fields = ['_id', 'userID', 'nameAccount', 'fullName', 'imageAccount',
+  const fields = ['_id', 'userID', 'profileSlug', 'nameAccount', 'fullName', 'imageAccount',
     'bannerImage', 'profileTag', 'bio', 'gmail', 'grender', 'role', 'userName'];
   return Object.fromEntries(fields.filter(key => user[key] !== undefined).map(key => [key, user[key]]));
 }
@@ -95,10 +95,12 @@ async function renderProfile(req, res, editOpen = false, message = '', status = 
     let user = await loadUser(req);
     if (!user) return res.redirect('/auth/signin');
     user = await ensureProfileTag(user);
-  user = await require('../utils/permalinkService').ensureUserProfileSlug(user);
+    user = await require('../utils/permalinkService').ensureUserProfileSlug(user);
     // Previous: req.session.userLogin = { ...req.session.userLogin, ...user };
     req.session.userLogin = sessionProfile(user);
-    return res.status(status).render('user/profile.ejs', { user, editOpen, message });
+    // Previous profile.ejs remains unloaded with the original banner/editor for reference.
+    const data = await require('../modules/profile/service/ProfileService').get(req.query, user);
+    return res.status(status).render('user/profile-page', { data, editorUser: user, ownRoute: true, canUpload: Number(user.role) === 2, editOpen, message });
   } catch (error) {
     console.error('Cannot load profile:', error.message);
     // Previous: return res.status(500).send('Không thể tải hồ sơ.');
@@ -107,6 +109,21 @@ async function renderProfile(req, res, editOpen = false, message = '', status = 
 }
 exports.getProfile = (req, res) => renderProfile(req, res);
 exports.getEditProfile = (req, res) => renderProfile(req, res, true);
+async function redirectProfile(req, res, next, editOpen = false) {
+  res.vary('X-Requested-With');
+  res.set('Cache-Control', 'no-store');
+  try {
+    let user = await loadUser(req);
+    if (!user) return res.redirect('/auth/signin');
+    user = await require('../utils/permalinkService').ensureUserProfileSlug(user);
+    req.session.userLogin = sessionProfile(user);
+    const path = require('../utils/profileUrl')(user) + (editOpen ? '/edit' : '');
+    // An account-dependent entry must not be permanently cached across sign-ins.
+    return res.redirect(302, path + new URL(req.originalUrl, 'http://localhost').search);
+  } catch (error) { return next(error); }
+}
+exports.redirectProfile = (req, res, next) => redirectProfile(req, res, next);
+exports.redirectEditProfile = (req, res, next) => redirectProfile(req, res, next, true);
 exports.postEditProfile = async (req, res) => {
   // Previous: let newPaths = [];
   let newFileIds = [];
@@ -114,6 +131,8 @@ exports.postEditProfile = async (req, res) => {
     const user = await loadUser(req);
     // Previous: if (!user) return res.status(401).json({ success: false, message: 'Vui lòng đăng nhập lại.' });
     if (!user) return res.status(401).json({ success: false, message: 'Please sign in again.' });
+    const expectedOwner = req.get('X-Profile-Owner') || req.body?.profileOwner;
+    if (expectedOwner && expectedOwner !== String(user._id)) throw Object.assign(new Error('Your account has changed. Reopen Profile before saving.'), { status: 409 });
     if (req.profileUploadError) throw new Error(req.profileUploadError);
     // Previous form validation:
     // const fullName = typeof req.body.fullName === 'string' ? req.body.fullName.trim() : '';
@@ -141,14 +160,15 @@ exports.postEditProfile = async (req, res) => {
     req.session.userLogin = sessionProfile(updatedUser);
     if (req.session.save) await new Promise((resolve, reject) => req.session.save(error => error ? reject(error) : resolve()));
     if (req.xhr) return res.json({ success: true, user: publicProfile(updatedUser) });
-    return res.redirect('/users/profile');
+    // Previous: return res.redirect('/users/profile');
+    return res.redirect(require('../utils/profileUrl')(updatedUser) || '/users/profile');
   } catch (error) {
     // Previous: await cleanup(newPaths);
     await cleanup(newFileIds);
     // Previous: const message = error.code === 11000 ? 'Biệt danh này đã được sử dụng. Hãy chọn mã khác.' : error.message;
     const message = error.code === 11000 ? 'This profile tag is already taken. Please choose another.' : error.message;
-    if (req.xhr) return res.status(400).json({ success: false, message });
-    return renderProfile(req, res, true, message, 400);
+    if (req.xhr) return res.status(error.status || 400).json({ success: false, message });
+    return renderProfile(req, res, true, message, error.status || 400);
   }
 };
 exports.getLikes = async (req, res) => {

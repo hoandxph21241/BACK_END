@@ -16,6 +16,7 @@
       <input id="popupPassword" name="namePassword" type="password" autocomplete="current-password" required>
       <button type="button" data-login-reveal aria-label="Hiện mật khẩu" title="Hiện mật khẩu" aria-pressed="false" aria-controls="popupPassword"><span aria-hidden="true"></span></button>
     </div>
+    <%- include('../auth/_login_security_fields',{securityPrefix:'popup'}) %>
     <button type="submit" class="login-popup-submit" data-login-submit>Đăng nhập</button>
   </form>
   <div class="login-popup-divider"><span>hoặc</span></div>

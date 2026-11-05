@@ -1,30 +1,37 @@
 .track-page,.track-page * { box-sizing:border-box; }
 .track-page { padding:24px 0 72px; color:#eee; font-family:Arial,sans-serif; }
 /* Previous track-header background: #393c3b. */
-.track-header { display:grid; grid-template-columns:minmax(0,1fr) 264px; gap:32px; padding:32px; background:#000000; }
+/* Previous fixed background: #000000. Theme is rendered with the page, not after image load. */
+/* Previous square header: border-radius:0; overflow:visible. */
+.track-header { --track-header-bg:#303030; --track-waveform-played:#ff5500; --track-waveform-unplayed:#dee3e1; display:grid; grid-template-columns:minmax(0,1fr) 264px; gap:32px; padding:32px; border-radius:16px; overflow:hidden; background:var(--track-header-bg); color:#fff; }
 .track-main-info { display:flex; flex-direction:column; min-width:0; }
 .track-heading { display:flex; align-items:flex-start; gap:18px; }
 .track-heading-text { min-width:0; }
 .track-heading h1 { margin:7px 0 0; font-size:28px; line-height:1.3; overflow-wrap:anywhere; }
-.track-artist { margin:0; color:#ccc; font-size:15px; overflow-wrap:anywhere; }
+/* Previous artist color: #ccc. */
+.track-artist { margin:0; color:#eee; font-size:15px; overflow-wrap:anywhere; }
 .track-play { display:grid; place-items:center; flex:0 0 58px; width:58px; height:58px; padding:0; border:0; border-radius:50%; color:#fff; background:#f50; cursor:pointer; transition:background-color 150ms ease; }
 .track-play:hover { background:#e64b00; }
 .track-play-icon,.track-small-play,.track-share-icon { display:block; width:26px; height:26px; background:currentColor; mask:url('/images/player/play-fill.svg') center/contain no-repeat; -webkit-mask:url('/images/player/play-fill.svg') center/contain no-repeat; }
 .track-play.is-playing .track-play-icon { mask-image:url('/images/player/pause-fill.svg'); -webkit-mask-image:url('/images/player/pause-fill.svg'); }
-.track-tags { display:flex; flex-wrap:wrap; align-items:center; gap:16px; margin:24px 0; font-size:12px; color:#c9cecc; }
+/* Previous tag/date color: #c9cecc. */
+.track-tags { display:flex; flex-wrap:wrap; align-items:center; gap:16px; margin:24px 0; font-size:12px; color:#eee; }
 .track-tags > span { padding:4px 9px; border-radius:3px; background:#284b43; color:#d1f0e5; }
 /* Previous: .track-artwork { display:block; width:100%; aspect-ratio:1; object-fit:cover; background:#252525; } */
-.track-artwork { display:block; width:100%; aspect-ratio:1; object-fit:cover; background:#252525; border:1px solid #ffffff; border-radius:5%; }
+/* Previous artwork background: #252525. */
+.track-artwork { display:block; width:100%; aspect-ratio:1; object-fit:cover; background:var(--track-header-bg); border:1px solid #ffffff; border-radius:5%; }
 .track-artwork { position:relative; z-index:2; }
 .track-artwork-frame { position:relative; width:100%; aspect-ratio:1; align-self:start; }
-.track-artwork-backdrop { display:block; position:absolute; inset:0; width:100%; height:100%; z-index:1; object-fit:fill; background:#000000; pointer-events:none; user-select:none; }
+/* Previous backdrop was a black image with object-fit:fill and background:#000000. */
+.track-artwork-backdrop { display:block; position:absolute; inset:0; width:100%; height:100%; z-index:1; background:var(--track-header-bg); pointer-events:none; user-select:none; }
 .track-artwork-frame > .track-artwork { width:100%; height:100%; }
 /* Previous timeline styles retained for reference:
 .track-timeline { margin-top:auto; padding-top:28px; }
 .track-timeline input { display:block; width:100%; height:22px; margin:0; accent-color:#f50; cursor:pointer; }
 .track-timeline input:disabled { cursor:default; opacity:.5; }
 */
-.track-times { display:flex; justify-content:space-between; padding-top:6px; font-size:12px; color:#d6d6d6; font-variant-numeric:tabular-nums; }
+/* Previous time color: #d6d6d6. */
+.track-times { display:flex; justify-content:space-between; padding-top:6px; font-size:12px; color:#eee; font-variant-numeric:tabular-nums; }
 .track-toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 0; border-bottom:1px solid #444; }
 .track-stats { display:flex; flex-wrap:wrap; gap:20px; font-size:12px; color:#bbb; }
 .track-stats > span { display:flex; align-items:center; gap:5px; }
@@ -51,6 +58,35 @@
 .track-related-item strong { font-size:13px; font-weight:600; }
 .track-related-item :is(small,strong) { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .track-related-item:hover strong { color:#ff7a38; }
+.track-sidebar { min-width:0; align-self:start; }
+.track-sidebar > .track-related { padding-left:0; border-left:0; }
+.track-creator + .track-related { margin-top:28px; }
+.track-creator-card { padding:16px; border-radius:8px; background:#202020; }
+.track-creator-heading { display:flex; align-items:flex-start; gap:14px; }
+.track-creator-avatar { display:block; width:64px; height:64px; flex:0 0 64px; border-radius:50%; object-fit:cover; background:#333; }
+.track-creator-avatar[src="/images/auth/person-circle.svg"] { padding:4px; background:#dedede; }
+.track-creator-identity { min-width:0; flex:1; }
+.track-creator-card .track-creator-name { margin:2px 0 4px; font-size:14px; line-height:1.4; font-weight:700; color:#fff; overflow-wrap:anywhere; }
+.track-creator-location,.track-creator-tag,.track-creator-counts { margin:0; font-size:12px; line-height:1.6; color:#a9a9a9; overflow-wrap:anywhere; }
+.track-creator-tag { color:#c8c8c8; }
+.track-creator-counts { display:flex; flex-wrap:wrap; column-gap:5px; }
+.track-creator-counts b { font-weight:400; }
+.track-creator-bio { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; margin:12px 0 0; font-size:12px; line-height:1.6; color:#bbb; white-space:pre-line; overflow-wrap:anywhere; }
+.track-creator-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:16px; padding-top:16px; border-top:1px solid #3c3c3c; }
+.track-creator-actions[hidden] { display:none; }
+.track-creator-actions button { min-width:0; min-height:32px; padding:6px 10px; border:1px solid #505050; border-radius:18px; background:transparent; color:#fff; font:inherit; font-size:12px; font-weight:600; cursor:pointer; transition:background-color 160ms ease,color 160ms ease,border-color 160ms ease; }
+.track-creator-actions .track-creator-follow { border-color:#f3f3f3; background:#f3f3f3; color:#111; }
+.track-creator-actions .track-creator-follow[aria-pressed="true"] { background:transparent; border-color:#b0b0b0; color:#fff; }
+.track-creator-actions button:hover:not(:disabled) { background:#363636; border-color:#ccc; color:#fff; }
+.track-creator-actions .track-creator-follow:hover:not(:disabled):not([aria-pressed="true"]) { background:#d8d8d8; color:#111; }
+.track-creator-actions button:disabled { cursor:wait; opacity:.6; }
+.track-creator-status { margin:10px 0 0; font-size:12px; line-height:1.5; color:#ffd0bb; overflow-wrap:anywhere; }
+.track-creator-status:empty { display:none; }
+.track-creator-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:8px 0 0; }
+.track-creator-stats > div { display:flex; flex-direction:column-reverse; justify-content:center; gap:3px; min-width:0; min-height:78px; padding:12px 4px; border-radius:8px; background:#202020; text-align:center; }
+.track-creator-stats dt { font-size:10px; line-height:1.4; font-weight:400; color:#aaa; }
+.track-creator-stats dd { margin:0; font-size:21px; line-height:1.2; font-weight:700; color:#fff; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+@media(prefers-reduced-motion:reduce) { .track-creator-actions button { transition:none; } }
 .track-page :is(button,input,a):focus-visible { outline:2px solid #f50; outline-offset:3px; }
 .track-missing { padding:48px 20px; color:#eee; }
 @media(max-width:800px) { .track-header { grid-template-columns:minmax(0,1fr) 180px; gap:20px; padding:24px; } .track-heading h1 { font-size:23px; } .track-columns { grid-template-columns:minmax(0,1fr) 240px; gap:24px; } }
@@ -70,7 +106,8 @@
 .track-waveform > canvas { max-width: 100%; max-height: 100%; clip-path: inset(0); contain: paint; }
 /* Previous loading backdrop: .track-waveform.is-loading { background: #ffffff08; animation: track-waveform-loading 1.5s ease-in-out infinite; } */
 .track-waveform-label { position: absolute; top: 0; transform: translateX(-50%); padding: 2px 5px; background: #202322; color: #fff; border-radius: 3px; font-size: 11px; pointer-events: none; font-variant-numeric: tabular-nums; }
-.track-waveform-state { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; pointer-events: none; color: #d0d6d3; font-size: 12px; text-align: center; }
+/* Previous waveform status color: #d0d6d3. */
+.track-waveform-state { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px; pointer-events: none; color: #eee; font-size: 12px; text-align: center; }
 .track-waveform-state button { pointer-events: auto; flex-shrink: 0; padding: 5px 9px; border: 1px solid #87938d; border-radius: 3px; background: transparent; color: #fff; font: inherit; cursor: pointer; }
 .track-waveform-state [hidden], .track-waveform-label[hidden] { display: none !important; }
 /* Previous timeline spacing: .track-timeline { margin-top:auto; padding-top:28px; } */

@@ -11,8 +11,10 @@ const optionalAuth = (req, res, next) => req.headers.authorization ? verify(req,
 const requireAuth = (req, res, next) => req.headers.authorization ? verify(req, res, next) : webAuth(req, res, next);
 const limit = rateLimit({ windowMs: 60000, max: 30, message: { success: false, message: "Bạn thao tác quá nhanh. Vui lòng thử lại sau." } });
 router.get("/:id/stats", optionalAuth, async (req, res) => res.json({ success: true, data: await service.getStats(req.params.id, userId(req)) }));
-router.post("/:id/listen", limit, optionalAuth, async (req, res) => res.json({ success: true, data: await service.recordListen(req.params.id, req.body?.playbackId, userId(req)) }));
-router.put("/:id/like", limit, requireAuth, async (req, res) => res.json({ success: true, data: await service.setLike(req.params.id, userId(req), req.body?.liked) }));
+// Previous listen call had no origin-account guard.
+router.post("/:id/listen", limit, optionalAuth, async (req, res) => res.json({ success: true, data: await service.recordListen(req.params.id, req.body?.playbackId, userId(req), req.get('X-Listen-Owner')) }));
+// Previous Like call did not bind the write to the account that initiated it.
+router.put("/:id/like", limit, requireAuth, async (req, res) => res.json({ success: true, data: await service.setLike(req.params.id, userId(req), req.body?.liked, req.get('X-Like-Owner')) }));
 router.use((error, req, res, next) => {
   if (res.headersSent) return next(error);
   return res.status(error.status || 500).json({ success: false, message: error.status ? error.message : "Không thể cập nhật lượt nghe/yêu thích." });

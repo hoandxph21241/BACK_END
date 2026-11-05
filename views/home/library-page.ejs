@@ -1,0 +1,30 @@
+<section class="mh-library" lang="en" data-library-view data-owner-id="<%= ownerId %>" aria-labelledby="libraryHeading" aria-busy="true">
+  <header class="mh-library-heading"><div><p class="mh-library-eyebrow">MEDIAHZ / YOUR COLLECTION</p><h1 id="libraryHeading">Library</h1><p>Your favourites. Your people. Your listening.</p></div><button type="button" class="mh-library-button" data-library-refresh aria-label="Refresh Library">↻ <span>Refresh</span></button></header>
+  <div class="mh-library-tabs" role="tablist" aria-label="Your Library">
+    <% for (const [id, label] of [['likes', 'Liked tracks'], ['history', 'Listening history'], ['following', 'Following']]) { %>
+      <button type="button" role="tab" id="libraryTab-<%= id %>" data-library-tab="<%= id %>" aria-controls="libraryPanel" aria-selected="<%= id === 'likes' %>" tabindex="<%= id === 'likes' ? 0 : -1 %>"><%= label %></button>
+    <% } %>
+  </div>
+  <div class="mh-library-layout"><div class="mh-library-main" id="libraryPanel" role="tabpanel" aria-labelledby="libraryTab-likes">
+    <div class="mh-library-toolbar" data-library-toolbar>
+      <label class="mh-library-search"><span class="mh-library-sr-only">Search your Library</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5"></path></svg><input type="search" data-library-search maxlength="100" placeholder="Search liked tracks" autocomplete="off"></label>
+      <label data-library-genre-label>Genre<select data-library-genre><option value="">All genres</option></select></label>
+      <label>Sort by<select data-library-sort><option value="recent">Newest tracks</option><option value="title">Title A–Z</option><option value="artist">Artist A–Z</option></select></label>
+    </div>
+    <button type="button" class="mh-library-change" data-library-changed hidden>Changes saved. Refresh to update this list.</button>
+    <p class="mh-library-status" data-library-status role="status" aria-live="polite">Loading your collection…</p>
+    <div data-library-items class="mh-library-items"></div>
+    <% /* Previous active skeleton: _collection_skeleton.ejs. */ %>
+    <div data-library-loading><%- include('_library-skeleton') %></div>
+    <!-- Previous Discover links: /home. -->
+    <div class="mh-library-empty" data-library-empty hidden><span class="mh-library-empty-symbol" aria-hidden="true">♡</span><h2 data-library-empty-title></h2><p data-library-empty-copy></p><a href="/discover" class="mh-library-button mh-library-primary" data-library-link>Discover music</a></div>
+    <div class="mh-library-empty" data-library-guest <%= ownerId ? 'hidden' : '' %>><span class="mh-library-empty-symbol" aria-hidden="true">♡</span><h2>Your music starts here</h2><p>Sign in to find your liked tracks, listening history and the people you follow.</p><div class="mh-library-empty-actions"><button type="button" class="mh-library-button mh-library-primary" data-library-login>Sign in</button><a href="/discover" class="mh-library-button" data-library-link>Explore music</a></div></div>
+    <button type="button" class="mh-library-button" data-library-retry hidden>Try again</button>
+    <div class="mh-library-more"><button type="button" class="mh-library-button" data-library-more hidden>Load more</button></div>
+  </div><aside class="mh-library-sidebar" aria-label="Library tools">
+    <section><h2>Make it yours</h2><p data-library-help>Keep the tracks you love close. Use the heart on any track to save it here.</p></section>
+    <!-- Previous sidebar paths: /home and /home/ct_home_v2. -->
+    <section><h2>Quick access</h2><a href="/discover" data-library-link>Discover new music <span aria-hidden="true">↗</span></a><a href="/feed" data-library-link>Your Feed <span aria-hidden="true">↗</span></a><a href="/users/profile" data-library-profile data-library-link <%= ownerId ? '' : 'hidden' %>>Your profile <span aria-hidden="true">↗</span></a></section>
+    <p class="mh-library-footer">MediaHz · Music connects us</p>
+  </aside></div>
+</section>

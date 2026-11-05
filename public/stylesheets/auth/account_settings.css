@@ -1,0 +1,36 @@
+.account-settings-intro { margin:9px 0 0; color:#999; font-size:12px; }
+.account-settings-page .account-settings-group-title { margin:0; padding-top:8px; font-size:12px; color:#888; font-weight:500; }
+.account-settings-status,.account-dialog-status { margin:12px 0; color:#bdbdbd; font-size:12px; line-height:1.6; overflow-wrap:anywhere; }
+.account-settings-status.is-error,.account-dialog-status.is-error { color:#ffa38f; }
+.account-status-actions { display:flex; gap:10px; }
+.account-dialog { width:min(600px,calc(100vw - 32px)); }
+.account-info-list { margin:0; }
+.account-info-list>div { display:grid; grid-template-columns:140px minmax(0,1fr); gap:15px; padding:15px 0; border-bottom:1px solid #303030; }
+.account-info-list dt { color:#929292; font-weight:400; font-size:12px; }
+.account-info-list dd { color:#eee; margin:0; font-size:13px; overflow-wrap:anywhere; }
+.account-profile-link { display:flex; flex-wrap:wrap; gap:12px; margin-top:24px; }
+.account-profile-link>span { width:100%; font-size:12px; color:#999; }
+.account-profile-link input { flex:1 1 200px; min-width:0; font-size:12px; color:#ccc; }
+.account-dialog a.password-primary { display:inline-flex; align-items:center; justify-content:center; text-decoration:none; color:#fff; }
+.account-dialog footer { gap:10px; flex-wrap:wrap; }
+.account-sessions-dialog { width:min(660px,calc(100vw - 32px)); }
+.account-session-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; color:#999; font-size:12px; margin:0 0 10px; }
+.account-text-button { padding:5px 0; border:0; background:transparent; color:#ccc; font:inherit; cursor:pointer; }
+.account-text-button:hover { color:#fff; }
+.account-session { display:grid; grid-template-columns:32px minmax(0,1fr) auto; align-items:center; gap:15px; padding:19px 0; border-bottom:1px solid #303030; }
+.account-session strong { display:block; font-size:13px; font-weight:600; color:#eee; overflow-wrap:anywhere; }
+.account-session p { margin:5px 0 0; font-size:11px; color:#999; line-height:1.6; }
+.account-session-current { display:inline-block; padding:2px 7px; margin:6px 0 1px; font-size:10px; color:#a9d4b9; background:#1b3024; border-radius:4px; }
+.account-session button { padding:6px 10px; min-height:33px; font-size:11px; }
+.account-device-symbol { display:grid; place-items:center; position:relative; width:30px; height:30px; color:#aaa; }
+.account-device-symbol::before { content:''; width:24px; height:16px; border:1.6px solid currentColor; border-radius:2px; }
+.account-device-symbol::after { content:''; position:absolute; width:28px; height:2px; background:currentColor; bottom:3px; }
+.account-device-symbol[data-kind=mobile]::before { width:13px; height:24px; border-radius:3px; }
+.account-device-symbol[data-kind=mobile]::after { width:4px; height:1px; bottom:6px; }
+.account-danger-button { color:#f5b0a1; border-color:#66453d; }
+.account-danger-button:hover { color:#ffcbbb; border-color:#ad6c5b; background:#38231c; }
+.account-session-confirm { padding:10px 0 0; }
+.account-session-confirm h3 { font-size:17px; margin:0 0 14px; }
+.account-session-confirm p { color:#bbb; font-size:13px; line-height:1.7; overflow-wrap:anywhere; }
+html:has(.account-dialog[open]) { overflow:hidden; }
+@media(max-width:600px) { .account-info-list>div { grid-template-columns:minmax(0,1fr); gap:6px; } .account-session { gap:12px; grid-template-columns:24px minmax(0,1fr); } .account-session>button { grid-column:2; justify-self:start; } .account-dialog footer { justify-content:flex-start; } .account-sessions-dialog .password-dialog-body { padding:18px; } }

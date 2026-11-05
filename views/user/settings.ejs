@@ -1,63 +1,30 @@
-<!-- Previous settings page retained for reference:
-<!DOCTYPE html>
-<html>
-
-<head>
-  <title>Cài đặt</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-    crossorigin="anonymous"></script>
-  <link rel="icon" href="/images/bg.png" type="image/x-icon">
-</head>
-
-<body>
-  <div class="container mt-5">
-    <h1>⚙️ Cài đặt</h1>
-    
-    <div class="card mt-4">
-      <div class="card-header">
-        <h5>Cài đặt tài khoản</h5>
-      </div>
-      <div class="card-body">
-        <form>
-          <div class="mb-3">
-            <label for="volume" class="form-label">Âm lượng:</label>
-            <input type="range" class="form-range" id="volume" min="0" max="100" value="50">
-          </div>
-          
-          <div class="mb-3">
-            <label for="theme" class="form-label">Giao diện:</label>
-            <select class="form-select" id="theme">
-              <option value="dark">Tối</option>
-              <option value="light">Sáng</option>
-            </select>
-          </div>
-
-          <div class="mb-3">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="notifications" checked>
-              <label class="form-check-label" for="notifications">
-                Bật thông báo
-              </label>
-            </div>
-          </div>
-
-          <button type="submit" class="btn btn-primary">Lưu cài đặt</button>
-        </form>
-      </div>
+<!-- The full previous settings view is preserved in _password_settings_full_legacy.ejs (unloaded). -->
+<section class="password-settings account-settings-page" data-password-settings data-account-settings data-account-authenticated="true" data-account-owner="<%= typeof user !== 'undefined' && user ? String(user._id || user.id || '') : '' %>">
+  <header class="password-settings-heading"><div><h1>Cài đặt tài khoản</h1><p class="account-settings-intro">Quản lý thông tin cá nhân và bảo mật đăng nhập.</p></div></header>
+  <p class="account-settings-status" data-account-status role="status" hidden></p>
+  <div class="account-status-actions"><button type="button" class="password-secondary" data-account-retry hidden>Thử lại</button><button type="button" class="password-primary" data-account-login hidden>Đăng nhập lại</button></div>
+  <%# Previous account information/profile shortcuts retained at user request; removed from Settings.
+  <section class="account-settings-list" aria-label="Thông tin tài khoản">
+    <h2 class="account-settings-group-title">Tài khoản</h2>
+    <div class="account-setting-row"><span class="account-setting-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 6 9 7 9-7"></path></svg></span><div class="account-setting-copy"><h2>Thông tin tài khoản</h2><p>Tên đăng nhập, email và liên kết hồ sơ của bạn.</p></div><button type="button" class="password-secondary" data-account-open="info" aria-haspopup="dialog" aria-controls="accountInfoDialog">Xem thông tin</button></div>
+    <div class="account-setting-row"><span class="account-setting-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg></span><div class="account-setting-copy"><h2>Hồ sơ cá nhân</h2><p>Cập nhật tên hiển thị, ảnh đại diện, banner và giới thiệu.</p></div><button type="button" class="password-secondary" data-account-edit>Edit Profile</button></div>
+  </section>
+  %>
+  <section class="account-settings-list" aria-label="Bảo mật tài khoản">
+    <h2 class="account-settings-group-title">Bảo mật</h2>
+    <div class="account-setting-row">
+      <span class="account-setting-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3M12 15v2"></path></svg></span>
+      <div class="account-setting-copy"><h2>Mật khẩu</h2><p>Đổi mật khẩu bằng mật khẩu hiện tại hoặc OTP qua email.</p></div>
+      <button type="button" class="password-secondary" data-password-open aria-haspopup="dialog" aria-controls="changePasswordDialog">Đổi mật khẩu</button>
     </div>
-  </div>
-</body>
-
-</html>
--->
-<section class="password-settings" data-password-settings>
-  <header class="password-settings-heading"><h1>Cài đặt tài khoản</h1><span>Bảo mật</span></header>
-  <section class="password-settings-section" aria-labelledby="passwordSettingsTitle">
-    <h2 id="passwordSettingsTitle">Đổi mật khẩu</h2>
-    <div class="password-methods" role="tablist" aria-label="Cách xác nhận">
+    <div class="account-setting-row"><span class="account-setting-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="13" rx="2"></rect><path d="M8 21h8m-4-5v5"></path></svg></span><div class="account-setting-copy"><h2>Phiên đăng nhập</h2><p>Xem thiết bị đang đăng nhập và đăng xuất phiên không còn sử dụng.</p></div><button type="button" class="password-secondary" data-account-open="sessions" aria-haspopup="dialog" aria-controls="accountSessionsDialog">Quản lý thiết bị</button></div>
+  </section>
+  <%- include('_account_preferences') %>
+  <%- include('_account_settings_dialogs') %>
+  <dialog id="changePasswordDialog" class="password-dialog" data-password-dialog aria-labelledby="passwordDialogTitle" aria-describedby="passwordDialogDescription">
+    <header class="password-dialog-header"><div><h2 id="passwordDialogTitle">Đổi mật khẩu</h2><p id="passwordDialogDescription">Chọn cách xác nhận để bảo vệ tài khoản của bạn.</p></div><button type="button" class="password-dialog-close" data-password-close aria-label="Đóng hộp thoại đổi mật khẩu" title="Đóng"><span aria-hidden="true"></span></button></header>
+    <div class="password-dialog-body">
+<div class="password-methods" role="tablist" aria-label="Cách xác nhận">
       <button type="button" id="passwordMethodCurrent" role="tab" aria-selected="true" aria-controls="passwordProof" data-password-method="password">Mật khẩu hiện tại</button>
       <button type="button" id="passwordMethodOtp" role="tab" aria-selected="false" aria-controls="passwordProof" tabindex="-1" data-password-method="otp">OTP qua email</button>
     </div>
@@ -79,8 +46,10 @@
       <p id="passwordRule" class="password-rule">Ít nhất 8 ký tự, tối đa 72 byte.</p>
       <label for="confirmNewPassword">Xác nhận mật khẩu mới</label>
       <div class="password-field"><input id="confirmNewPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="72" required><button type="button" class="password-reveal" data-password-reveal="confirmNewPassword" aria-pressed="false" aria-label="Hiện mật khẩu" title="Hiện mật khẩu"><span aria-hidden="true"></span></button></div>
-      <footer><button type="submit" class="password-primary" data-password-submit>Đổi mật khẩu</button></footer>
+      <footer><button type="button" class="password-secondary" data-password-close>Hủy</button><button type="submit" class="password-primary" data-password-submit>Đổi mật khẩu</button></footer>
     </form>
     <button type="button" class="password-primary" data-password-login hidden>Đăng nhập lại</button>
-  </section>
+
+    </div>
+  </dialog>
 </section>

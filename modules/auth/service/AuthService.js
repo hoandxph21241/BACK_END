@@ -121,11 +121,15 @@ class AuthService {
 
   // Previous: async login(req, options = {})
   async login(req) {
-    const { nameAccount, namePassword } = AuthValidator.login(req.body);
+    const loginData = AuthValidator.login(req.body);
+    const { nameAccount, namePassword } = loginData;
     // Previous: const user = await UserRepository.findByAccount(nameAccount);
     let user = await UserRepository.findByAccount(nameAccount);
     if (!user) throw new ApiError(ErrorCode.AUTH.ACCOUNT_NOT_FOUND);
 
+    const security = require("../../account/service/AccountSecurityService");
+    const securityState = await require("../../account/model/AccountSecurity").findOne({userId:user._id}).lean();
+    if (!security.localLogin(user, securityState || {})) throw new ApiError(ErrorCode.AUTH.INVALID_PASSWORD);
     const storedPassword = user.namePassword;
     const isHash = typeof storedPassword === "string" &&
       /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/.test(storedPassword);
@@ -140,7 +144,11 @@ class AuthService {
       matched = supplied.length === stored.length &&
         crypto.timingSafeEqual(supplied, stored);
     }
-    if (!matched) throw new ApiError(ErrorCode.AUTH.INVALID_PASSWORD);
+    // Previous: password failures produced no per-account security event.
+    if (!matched) {
+      await security.record(user,"login_failed").catch(()=>console.warn("Cannot record failed-login security event."));
+      throw new ApiError(ErrorCode.AUTH.INVALID_PASSWORD);
+    }
 
     if (!isHash && Buffer.byteLength(namePassword, "utf8") > 72) {
       throw new ApiError({
@@ -161,7 +169,8 @@ class AuthService {
     }
     // Previous: if (options.issueTokens === false) return UserMapper.toProfile(user);
     // Previous: const tokens = await SessionService.createSession(user, this.getDevice(req));
-    const tokens = await SessionService.createSession(user, this.getDevice(req), this.getSessionContext(req));
+    const securityGrant = await security.verifyLogin(user, loginData);
+    const tokens = await SessionService.createSession(user, this.getDevice(req), {...this.getSessionContext(req), securityGrant});
     return UserMapper.toLoginResponse(user, tokens);
   }
 
@@ -221,15 +230,18 @@ class AuthService {
   // }
 
   async googleCallback(profile, req) {
-    const user = await GoogleAuthService.authenticate(profile);
+    //     const user = await GoogleAuthService.authenticate(profile);
+    // 
+    //     const tokens = await SessionService.createSession(
+    //       user,
+    //       this.getDevice(req),
+    //       this.getSessionContext(req),
+    //     );
+    // 
+    // Profile JSON cannot establish Google identity; use the verified Passport OAuth callback.
+    throw new ApiError({status:403,code:"VERIFIED_OAUTH_REQUIRED",message:"Use /auth/google to sign in with verified Google OAuth."});
 
-    const tokens = await SessionService.createSession(
-      user,
-      this.getDevice(req),
-      this.getSessionContext(req),
-    );
-
-    return UserMapper.toLoginResponse(user, tokens);
+    // Previous return: UserMapper.toLoginResponse(user, tokens);
   }
 
   async profile(userId) {

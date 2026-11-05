@@ -117,6 +117,9 @@ exports.change = async (actor, input) => {
     ...(version(actor) ? { authVersion: version(actor) } : { $or: [{ authVersion: 0 }, { authVersion: { $exists: false } }] }),
   }, { $set: { namePassword: hash, refreshTokens: [] }, $inc: { authVersion: 1 }, $unset: { otp: "" } });
   if (!result.modifiedCount) throw failure(409, "Thông tin tài khoản vừa thay đổi. Vui lòng đăng nhập lại rồi thử lại.");
+  // Keep the existing password update authoritative even if optional audit storage is unavailable.
+  await require('../../account/service/AccountSecurityService').passwordChanged(actor)
+    .catch(error=>console.warn('Cannot record password security event:',error.code||'AUDIT_FAILED'));
   await Challenge.updateOne({ userId: actor._id }, { $set: { consumed: true, ready: false }, $unset: { hash: "" } }).catch(() => console.error("Cannot clear password challenge metadata."));
   if (exports.options(actor).canUseEmail) await Email.sendPasswordChangedNotice(emailOf(actor)).catch(() => console.error("Cannot deliver password change notice."));
   return { requiresLogin: true, message: "Đổi mật khẩu thành công. Vui lòng đăng nhập lại." };

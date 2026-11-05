@@ -41,6 +41,8 @@ const Home = require('./CTL_home');
 const { getImageUrl, getUploadDate } = require('../utils/songResponse');
 const { songPath, validSlug, validProfileSlug } = require('../utils/permalink');
 const permalinks = require('../utils/permalinkService');
+const { ensureCoverTheme } = require('../utils/coverThemeService');
+const Follow = require('../modules/user/model/UserFollow');
 // Previous projection selected uploadDate but not the timestamp used by existing songs.
 const FIELDS = 'name artist album image categoryId duration fileSize uploadDate createdAt originalName playCount likeCount userID profileSlug slug';
 const PUBLIC = { isDeleted: { $ne: true }, isPublic: { $ne: false } };
@@ -94,9 +96,27 @@ exports.showBySlug = async (req, res, next) => {
       ? await Model.MP3.find({ categoryId: song.categoryId._id, _id: { $ne: song._id }, ...PUBLIC })
         .select(FIELDS).sort({ playCount: -1, uploadDate: -1 }).limit(5).lean() : [];
     const related = await Promise.all(relatedSongs.map(item => permalinks.ensureSongPermalink(item)));
-    const uploader = song.userID ? await Model.UserModel.findOne({ userID: song.userID })
-      .select('fullName userName imageAccount profileTag').lean() : null;
+    // Previous: findOne({ userID: song.userID }).select('fullName userName imageAccount profileTag').
+    const uploader = song.userID ? await Model.UserModel.findOne({ $or: [
+      { userID: song.userID }, ...(/^[a-f0-9]{24}$/i.test(song.userID) ? [{ _id: song.userID }] : []),
+    ] }).select('userID fullName userName imageAccount profileTag profileSlug city country bio').lean() : null;
+    if (uploader) {
+      const [totals, followers] = await Promise.all([
+        Model.MP3.aggregate([
+          { $match: { userID: { $in: [uploader.userID, String(uploader._id)].filter(Boolean) }, ...PUBLIC } },
+          { $group: { _id: null, tracks: { $sum: 1 }, plays: { $sum: '$playCount' }, likes: { $sum: '$likeCount' },
+            currentPlays: { $max: { $cond: [{ $eq: ['$_id', song._id] }, { $ifNull: ['$playCount', 0] }, 0] } },
+            currentLikes: { $max: { $cond: [{ $eq: ['$_id', song._id] }, { $ifNull: ['$likeCount', 0] }, 0] } },
+          } },
+        ]),
+        Follow.countDocuments({ followee: uploader._id }),
+      ]);
+      uploader.stats = totals[0] || { tracks: 0, plays: 0, likes: 0, currentPlays: 0, currentLikes: 0 };
+      uploader.followers = followers;
+    }
     // Previous: date rendering only had access to song.uploadDate.
-    return res.render('home/track_detail', { song, related, uploader, imageUrl, songPath, getUploadDate });
+    // Previous render used the same black header for every cover.
+    const headerTheme = await ensureCoverTheme(song, Model.MP3);
+    return res.render('home/track_detail', { song, related, uploader, imageUrl, songPath, getUploadDate, headerTheme });
   } catch (error) { next(error); }
 };

@@ -10,7 +10,8 @@ const updateSchema = Joi.object({
 
 class PlayerStateService {
   async actor(identifier, expectedOwner) {
-    const user = await UserRepository.findByIdentifier(identifier).select("_id userID currentSongId").lean();
+    // Previous projection did not include the account's song-memory policy.
+    const user = await UserRepository.findByIdentifier(identifier).select("_id userID currentSongId rememberSongEnabled").lean();
     if (!user) throw new ApiError(ErrorCode.USER.NOT_FOUND);
     if (expectedOwner && expectedOwner !== String(user._id)) {
       throw new ApiError({ status: 409, code: "PLAYER_ACCOUNT_CHANGED", message: "The signed-in account has changed." });
@@ -19,7 +20,8 @@ class PlayerStateService {
   }
 
   state(user, songId = user.currentSongId) {
-    return { userId: String(user._id), currentSongId: songId ? String(songId) : null };
+    // Previous: always return the selected track, even after memory was disabled.
+    return { userId: String(user._id), currentSongId: user.rememberSongEnabled !== false && songId ? String(songId) : null };
   }
 
   async get(identifier, expectedOwner) {
@@ -44,9 +46,15 @@ class PlayerStateService {
     const { error, value } = updateSchema.validate(body, { abortEarly: false });
     if (error) throw new ApiError({ ...ErrorCode.VALIDATION.FAILED, message: error.details.map(item => item.message).join(", ") });
     const user = await this.actor(identifier, expectedOwner);
+    if(user.rememberSongEnabled === false)return this.state(user,null);
     if (value.currentSongId && !await this.songExists(user, value.currentSongId)) throw new ApiError(ErrorCode.SONG.NOT_FOUND);
     const result = await UserRepository.updatePlayer(user._id, value.currentSongId);
-    if (!result.matchedCount) throw new ApiError(ErrorCode.USER.NOT_FOUND);
+    if (!result.matchedCount) {
+      // A concurrent preference update may have disabled song memory, not deleted the account.
+      const fresh=await this.actor(identifier,expectedOwner);
+      if(fresh.rememberSongEnabled===false)return this.state(fresh,null);
+      throw new ApiError(ErrorCode.USER.NOT_FOUND);
+    }
     return this.state(user, value.currentSongId);
   }
 }

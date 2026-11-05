@@ -45,7 +45,8 @@ class UserRepository extends BaseRepository {
   }
 
   updatePlayer(userId, songId) {
-    return this.model.updateOne({ _id: userId }, { $set: { currentSongId: songId } }, { runValidators: true });
+    // Previous: only _id was checked, so a delayed write could re-enable a forgotten track.
+    return this.model.updateOne({ _id: userId, ...(songId ? {rememberSongEnabled:{$ne:false}} : {}) }, { $set: { currentSongId: songId } }, { runValidators: true });
   }
 
   clearPlayerIfSelected(userId, songId) {

@@ -1,0 +1,107 @@
+  <dialog id="profileEditDialog" class="profile-dialog" aria-labelledby="profileEditTitle">
+    <form id="profileEditForm" action="/users/profile/edit" method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="profileOwner" value="<%= String(user._id) %>">
+      <div class="profile-dialog-header">
+        <h2 id="profileEditTitle">Edit Profile</h2>
+        <button type="button" class="profile-close" data-close-profile aria-label="Close" title="Close"><span class="profile-icon profile-x" aria-hidden="true"></span></button>
+      </div>
+      <div class="profile-form-body">
+        <p id="profileFormError" class="profile-form-error" role="alert" <%= profileMessage ? '' : 'hidden' %>><%= profileMessage %></p>
+        <div class="profile-editor-layout">
+        <aside class="profile-media-column">
+        <div class="profile-banner-field">
+          <!-- Previous: <label for="profileBannerFile">Ảnh banner</label> -->
+          <!-- Previous: <span class="profile-file-heading">Ảnh banner</span> -->
+          <span class="profile-file-heading">Banner image</span>
+          <!-- Previous preview did not show a fixed crop frame or dimensions. -->
+          <div class="profile-preview-frame profile-banner-frame">
+            <img id="profileBannerPreview" class="profile-banner-preview" src="<%= banner %>" alt="Banner preview">
+            <span id="profileBannerDimensions" class="profile-image-dimensions" aria-label="Banner output size"></span>
+          </div>
+          <!-- Previous: <input id="profileBannerFile" name="banner" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="profileImageHint"> -->
+          <div class="profile-file-picker">
+            <button type="button" class="profile-file-button" data-profile-file-target="profileBannerFile" aria-controls="profileBannerFile">Update banner</button>
+            <button type="button" class="profile-adjust-image" data-profile-adjust="profileBannerFile" aria-label="Adjust banner" title="Adjust banner"><span class="profile-icon profile-crop-icon" aria-hidden="true"></span></button>
+            <!-- Previous: <span id="profileBannerFileName" class="profile-file-name" aria-live="polite">Chưa chọn ảnh</span> -->
+            <span id="profileBannerFileName" class="profile-file-name" aria-live="polite" hidden></span>
+          </div>
+          <input id="profileBannerFile" name="banner" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Banner image" aria-describedby="profileImageHint" hidden>
+        </div>
+        <div class="profile-avatar-field">
+          <!-- Previous: avatar preview without a crop frame. -->
+          <div class="profile-avatar-frame"><img id="profileAvatarPreview" src="<%= avatar %>" alt="Profile picture preview"></div>
+          <span id="profileAvatarDimensions" class="profile-image-dimensions" aria-label="Profile picture output size">512 x 512 px</span>
+          <!-- Previous: <div><label for="profileAvatarFile">Ảnh đại diện</label><input id="profileAvatarFile" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="profileImageHint"></div> -->
+          <div class="profile-avatar-picker">
+            <!-- Previous: <span class="profile-file-heading">Ảnh đại diện</span> -->
+            <div class="profile-file-picker">
+              <!-- Previous: <button type="button" class="profile-file-button" data-profile-file-target="profileAvatarFile" aria-controls="profileAvatarFile">Chọn ảnh đại diện</button> -->
+              <button type="button" class="profile-file-button" data-profile-file-target="profileAvatarFile" aria-controls="profileAvatarFile">Update image</button>
+              <button type="button" class="profile-adjust-image" data-profile-adjust="profileAvatarFile" aria-label="Adjust profile picture" title="Adjust profile picture"><span class="profile-icon profile-crop-icon" aria-hidden="true"></span></button>
+              <!-- Previous: <span id="profileAvatarFileName" class="profile-file-name" aria-live="polite">Chưa chọn ảnh</span> -->
+              <span id="profileAvatarFileName" class="profile-file-name" aria-live="polite" hidden></span>
+            </div>
+            <input id="profileAvatarFile" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Profile picture" aria-describedby="profileImageHint" hidden>
+          </div>
+        </div>
+        <p id="profileImageHint" class="profile-field-hint">JPG, PNG or WebP · Up to 5 MB per image</p>
+        </aside>
+        <div class="profile-fields-column">
+        <!-- Previous fields:
+        <div class="profile-form-grid">
+          <div><label for="profileFullNameInput">Họ và tên</label><input id="profileFullNameInput" name="fullName" value="&lt;%= user.fullName || user.userName || '' %>" maxlength="80" autocomplete="name" required></div>
+          <div><label for="profileTagInput">Biệt danh</label><input id="profileTagInput" name="profileTag" value="#&lt;%= tag %>" pattern="#?hz[0-9]{3,12}" title="hz và từ 3 đến 12 chữ số, ví dụ #hz231" maxlength="15" spellcheck="false" required></div>
+        </div>
+        -->
+        <div class="profile-primary-fields">
+          <div><label for="profileFullNameInput">Display name <span class="profile-required" aria-hidden="true">*</span></label><input id="profileFullNameInput" name="fullName" value="<%= user.fullName || '' %>" maxlength="80" autocomplete="nickname" required></div>
+          <div><label for="profileTagInput">Profile tag <span class="profile-required" aria-hidden="true">*</span></label><input id="profileTagInput" name="profileTag" value="#<%= tag %>" pattern="#?hz[0-9]{3,12}" title="hz followed by 3 to 12 digits, e.g. #hz231" maxlength="15" spellcheck="false" required></div>
+        </div>
+        <div class="profile-form-grid">
+          <div><label for="profileFirstNameInput">First name</label><input id="profileFirstNameInput" name="firstName" value="<%= user.firstName || '' %>" maxlength="60" autocomplete="given-name"></div>
+          <div><label for="profileLastNameInput">Last name</label><input id="profileLastNameInput" name="lastName" value="<%= user.lastName || '' %>" maxlength="60" autocomplete="family-name"></div>
+          <div><label for="profileCityInput">City</label><input id="profileCityInput" name="city" value="<%= user.city || '' %>" maxlength="80" autocomplete="address-level2"></div>
+          <div><label for="profileCountryInput">Country</label><input id="profileCountryInput" name="country" value="<%= user.country || '' %>" maxlength="80" autocomplete="country-name"></div>
+        </div>
+        <label for="profileBioInput">Bio</label>
+        <textarea id="profileBioInput" name="bio" rows="3" maxlength="500"><%= user.bio || '' %></textarea>
+        </div>
+        </div>
+        <section class="profile-links-editor" aria-labelledby="profileLinksTitle">
+          <h3 id="profileLinksTitle">Your links</h3>
+          <input id="profileLinksData" type="hidden" name="links" value="<%= JSON.stringify(profileLinks.map(link => ({ label: link.label || '', url: link.url }))) %>">
+          <div id="profileLinkRows"></div>
+          <button id="profileAddLink" type="button" class="profile-file-button"><span class="profile-icon profile-plus-icon" aria-hidden="true"></span>Add link</button>
+        </section>
+      </div>
+      <div class="profile-form-actions"><button type="button" class="profile-cancel" data-close-profile>Cancel</button><button id="profileSaveButton" type="submit" class="profile-save">Save changes</button></div>
+    </form>
+  </dialog>
+  <dialog id="profileCropDialog" class="profile-dialog profile-crop-dialog" aria-labelledby="profileCropTitle">
+    <div class="profile-dialog-header">
+      <h2 id="profileCropTitle">Adjust image</h2>
+      <button type="button" class="profile-close" data-close-crop aria-label="Close image editor" title="Close image editor"><span class="profile-icon profile-x" aria-hidden="true"></span></button>
+    </div>
+    <div class="profile-crop-body">
+      <p id="profileCropError" class="profile-form-error" role="alert" hidden></p>
+      <div id="profileCropStage" class="profile-crop-stage" tabindex="0" aria-label="Image position">
+        <img id="profileCropImage" alt="Image being adjusted">
+        <span id="profileCropStatus" class="profile-crop-status" role="status">Loading image...</span>
+        <span id="profileCropDimensions" class="profile-image-dimensions" aria-label="Cropped image output size"></span>
+        <button id="profileCropReset" type="button" class="profile-adjust-image profile-crop-reset" aria-label="Center image" title="Center image"><span class="profile-icon profile-reset-image" aria-hidden="true"></span></button>
+      </div>
+      <!-- Previous manual zoom toolbar, disabled: images now auto-fit only when too small.
+      <div class="profile-crop-tools">
+        <button type="button" class="profile-adjust-image" data-crop-zoom="-10" aria-label="Zoom out" title="Zoom out"><span class="profile-icon profile-zoom-out" aria-hidden="true"></span></button>
+        <input id="profileCropZoom" type="range" min="0" max="300" value="0" step="1" aria-label="Image zoom">
+        <button type="button" class="profile-adjust-image" data-crop-zoom="10" aria-label="Zoom in" title="Zoom in"><span class="profile-icon profile-zoom-in" aria-hidden="true"></span></button>
+        <output id="profileCropZoomValue" for="profileCropZoom">100%</output>
+        <button type="button" class="profile-adjust-image" aria-label="Reset image position" title="Reset image position"><span class="profile-icon profile-reset-image" aria-hidden="true"></span></button>
+      </div>
+      -->
+    </div>
+    <div class="profile-form-actions">
+      <button type="button" class="profile-cancel" data-close-crop>Cancel</button>
+      <button id="profileCropApply" type="button" class="profile-save" disabled>Apply</button>
+    </div>
+  </dialog>

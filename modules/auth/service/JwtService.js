@@ -2,7 +2,8 @@ const jwt = require("jsonwebtoken");
 const { randomUUID } = require("crypto");
 
 class JwtService {
-  generateAccessToken(user) {
+  // sessionId is optional for legacy callers; login/refresh always provide it.
+  generateAccessToken(user, sessionId) {
     return jwt.sign(
       {
         id: user._id,
@@ -10,6 +11,7 @@ class JwtService {
         role: user.role,
         tokenType: "access",
         authVersion: user.authVersion || 0,
+        ...(sessionId ? { sid: String(sessionId) } : {}),
       },
       process.env.JWT_SECRET,
       {
@@ -18,13 +20,14 @@ class JwtService {
     );
   }
 
-  generateRefreshToken(user) {
+  generateRefreshToken(user, sessionId) {
     return jwt.sign(
       {
         id: user._id,
         userID: user.userID,
         tokenType: "refresh",
         authVersion: user.authVersion || 0,
+        ...(sessionId ? { sid: String(sessionId) } : {}),
       },
       process.env.JWT_SECRET,
       {

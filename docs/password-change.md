@@ -4,6 +4,24 @@ Open `/users/settings` from the account menu. Both methods require an authentica
 account: current password, or an OTP delivered to the account's registered email.
 This is not a public forgotten-password endpoint.
 
+Settings presents a compact Password row. Its **Đổi mật khẩu** action opens a
+native dialog containing both confirmation methods, rather than rendering the
+entire form on the page. Options are fetched only when the dialog opens. Closing
+clears password/OTP input and reveal state; reopening reloads the server challenge
+and resend cooldown. Close, Cancel, Escape and backdrop clicks work while idle;
+dismissal is blocked during OTP send/password update to preserve the pending result.
+After a successful change, the existing sign-out and Login flow is retained, with
+the password dialog closed before opening the login popup. SPA removal disposes
+the dialog, timer and options request. The previous full-page EJS remains in
+`views/user/_password_settings_full_legacy.ejs`, unloaded for reference.
+
+Dialog verification (2026-10-30): 32 isolated browser assertions pass for close/
+reopen, immediate secret clearing, OTP challenge/cooldown, both submit methods,
+pending-request guards, errors, login handoff and 320–1440px layouts. Seven actual
+shell fixture checks pass for direct/F5 entry, SPA removal/remount, scroll release
+and preserving the player. All password/OTP endpoints were mocked; no real email
+or password change was performed. A fresh focused UI review found no material issues.
+
 Endpoints:
 
 <!-- Previous: GET /api/auth/password/options returned availability and masked email only. -->

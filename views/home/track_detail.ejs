@@ -1,21 +1,25 @@
 <% if (!song) { %>
-<section class="track-missing"><h1>Không tìm thấy bài hát</h1><a href="/home">Về trang chủ</a></section>
+<!-- Previous Home link: /home. -->
+<section class="track-missing"><h1>Không tìm thấy bài hát</h1><a href="/discover">Về trang chủ</a></section>
 <% } else {
   const seconds = Math.max(0, Math.floor(Number(song.duration) || 0));
   const durationText = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
   // Previous: only song.uploadDate was checked, even when createdAt existed in the DB.
   const uploadDate = getUploadDate(song);
   const uploaded = uploadDate ? uploadDate.toLocaleDateString('vi-VN') : 'Chưa cập nhật';
+  const theme = typeof headerTheme !== 'undefined' && headerTheme
+    ? headerTheme : { background: '#303030', played: '#ff5500' };
 %>
 <%# Previous article used data-song-id only, without a canonical public URL. %>
 <article class="track-page" data-track-view data-track-url="<%= songPath(song) %>" data-song-id="<%= song._id %>" data-song-name="<%= song.name %>" data-category-id="<%= song.categoryId?._id || '' %>" data-duration="<%= seconds %>">
-  <header class="track-header">
+  <%# Previous: <header class="track-header"> with a fixed black background. %>
+  <header class="track-header" style="--track-header-bg:<%= theme.background %>;--track-waveform-played:<%= theme.played %>">
     <div class="track-main-info">
       <div class="track-heading">
         <button type="button" class="track-play" data-track-play aria-label="Phát bài hát" title="Phát bài hát"><span class="track-play-icon" aria-hidden="true"></span></button>
         <div class="track-heading-text"><p class="track-artist"><%= song.artist || 'Unknown Artist' %></p><h1><%= song.name %></h1></div>
       </div>
-      <div class="track-tags"><span><%= song.categoryId?.nameCategory || 'Âm nhạc' %></span><time<% if (uploadDate) { %> datetime="<%= uploadDate.toISOString() %>"<% } %>><%= uploaded %></time></div>
+      <% /* Previous empty-genre label: Âm nhạc (header), Chưa cập nhật (details). */ %><div class="track-tags"><span><%= song.categoryId?.nameCategory || 'Chưa phân loại' %></span><time<% if (uploadDate) { %> datetime="<%= uploadDate.toISOString() %>"<% } %>><%= uploaded %></time></div>
       <div class="track-waveform-shell">
         <div class="track-waveform is-loading" data-track-waveform role="slider" tabindex="-1"
              aria-label="Tua trên waveform" aria-valuemin="0" aria-valuemax="<%= seconds %>" aria-valuenow="0" aria-disabled="true">
@@ -39,7 +43,8 @@
     <img class="track-artwork" src="&lt;%= imageUrl(song.image) %>" alt="Ảnh bìa &lt;%= song.name %>" data-track-image>
     -->
     <div class="track-artwork-frame">
-      <img class="track-artwork-backdrop" src="/images/player/artwork-black.svg" alt="" aria-hidden="true" draggable="false">
+      <%# Previous black backdrop: <img class="track-artwork-backdrop" src="/images/player/artwork-black.svg" alt="" aria-hidden="true" draggable="false"> %>
+      <span class="track-artwork-backdrop" aria-hidden="true"></span>
       <img class="track-artwork" src="<%= imageUrl(song.image) %>" alt="Ảnh bìa <%= song.name %>" data-track-image>
     </div>
   </header>
@@ -50,13 +55,49 @@
   <p class="track-feedback" data-track-feedback role="status"></p>
   <div class="track-columns">
     <section class="track-about"><h2>Thông tin bài hát</h2>
-      <dl><div><dt>Nghệ sĩ</dt><dd><%= song.artist || 'Unknown Artist' %></dd></div><div><dt>Album</dt><dd><%= song.album || 'Đĩa đơn' %></dd></div><div><dt>Thể loại</dt><dd><%= song.categoryId?.nameCategory || 'Chưa cập nhật' %></dd></div><div><dt>Ngày tải lên</dt><dd><%= uploaded %></dd></div><div><dt>Tệp gốc</dt><dd><%= song.originalName || 'Chưa cập nhật' %></dd></div><div><dt>Dung lượng</dt><dd><%= song.fileSize ? (Number(song.fileSize) / 1024 / 1024).toFixed(2) + ' MB' : 'Chưa cập nhật' %></dd></div></dl>
-      <% if (uploader) { %><div class="track-uploader"><img src="<%= imageUrl(uploader.imageAccount) %>" alt="" data-track-image><div><small>Đăng bởi</small><strong><%= uploader.fullName || uploader.userName || 'MediaHz' %></strong><% if (uploader.profileTag) { %><span>#<%= uploader.profileTag %></span><% } %></div></div><% } %>
+      <dl><div><dt>Nghệ sĩ</dt><dd><%= song.artist || 'Unknown Artist' %></dd></div><div><dt>Album</dt><dd><%= song.album || 'Đĩa đơn' %></dd></div><div><dt>Thể loại</dt><dd><%= song.categoryId?.nameCategory || 'Chưa phân loại' %></dd></div><div><dt>Ngày tải lên</dt><dd><%= uploaded %></dd></div><div><dt>Tệp gốc</dt><dd><%= song.originalName || 'Chưa cập nhật' %></dd></div><div><dt>Dung lượng</dt><dd><%= song.fileSize ? (Number(song.fileSize) / 1024 / 1024).toFixed(2) + ' MB' : 'Chưa cập nhật' %></dd></div></dl>
+      <!-- Previous uploader placement retained for reference:
+      &lt;% if (uploader) { %><div class="track-uploader"><img src="&lt;%= imageUrl(uploader.imageAccount) %>" alt="" data-track-image><div><small>Đăng bởi</small><strong>&lt;%= uploader.fullName || uploader.userName || 'MediaHz' %></strong>&lt;% if (uploader.profileTag) { %><span>#&lt;%= uploader.profileTag %></span>&lt;% } %></div></div>&lt;% } %>
+      -->
     </section>
-    <aside class="track-related"><h2>Cùng thể loại</h2>
+    <%# Previous: the sidebar consisted only of <aside class="track-related">. %>
+    <aside class="track-sidebar" aria-label="Người đăng và bài hát liên quan">
+      <% if (uploader) {
+        const creatorName = uploader.fullName || uploader.userName || (uploader.profileTag ? '#' + uploader.profileTag : 'MediaHz');
+        const creatorLocation = [uploader.city, uploader.country].filter(Boolean).join(', ');
+        const creatorStats = uploader.stats || { tracks: 0, plays: 0, likes: 0, currentPlays: 0, currentLikes: 0 };
+        const compact = value => new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(Math.max(0, Number(value) || 0));
+      %>
+      <section class="track-creator" aria-label="Thông tin người đăng" data-track-creator data-creator-id="<%= uploader._id %>" data-creator-name="<%= creatorName %>" data-creator-tag="<%= uploader.profileTag || '' %>" data-creator-avatar="<%= uploader.imageAccount ? imageUrl(uploader.imageAccount) : '/images/auth/person-circle.svg' %>" data-current-plays="<%= creatorStats.currentPlays %>" data-current-likes="<%= creatorStats.currentLikes %>">
+        <div class="track-creator-card">
+          <div class="track-creator-heading">
+            <img class="track-creator-avatar" src="<%= uploader.imageAccount ? imageUrl(uploader.imageAccount) : '/images/auth/person-circle.svg' %>" alt="" width="64" height="64" data-track-image data-track-image-fallback="/images/auth/person-circle.svg">
+            <div class="track-creator-identity">
+              <% /* Previous public uploader link prefix: /profile/. */ %><h2 class="track-creator-name"><% if(uploader.profileSlug && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(uploader.profileSlug)) { %><a href="/users/profile/<%= uploader.profileSlug %>" data-track-navigation><%= creatorName %></a><% } else { %><%= creatorName %><% } %></h2>
+              <% if (creatorLocation) { %><p class="track-creator-location"><%= creatorLocation %></p><% } %>
+              <% if (uploader.profileTag) { %><p class="track-creator-tag">#<%= uploader.profileTag %></p><% } %>
+              <p class="track-creator-counts"><span><b data-creator-followers><%= Number(uploader.followers || 0).toLocaleString('vi-VN') %></b> người theo dõi</span><span aria-hidden="true">&middot;</span><span><%= Number(creatorStats.tracks).toLocaleString('vi-VN') %> bài hát</span></p>
+            </div>
+          </div>
+          <% if (uploader.bio) { %><p class="track-creator-bio" title="<%= uploader.bio %>"><%= uploader.bio %></p><% } %>
+          <div class="track-creator-actions" data-creator-actions>
+            <button type="button" class="track-creator-follow" data-creator-follow aria-pressed="false" disabled>Follow</button>
+            <button type="button" class="track-creator-message" data-creator-message>Message</button>
+          </div>
+          <p class="track-creator-status" data-creator-status role="status" aria-live="polite"></p>
+        </div>
+        <dl class="track-creator-stats" aria-label="Thống kê bài hát công khai của người đăng">
+          <% for (const [key, label] of [['plays', 'LƯỢT NGHE'], ['likes', 'LƯỢT THÍCH'], ['tracks', 'BÀI HÁT']]) { %>
+          <div><dt><%= label %></dt><dd data-creator-total="<%= key %>" data-total="<%= creatorStats[key] %>" title="<%= Number(creatorStats[key]).toLocaleString('vi-VN') %>"><%= compact(creatorStats[key]) %></dd></div>
+          <% } %>
+        </dl>
+      </section>
+      <% } %>
+      <section class="track-related"><h2>Cùng thể loại</h2>
       <% if (!related.length) { %><p class="track-muted">Chưa có bài hát khác.</p><% } %>
       <%# Previous related link: href="/home/song/" + item._id %>
       <% related.forEach(item => { %><a class="track-related-item" href="<%= songPath(item) %>" data-track-navigation><img src="<%= imageUrl(item.image) %>" alt="" loading="lazy" data-track-image><span><small><%= item.artist || 'Unknown Artist' %></small><strong><%= item.name %></strong></span></a><% }); %>
+      </section>
     </aside>
   </div>
 </article>

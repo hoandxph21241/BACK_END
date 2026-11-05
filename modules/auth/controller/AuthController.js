@@ -9,11 +9,17 @@ class AuthController extends BaseController {
     super(AuthService, UserMapper);
   }
 
+  authenticationFailure(res,error) {
+    res.set("Cache-Control","no-store");
+    if (error.retryAfter) res.set("Retry-After",String(error.retryAfter));
+    return res.status(error instanceof ApiError ? error.status : 500).json({success:false,code:error instanceof ApiError ? error.code : "AUTH_UNAVAILABLE",message:error instanceof ApiError ? error.message : "Không thể xác thực lúc này.",...(error.retryAfter ? {retryAfter:error.retryAfter} : {})});
+  }
+
   // POST /api/auth/login
   login = async (req, res) => {
-    const data = await this.service.login(req);
-
-    return this.success(res, data);
+    // Previous: uncaught errors reached the global handler, which omitted actionable 2FA codes.
+    try { const data = await this.service.login(req); return this.success(res,data); }
+    catch(error) { return this.authenticationFailure(res,error); }
   };
 
   // POST /api/auth/register
@@ -65,9 +71,8 @@ class AuthController extends BaseController {
   // POST /api/auth/google
   googleCallback = async (req, res) => {
     // Previous: const data = await this.service.googleCallback(req.body);
-    const data = await this.service.googleCallback(req.body, req);
-
-    return this.success(res, data);
+    try { const data = await this.service.googleCallback(req.body,req); return this.success(res,data); }
+    catch(error) { return this.authenticationFailure(res,error); }
   };
 
   // GET /api/auth/profile

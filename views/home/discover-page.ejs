@@ -1,0 +1,16 @@
+<section class="mh-home" lang="en" data-home-view data-owner-id="<%= ownerId %>" aria-labelledby="homeHeading" aria-busy="true">
+  <header class="mh-home-heading"><div><p class="mh-home-eyebrow">MEDIAHZ / DISCOVER</p><h1 id="homeHeading">Discover music</h1></div><button type="button" class="mh-home-refresh" data-home-refresh aria-label="Refresh Home">↻ <span>Refresh</span></button></header>
+  <div class="mh-home-toolbar"><p>New sounds. Fresh inspiration.</p><label>Genre<select data-home-category><option value="">All genres</option></select></label></div>
+  <div class="mh-home-layout"><div class="mh-home-main">
+    <button type="button" class="mh-home-change" data-home-changed hidden>Your recommendations have changed. Refresh Home</button>
+    <p class="mh-home-status" data-home-status role="status" aria-live="polite">Loading music…</p>
+    <div data-home-shelves></div>
+    <div data-home-loading class="mh-home-loading" aria-hidden="true"><% for(let row = 0; row < 2; row++) { %><div class="mh-home-skeleton-heading"></div><div class="mh-home-skeleton-row"><% for(let i = 0; i < 4; i++) { %><div><div class="mh-home-skeleton-cover"></div><div class="mh-home-skeleton-title"></div><div class="mh-home-skeleton-artist"></div></div><% } %></div><% } %></div>
+    <div class="mh-home-empty" data-home-empty hidden><h2>No tracks found</h2><p>Try another genre or come back later to discover new music.</p></div>
+    <button type="button" class="mh-home-button" data-home-retry hidden>Try again</button>
+  </div><aside class="mh-home-sidebar" aria-label="Suggested creators and listening history">
+    <section class="mh-home-side-section"><h2>Creators to follow</h2><p class="mh-home-side-note">Find more sounds you love</p><div data-home-creators></div><p class="mh-home-side-note" data-home-creators-empty hidden>No new creator suggestions right now.</p></section>
+    <section class="mh-home-side-section"><h2>Listening history</h2><div data-home-recent></div><p class="mh-home-side-note" data-home-recent-empty>Your recently played tracks will appear here.</p><button type="button" class="mh-home-button" data-home-login <%= ownerId ? 'hidden' : '' %>>Sign in</button></section>
+    <div class="mh-home-footer">MediaHz · Music connects us</div>
+  </aside></div>
+</section>

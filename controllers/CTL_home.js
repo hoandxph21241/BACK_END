@@ -61,17 +61,16 @@ const getPlayHistory = (req, limit = 4) => {
 
 exports.Home = async (req, res, next) => {
   try {
-    const mp3List = await db.MP3.find()
-      .populate({
-        path: "categoryId",
-        select: "nameCategory",
-      })
-      .lean();
+    // Previous shell query loaded every song before the selected SPA view loaded again.
+    // const mp3List = await db.MP3.find().populate({ path: "categoryId", select: "nameCategory" }).lean();
+    // Nav has no catalogue dependency. Each view owns its bounded data request.
+    const mp3List = [];
 
     // Láº¥y lá»‹ch sá»­ phÃ¡t nháº¡c
     const historySongs = getPlayHistory(req, 4);
 
-    res.render("home/Home.ejs", { 
+    // Previous template: home/Home.ejs (renamed without dropping its shell/player logic).
+    res.render("home/app-shell.ejs", {
       mp3List: mp3List,
       historySongs: historySongs 
     });

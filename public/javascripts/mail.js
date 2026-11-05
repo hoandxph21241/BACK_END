@@ -8,6 +8,7 @@
   let listRequest = 0, detailRequest = 0, authVersion = 0, listController, selected, clientId, replyTo = null;
   let returnFocus, outside = false;
   let recipientSelection = null, recipientTimer, recipientController, recipientRequest = 0, recipientIndex = -1, recipientItems = [];
+  let pendingRecipient = null;
   const names = { message: 'Tin nhắn', complaint: 'Khiếu nại', request: 'Yêu cầu' };
   const element = (tag, className, text) => {
     const node = document.createElement(tag); node.className = className;
@@ -206,6 +207,16 @@
     // Previous: (fields.recipient.disabled || fields.recipient.value ? fields.subject : fields.recipient).focus();
     (fields.recipient.disabled || recipientSelection ? fields.subject : fields.recipient).focus();
   }
+  function composeTo(user) {
+    if (!user || typeof user.id !== 'string' || !/^[a-f0-9]{24}$/i.test(user.id) || user.id === userId || sending) return false;
+    if (!userId) { pendingRecipient = { id: user.id, name: user.name, avatar: user.avatar, tag: user.tag }; login(); return true; }
+    if (dialog.open && !form.hidden && (fields.subject.value.trim() || fields.body.value.trim())) {
+      status.hidden = false; status.textContent = 'Bạn đang có thư chưa gửi. Hãy hoàn tất hoặc hủy thư hiện tại trước.';
+      fields.subject.focus(); return false;
+    }
+    composeMail({ recipientUser: user });
+    return true;
+  }
   function renderDetail(mail, sent = false) {
     selected = mail; form.hidden = true; detail.hidden = false;
     find('#mailDialogTitle').textContent = 'Nội dung thư';
@@ -291,15 +302,23 @@
       resetRecipient();
     } else if (dialog.open && form.hidden) closeDialog();
     ownerId = userId;
-    refreshUnread(); if (waitingForLogin) { waitingForLogin = false; openPanel(); }
+    // Previous: authentication always opened the inbox, even when composing to a creator.
+    refreshUnread();
+    if (waitingForLogin && userId) {
+      waitingForLogin = false;
+      const recipient = pendingRecipient; pendingRecipient = null;
+      if (recipient) queueMicrotask(() => composeTo(recipient)); else openPanel();
+    }
   });
-  document.getElementById('loginPopup')?.addEventListener('close', () => { if (!userId) waitingForLogin = false; });
+  // Previous: closing login only cleared waitingForLogin.
+  document.getElementById('loginPopup')?.addEventListener('close', () => { if (!userId) { waitingForLogin = false; pendingRecipient = null; } });
   window.addEventListener('focus', refreshUnread);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshUnread(); });
   const timer = setInterval(refreshUnread, 30000);
   // Previous: window.addEventListener('pagehide', () => { clearInterval(timer); listController?.abort(); });
   window.addEventListener('pagehide', () => { clearInterval(timer); listController?.abort(); stopRecipientSearch(); });
-  window.MediaHzMail = Object.freeze({ open: openPanel });
+  // Previous public API: Object.freeze({ open: openPanel }).
+  window.MediaHzMail = Object.freeze({ open: openPanel, composeTo });
   trigger.title = 'Hộp thư'; setUnread(0);
   refreshUnread();
 })();

@@ -6,6 +6,7 @@ const verifyToken = require("../../../middlewares/verifyToken");
 const webAccessToken = require("../../../middlewares/auth/webAccessToken");
 
 const router = express.Router();
+router.use('/:id/follow', require('./FollowRouter'));
 
 const playerAuth = (req, res, next) => {
   res.set("Cache-Control", "no-store");

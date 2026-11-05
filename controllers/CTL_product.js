@@ -120,6 +120,7 @@ const upload = multer({
 //   }
 // }
 const uploadImageToImgBB = require("../utils/songCover");
+const { keepExistingTheme } = require('../utils/coverThemeService');
 exports.Product = async (req, res, next) => {
   try {
     let listidCategory = await db.CategoryModel.find();
@@ -155,7 +156,8 @@ function parseOptionalDate(value) {
 }
 
 function buildImageUpdate(body, existingImage) {
-  return {
+  // Previous: return { ... } discarded cover metadata on unrelated song edits.
+  return keepExistingTheme({
     url: normalizeEmpty(body.imageUrl),
     display_url: normalizeEmpty(body.imageDisplayUrl),
     delete_url: normalizeEmpty(body.imageDeleteUrl),
@@ -167,7 +169,7 @@ function buildImageUpdate(body, existingImage) {
       url: normalizeEmpty(body.imageThumbUrl),
     },
     originalName: normalizeEmpty(body.imageOriginalName) || existingImage?.originalName || null,
-  };
+  }, existingImage);
 }
 
 exports.EditSongsPage = async (req, res) => {
@@ -242,6 +244,7 @@ exports.UpdateSong = async (req, res) => {
         delete_url: imgbbResult.data.delete_url,
         thumb: imgbbResult.data.thumb,
         originalName: fixVietnameseFileName(imageFile.originalname),
+        theme: imgbbResult.data.theme,
       };
 
       if (fs.existsSync(imageFile.path)) {

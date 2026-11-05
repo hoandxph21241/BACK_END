@@ -21,8 +21,9 @@
                                              alt="" width="28" height="28" referrerpolicy="no-referrer"
                                              data-avatar-fallback="/images/auth/person-circle.svg">
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-dark px-3">
-                                        <li><a class="dropdown-item nav-link nav-load d-inline p-0"
+                                    <!-- Previous menu: dropdown-menu dropdown-menu-dark px-3; items used d-inline p-0. -->
+                                    <ul class="dropdown-menu dropdown-menu-dark nav-account-menu" aria-labelledby="navAccountDropdown">
+                                        <li><a class="dropdown-item nav-link nav-load"
                                                 href="/users/profile" data-url="/users/profile">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     fill="currentColor" class="bi bi-person-fill me-2"
@@ -31,7 +32,7 @@
                                                         d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
                                                 </svg>Profile
                                             </a></li>
-                                        <li><a class="dropdown-item nav-link nav-load d-inline p-0" href="/users/likes"
+                                        <li><a class="dropdown-item nav-link nav-load" href="/users/likes"
                                                 data-url="/users/likes">
 
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -44,7 +45,7 @@
                                         <li>
                                             <hr class="dropdown-divider">
                                         </li>
-                                        <li><a class="dropdown-item nav-link nav-load d-inline p-0"
+                                        <li><a class="dropdown-item nav-link nav-load"
                                                 href="/users/settings" data-url="/users/settings">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     fill="currentColor" class="bi bi-gear-fill me-2"
@@ -56,7 +57,7 @@
                                         <li>
                                             <hr class="dropdown-divider">
                                         </li>
-                                        <li><a class="dropdown-item nav-link d-inline p-0" href="/auth/signout">
+                                        <li><a class="dropdown-item nav-link" href="/auth/signout">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     fill="currentColor" class="bi bi-box-arrow-right me-2"
                                                     viewBox="0 0 16 16">
